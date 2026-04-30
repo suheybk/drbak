@@ -51,13 +51,14 @@ export const apiFetch = async <T>(path: string, opts: FetchOpts = {}): Promise<R
 
   let res: Response;
   try {
-    res = await fetch(url, {
+    const init: RequestInit = {
       method: opts.method ?? 'GET',
       headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
       credentials: 'include',
-      signal: opts.signal,
-    });
+    };
+    if (opts.body !== undefined) init.body = JSON.stringify(opts.body);
+    if (opts.signal) init.signal = opts.signal;
+    res = await fetch(url, init);
   } catch {
     return { ok: false, error: NETWORK_ERROR(headers['X-Correlation-Id']) };
   }

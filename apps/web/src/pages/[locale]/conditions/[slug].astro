@@ -1,5 +1,6 @@
 ---
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import ConditionDetailPage from '~/views/ConditionDetailPage.astro';
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 const slug = Astro.params.slug as string;
 ---

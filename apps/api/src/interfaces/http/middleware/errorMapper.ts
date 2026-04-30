@@ -21,14 +21,17 @@ const envelope = (
   message: string,
   c: Context,
   extra: Partial<ErrEnvelope['error']> = {},
-): ErrEnvelope => ({
-  error: {
-    code,
-    message,
-    correlationId: (c.get('correlationId') as string | undefined) ?? undefined,
-    ...extra,
-  },
-});
+): ErrEnvelope => {
+  const correlationId = c.get('correlationId') as string | undefined;
+  return {
+    error: {
+      code,
+      message,
+      ...(correlationId !== undefined ? { correlationId } : {}),
+      ...extra,
+    },
+  };
+};
 
 export const mapErrorToResponse = (e: unknown, c: Context): Response => {
   if (e instanceof DomainError) {

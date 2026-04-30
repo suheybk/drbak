@@ -1,5 +1,6 @@
 ---
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import AccessibilityPage from '~/views/AccessibilityPage.astro';
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 ---
 <AccessibilityPage locale={locale} />

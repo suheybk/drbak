@@ -38,29 +38,25 @@ export class SlotLockClient implements SlotLockService {
   async holdSlot(input: HoldSlotInput): Promise<HoldSlotResult | null> {
     const stub = stubFor(this.ns, input.doctorId, input.startsAt);
     // Init day on first contact (idempotent)
-    await stub.fetch(
-      new Request('https://do/init', {
-        method: 'POST',
-        body: JSON.stringify({
-          doctorId: input.doctorId,
-          date: localDate(input.startsAt),
-        }),
+    await stub.fetch('https://do/init', {
+      method: 'POST',
+      body: JSON.stringify({
+        doctorId: input.doctorId,
+        date: localDate(input.startsAt),
       }),
-    );
-    const res = await stub.fetch(
-      new Request('https://do/hold', {
-        method: 'POST',
-        body: JSON.stringify({
-          startsAtMs: input.startsAt as number,
-          durationMinutes: Math.round(
-            ((input.endsAt as number) - (input.startsAt as number)) / 60_000,
-          ),
-          ttlSeconds: input.holdTtlSeconds,
-          serviceId: input.serviceId,
-          nowMs: input.now as number,
-        }),
+    });
+    const res = await stub.fetch('https://do/hold', {
+      method: 'POST',
+      body: JSON.stringify({
+        startsAtMs: input.startsAt as number,
+        durationMinutes: Math.round(
+          ((input.endsAt as number) - (input.startsAt as number)) / 60_000,
+        ),
+        ttlSeconds: input.holdTtlSeconds,
+        serviceId: input.serviceId,
+        nowMs: input.now as number,
       }),
-    );
+    });
     if (!res.ok) throw new Error(`DO hold failed: ${res.status}`);
     const body = (await res.json()) as { token: string; expiresAtMs: number } | null;
     if (!body) return null;
@@ -79,18 +75,16 @@ export class SlotLockClient implements SlotLockService {
     now: Instant;
   }): Promise<ConfirmResult> {
     const stub = stubFor(this.ns, input.doctorId, input.startsAt);
-    const res = await stub.fetch(
-      new Request('https://do/confirm', {
-        method: 'POST',
-        body: JSON.stringify({
-          token: input.token,
-          appointmentId: input.appointmentId,
-          startsAtMs: input.startsAt as number,
-          endsAtMs: input.endsAt as number,
-          nowMs: input.now as number,
-        }),
+    const res = await stub.fetch('https://do/confirm', {
+      method: 'POST',
+      body: JSON.stringify({
+        token: input.token,
+        appointmentId: input.appointmentId,
+        startsAtMs: input.startsAt as number,
+        endsAtMs: input.endsAt as number,
+        nowMs: input.now as number,
       }),
-    );
+    });
     if (!res.ok) throw new Error(`DO confirm failed: ${res.status}`);
     const body = (await res.json()) as ConfirmResult;
     return body;
@@ -102,15 +96,13 @@ export class SlotLockClient implements SlotLockService {
     startsAt: Instant;
   }): Promise<void> {
     const stub = stubFor(this.ns, input.doctorId, input.startsAt);
-    await stub.fetch(
-      new Request('https://do/release', {
-        method: 'POST',
-        body: JSON.stringify({
-          token: input.token,
-          startsAtMs: input.startsAt as number,
-        }),
+    await stub.fetch('https://do/release', {
+      method: 'POST',
+      body: JSON.stringify({
+        token: input.token,
+        startsAtMs: input.startsAt as number,
       }),
-    );
+    });
   }
 
   async releaseBooking(input: {
@@ -119,20 +111,18 @@ export class SlotLockClient implements SlotLockService {
     appointmentId: AppointmentId;
   }): Promise<void> {
     const stub = stubFor(this.ns, input.doctorId, input.startsAt);
-    await stub.fetch(
-      new Request('https://do/release-booking', {
-        method: 'POST',
-        body: JSON.stringify({
-          startsAtMs: input.startsAt as number,
-          appointmentId: input.appointmentId,
-        }),
+    await stub.fetch('https://do/release-booking', {
+      method: 'POST',
+      body: JSON.stringify({
+        startsAtMs: input.startsAt as number,
+        appointmentId: input.appointmentId,
       }),
-    );
+    });
   }
 
   async dayProjection(doctorId: DoctorId, anyInstantInDay: Instant) {
     const stub = stubFor(this.ns, doctorId, anyInstantInDay);
-    const res = await stub.fetch(new Request('https://do/day', { method: 'GET' }));
+    const res = await stub.fetch('https://do/day', { method: 'GET' });
     return res.json() as Promise<{
       booked: Array<{ startsAtMs: number; endsAtMs: number; appointmentId: string }>;
       activeHolds: Array<{ startsAtMs: number; expiresAtMs: number }>;

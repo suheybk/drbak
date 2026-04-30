@@ -125,16 +125,16 @@ export class GoogleOauthClient {
     if (typeof payload.exp !== 'number' || payload.exp * 1000 < now) throw new Error('expired');
     if (payload.email_verified !== true) throw new Error('email not verified');
 
-    return {
+    const claims: GoogleIdTokenClaims = {
       sub: String(payload.sub),
       email: String(payload.email),
       emailVerified: true,
-      name: typeof payload.name === 'string' ? payload.name : undefined,
       aud: String(payload.aud),
       iss: String(payload.iss),
       exp: payload.exp,
       iat: typeof payload.iat === 'number' ? payload.iat : 0,
     };
+    return typeof payload.name === 'string' ? { ...claims, name: payload.name } : claims;
   }
 
   async generatePkce(): Promise<{ codeVerifier: string; codeChallenge: string }> {

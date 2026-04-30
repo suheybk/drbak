@@ -63,8 +63,8 @@ export const createContentEntry =
       slug: input.slug,
       status: 'draft',
       authorUserId: input.actorUserId,
-      relatedConditionId: input.relatedConditionId,
-      relatedServiceId: input.relatedServiceId,
+      relatedConditionId: input.relatedConditionId ?? null,
+      relatedServiceId: input.relatedServiceId ?? null,
       createdAt: now,
       updatedAt: now,
     });

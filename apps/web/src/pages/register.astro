@@ -1,4 +1,5 @@
 ---
+import RegisterPage from '~/views/RegisterPage.astro';
 const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
 ---
 <RegisterPage locale={locale} />

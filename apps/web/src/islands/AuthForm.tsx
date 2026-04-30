@@ -17,7 +17,7 @@ interface Props {
   locale: Locale;
   dict: Record<string, unknown>;
   mode: Mode;
-  next?: string;
+  next?: string | undefined;
   consentDocumentVersion: string;
   oauthBeginPath: string;
 }

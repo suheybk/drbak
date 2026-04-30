@@ -68,7 +68,7 @@ export interface RescheduleAppointmentDeps {
 export interface RescheduleAppointmentInput {
   readonly originalAppointmentId: AppointmentId;
   readonly actorUserId: UserId;
-  readonly actorRole: 'patient' | 'staff' | 'admin';
+  readonly actorRole: 'patient' | 'staff' | 'admin' | 'doctor';
   readonly newSlotStartsAtIso: string;
   readonly newDeliveryMode: 'in_person' | 'home_visit' | 'telehealth';
   readonly holdToken: SlotHoldToken;

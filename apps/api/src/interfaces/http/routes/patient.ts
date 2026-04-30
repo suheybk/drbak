@@ -419,8 +419,9 @@ patientRouter.put('/me/documents/:id/_upload', async (c) => {
       401,
     );
   }
-  const body = c.req.raw.body;
-  if (!body) return c.json({ error: { code: 'VALIDATION_FAILED', message: 'Empty body.' } }, 400);
+  const body = await c.req.raw.arrayBuffer();
+  if (body.byteLength === 0)
+    return c.json({ error: { code: 'VALIDATION_FAILED', message: 'Empty body.' } }, 400);
   await c.env.R2_DOCUMENTS.put(docs[0].r2Key, body, {
     httpMetadata: { contentType: docs[0].mimeType },
     customMetadata: { uploadedByUserId: auth.userId, docId },

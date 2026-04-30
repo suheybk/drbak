@@ -9,6 +9,7 @@
  * Run with: TEST_KIND=integration pnpm --filter @dr-bak/api test
  */
 
+/// <reference path="../../../node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts" />
 import { env, runInDurableObject } from 'cloudflare:test';
 import type { DurableObjectStub } from '@cloudflare/workers-types';
 import { describe, expect, it } from 'vitest';

@@ -6,11 +6,11 @@
 
 import { decodeBase64 } from '@oslojs/encoding';
 import {
+  JWTClaims,
   createJWTSignatureMessage,
   encodeJWT,
   joseAlgorithmES256,
   parseJWT,
-  validateJWT,
 } from '@oslojs/jwt';
 import type { IssuedToken, JwtClaims, TokenIssuer } from '../../application/ports/index.js';
 import { type Instant, instantFromMillis } from '../../domain/shared/time.js';
@@ -68,8 +68,8 @@ export class Es256TokenIssuer implements TokenIssuer {
     const nowSec = Math.floor((now as number) / 1000);
     const expSec = nowSec + ttlSeconds;
     const jti = crypto.randomUUID();
-    const header = { alg: joseAlgorithmES256, typ: 'JWT', kid };
-    const payload = {
+    const headerJson = JSON.stringify({ alg: joseAlgorithmES256, typ: 'JWT', kid });
+    const payloadJson = JSON.stringify({
       iss: this.issuer,
       aud: this.audience,
       sub: claims.sub,
@@ -79,19 +79,19 @@ export class Es256TokenIssuer implements TokenIssuer {
       jti,
       iat: nowSec,
       exp: expSec,
-    };
-    const message = createJWTSignatureMessage(header, payload);
+    });
+    const message = createJWTSignatureMessage(headerJson, payloadJson);
     const sig = new Uint8Array(
       await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, privateKey, message),
     );
-    const token = encodeJWT(header, payload, sig);
+    const token = encodeJWT(headerJson, payloadJson, sig);
     return { token, expiresAt: instantFromMillis(expSec * 1000), jti };
   }
 
   async verifyAccess(token: string, now: Instant): Promise<JwtClaims | null> {
     try {
-      const [headerJson, payloadJson, signature, signatureMessage] = parseJWT(token);
-      const header = headerJson as { alg: string; kid?: string };
+      const [headerObj, payloadObj, signature, signatureMessage] = parseJWT(token);
+      const header = headerObj as { alg?: string; kid?: string };
       if (header.alg !== joseAlgorithmES256) return null;
       const { publicKey } = await this.loadKeys();
       const valid = await crypto.subtle.verify(
@@ -101,17 +101,18 @@ export class Es256TokenIssuer implements TokenIssuer {
         signatureMessage,
       );
       if (!valid) return null;
-      const payload = payloadJson as Record<string, unknown>;
-      // Standard claims validation
-      if (
-        !validateJWT(headerJson, payloadJson, {
-          issuer: this.issuer,
-          audience: this.audience,
-          now: new Date(now as number),
-        })
-      ) {
+      const claimsView = new JWTClaims(payloadObj);
+      if (!claimsView.hasIssuer() || claimsView.issuer() !== this.issuer) return null;
+      if (!claimsView.hasAudiences() || !claimsView.audiences().includes(this.audience)) {
         return null;
       }
+      if (!claimsView.hasExpiration() || claimsView.expiration().getTime() <= (now as number)) {
+        return null;
+      }
+      if (claimsView.hasNotBefore() && claimsView.notBefore().getTime() > (now as number)) {
+        return null;
+      }
+      const payload = payloadObj as Record<string, unknown>;
       return {
         sub: String(payload.sub),
         sid: String(payload.sid),

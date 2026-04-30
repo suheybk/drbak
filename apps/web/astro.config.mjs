@@ -39,7 +39,6 @@ export default defineConfig({
     locales: [...LOCALES],
     routing: {
       prefixDefaultLocale: false,
-      redirectToDefaultLocale: false,
     },
     fallback: {
       ar: 'tr',

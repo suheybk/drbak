@@ -126,13 +126,16 @@ adminRouter.get('/appointments.csv', async (c) => {
     db: container.resolve(token('Db') as never) as never,
     audit: container.resolve(T.AuditLogger),
   });
+  const fromIso = c.req.query('from');
+  const toIso = c.req.query('to');
+  const statusQ = c.req.query('status');
   const csv = await useCase({
     actorUserId: asUserId(auth.userId),
     actorRole: auth.role === 'admin' ? 'admin' : 'staff',
     correlationId: asCorrelationId(c.get('correlationId')),
-    fromIso: c.req.query('from'),
-    toIso: c.req.query('to'),
-    status: c.req.query('status'),
+    ...(fromIso !== undefined ? { fromIso } : {}),
+    ...(toIso !== undefined ? { toIso } : {}),
+    ...(statusQ !== undefined ? { status: statusQ } : {}),
     ipAddress: clientIp(c),
     userAgent: userAgent(c),
   });
@@ -255,7 +258,7 @@ adminRouter.post(
     const r = await useCase({
       testimonialId: c.req.valid('param').id,
       action: 'reject',
-      reason: body.reason,
+      ...(body.reason !== undefined ? { reason: body.reason } : {}),
       actorUserId: asUserId(auth.userId),
       correlationId: asCorrelationId(c.get('correlationId')),
       ipAddress: clientIp(c),
@@ -304,8 +307,13 @@ adminRouter.post(
       audit: container.resolve(T.AuditLogger),
     });
     const r = await useCase({
-      ...body,
       type: body.type as ContentType,
+      slug: body.slug,
+      translations: body.translations,
+      ...(body.relatedConditionId !== undefined
+        ? { relatedConditionId: body.relatedConditionId }
+        : {}),
+      ...(body.relatedServiceId !== undefined ? { relatedServiceId: body.relatedServiceId } : {}),
       actorUserId: asUserId(auth.userId),
       correlationId: asCorrelationId(c.get('correlationId')),
       ipAddress: clientIp(c),

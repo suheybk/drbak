@@ -1,4 +1,5 @@
 ---
+import ServicesPage from '~/views/ServicesPage.astro';
 const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
 ---
 <ServicesPage locale={locale} request={Astro.request} />

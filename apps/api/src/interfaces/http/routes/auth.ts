@@ -87,7 +87,13 @@ authRouter.post('/register', zValidator('json', RegisterRequestSchema), async (c
     dateOfBirth: body.dateOfBirth,
     locale: body.locale,
     phoneE164: body.phoneE164 ?? null,
-    consents: body.consents,
+    consents: {
+      appointmentBooking: body.consents.appointmentBooking,
+      healthDataProcessing: body.consents.healthDataProcessing,
+      ...(body.consents.marketingCommunications !== undefined
+        ? { marketingCommunications: body.consents.marketingCommunications }
+        : {}),
+    },
     consentDocumentVersion: body.consentDocumentVersion,
     ipAddress: clientIp(c),
     userAgent: userAgent(c),

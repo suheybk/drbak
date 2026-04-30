@@ -3,6 +3,8 @@
  * mirror locale constants here as `.mjs`. Keep these in sync with
  * `@dr-bak/i18n-keys` — there's a typecheck cross-check in `lib/locales.ts`.
  */
-export const LOCALES = ['tr', 'ar', 'en', 'fr', 'es'];
+/** @type {readonly ['tr', 'ar', 'en', 'fr', 'es']} */
+export const LOCALES = /** @type {const} */ (['tr', 'ar', 'en', 'fr', 'es']);
+/** @type {'tr'} */
 export const DEFAULT_LOCALE = 'tr';
 export const RTL_LOCALES = new Set(['ar']);

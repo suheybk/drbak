@@ -19,6 +19,7 @@
 
 import { sql } from 'drizzle-orm';
 import {
+  type AnyPgColumn,
   boolean,
   date,
   index,
@@ -222,9 +223,7 @@ export const patients = pgTable(
     countryIso2: text('country_iso2').notNull().default('TR'),
     emergencyContactName: text('emergency_contact_name'),
     emergencyContactPhoneE164: text('emergency_contact_phone_e164'),
-    guardianPatientId: text('guardian_patient_id').references(
-      (): typeof patients.id => patients.id,
-    ),
+    guardianPatientId: text('guardian_patient_id').references((): AnyPgColumn => patients.id),
     notesInternal: text('notes_internal'), // staff-only; never returned to patient API
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),

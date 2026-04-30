@@ -1,5 +1,6 @@
 ---
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import ContactPage from '~/views/ContactPage.astro';
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 ---
 <ContactPage locale={locale} />

@@ -1,4 +1,6 @@
 ---
+import BookingFlow from '~/islands/BookingFlow';
+import BaseLayout from '~/layouts/BaseLayout.astro';
 import { serverFetch } from '~/lib/api';
 import { buildT, loadDict } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
@@ -7,7 +9,7 @@ import { localeHrefsFor, routes } from '~/lib/routes';
 interface Props {
   locale: AppLocale;
   request: Request;
-  presetServiceSlug?: string;
+  presetServiceSlug?: string | undefined;
 }
 
 const { locale, request, presetServiceSlug } = Astro.props;

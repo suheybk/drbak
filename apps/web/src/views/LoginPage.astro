@@ -1,11 +1,13 @@
 ---
+import AuthForm from '~/islands/AuthForm';
+import BaseLayout from '~/layouts/BaseLayout.astro';
 import { buildT, loadDict } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
 import { localeHrefsFor, routes } from '~/lib/routes';
 
 interface Props {
   locale: AppLocale;
-  next?: string;
+  next?: string | undefined;
 }
 const { locale, next } = Astro.props;
 const t = buildT(locale);

@@ -158,12 +158,38 @@ Run these commands locally; all must pass.
 
 ```bash
 pnpm install
-pnpm typecheck
+pnpm typecheck    # 26 known errors fixed in 2026-04-30 cleanup; gate is hard from here
 pnpm lint
-pnpm test
+pnpm test         # 38/38 unit tests pass as of 2026-04-30
 pnpm --filter @dr-bak/web build
 pnpm --filter @dr-bak/web test:e2e        # Playwright RTL
 ```
+
+### Typecheck cleanup (2026-04-30) — DONE
+
+The 26 errors documented in earlier resume notes were resolved alongside a
+large hidden batch of apps/web errors that surfaced once apps/api went green.
+Summary of the fixes that landed:
+
+- `argon2-browser` ambient .d.ts shim under `apps/api/src/types/`
+- `@oslojs/jwt` API ported (header/payload now JSON-stringified, validation
+  via `JWTClaims` instead of removed `validateJWT`)
+- `Hyperdrive.connectionString` access — global type used directly
+- `cloudflare:test` — integration tests excluded from the main typecheck
+  (they run in the Workers pool with their own runtime)
+- `SlotLockClient` DO `Request` types — pass URL strings to `stub.fetch()`
+- R2 PUT — read body to `ArrayBuffer` instead of streaming `ReadableStream`
+- Self-referential `patients.guardianPatientId` — typed via `AnyPgColumn`
+- `exactOptionalPropertyTypes` cluster across admin/auth/patient/oauth/error
+  routes and use cases (~10 sites)
+- `apps/web` regression: commit `e65cae2` Biome organize-imports stripped
+  Astro component imports (Biome doesn't parse .astro templates) — restored
+  imports across BaseLayout, Header, Footer, all 17 view components, all 17
+  unprefixed pages, and all 17 `[locale]/` pages
+- `pnpm.overrides` pin for `zod-to-json-schema@3.23.5` — newer 3.25.x
+  imports `zod/v3` which only exists in zod ≥ 3.24
+- Astro 5 dropped `routing.redirectToDefaultLocale: false` as invalid when
+  `prefixDefaultLocale: false` — removed from `astro.config.mjs`
 
 Then in the GitHub repo:
 

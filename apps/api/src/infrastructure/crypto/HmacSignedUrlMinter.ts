@@ -71,8 +71,9 @@ export class HmacSignedUrlMinter implements SignedUrlMinter {
     const [appointmentId, action, expIso] = decoded.split('|');
     if (!appointmentId || !action || !expIso) return null;
     if (action !== 'reschedule' && action !== 'cancel') return null;
+    const narrowedAction: 'reschedule' | 'cancel' = action;
     const expiresAt = instantFromIso(expIso);
     if ((expiresAt as number) < Date.now()) return null;
-    return { appointmentId, action, expiresAt };
+    return { appointmentId, action: narrowedAction, expiresAt };
   }
 }

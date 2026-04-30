@@ -1,5 +1,6 @@
 ---
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import LoginPage from '~/views/LoginPage.astro';
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 const next = Astro.url.searchParams.get('next') ?? undefined;
 ---

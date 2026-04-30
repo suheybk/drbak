@@ -1,5 +1,6 @@
 ---
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import AboutPage from '~/views/AboutPage.astro';
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 ---
 <AboutPage locale={locale} />

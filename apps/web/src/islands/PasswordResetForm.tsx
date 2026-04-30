@@ -12,7 +12,7 @@ interface Props {
   locale: Locale;
   dict: Record<string, unknown>;
   mode: 'request' | 'confirm';
-  token?: string;
+  token?: string | undefined;
 }
 
 export default function PasswordResetForm({ locale, dict, mode, token }: Props) {

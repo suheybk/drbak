@@ -1,6 +1,7 @@
 ---
 import { buildT } from '~/lib/i18n';
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
 
 const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
 const t = buildT(locale);

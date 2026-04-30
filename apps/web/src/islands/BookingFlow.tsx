@@ -58,7 +58,7 @@ interface Props {
   dict: Record<string, unknown>;
   consentDocumentVersion: string;
   /** Optional service slug to pre-select. */
-  presetServiceSlug?: string;
+  presetServiceSlug?: string | undefined;
 }
 
 const todayUtcYmd = (): string => {

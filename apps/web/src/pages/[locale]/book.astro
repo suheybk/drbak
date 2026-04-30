@@ -1,5 +1,6 @@
 ---
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import BookingPage from '~/views/BookingPage.astro';
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 const presetServiceSlug = (Astro.url.searchParams.get('service') ?? undefined) as
   | string
