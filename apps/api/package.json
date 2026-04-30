@@ -25,7 +25,7 @@
     "@hono/zod-validator": "0.4.1",
     "@hono/zod-openapi": "0.16.4",
     "drizzle-orm": "0.36.1",
-    "@neondatabase/serverless": "0.10.1",
+    "@neondatabase/serverless": "1.1.0",
     "zod": "3.23.8",
     "uuid": "10.0.0",
     "@oslojs/jwt": "0.2.0",
