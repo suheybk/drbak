@@ -105,9 +105,9 @@ OKB'de derin TMS protokolleri 2018'de FDA onayı almıştır. Migren ve diğer
 endikasyonlarda kanıt birikimi sürmektedir; bu nedenle her hastada beklenti
 yönetimi yapılır ve seçilen protokol gerekçesi paylaşılır.
 
-> **Bir cümle ile:** TMS, "denenmesi mantıklı, ancak garantili sonuç
-> sunmayan" bir tedavidir. Tedavi planı, sizin geçmişinizle birlikte
-> okunarak yapılır.
+> **Bir cümle ile:** TMS, denenmesi mantıklı bir tedavi seçeneğidir; ancak
+> her hastada aynı yanıtı vermez ve bunu açık şekilde paylaşırız. Tedavi
+> planı, sizin geçmişinizle birlikte okunarak yapılır.
 
 ## Doktorun notu
 

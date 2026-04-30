@@ -56,11 +56,43 @@ export const buildApp = (env: Env, ctx: ExecutionContext) => {
     await next();
   });
 
-  // Health
+  // Liveness — cheap; never fails unless the runtime is gone.
   app.get('/healthz', (c) => c.json({ ok: true, env: env.ENVIRONMENT }));
+
+  /**
+   * Readiness — 503 if a dependency we need to serve traffic is down.
+   * Probes KV and Postgres in parallel with a 750ms cap each so the whole
+   * response is bounded even when something is unhealthy.
+   *
+   * Deliberately not probed: the queue (it has its own retry; a stuck
+   * queue shouldn't fail readiness for reads), R2 (per-bucket; covered by
+   * app-level error handling), the DO (per-shard; not a useful global signal).
+   */
   app.get('/readyz', async (c) => {
-    // TODO: ping KV + DB lightly
-    return c.json({ ok: true });
+    type Probe = { label: string; ok: true; value: unknown } | { label: string; ok: false; error: string };
+    const cap = <T,>(label: string, p: Promise<T>, ms = 750): Promise<Probe> =>
+      Promise.race<Probe>([
+        p.then((value): Probe => ({ label, ok: true, value })),
+        new Promise<Probe>((resolve) =>
+          setTimeout(() => resolve({ label, ok: false, error: `timeout ${ms}ms` }), ms),
+        ),
+      ]).catch((e): Probe => ({ label, ok: false, error: e instanceof Error ? e.message : String(e) }));
+
+    const kvProbe = cap('kv', env.KV_SESSIONS.get('__readyz_probe__'));
+    const dbProbe = cap(
+      'db',
+      (async () => {
+        const { buildDb } = await import('../../infrastructure/db/client.js');
+        const { sql } = await import('drizzle-orm');
+        const db = buildDb({ connectionString: env.HYPERDRIVE_DB.connectionString });
+        await db.execute(sql`select 1`);
+        return 'ok';
+      })(),
+    );
+
+    const [kv, db] = await Promise.all([kvProbe, dbProbe]);
+    const allOk = kv.ok && db.ok;
+    return c.json({ ok: allOk, checks: { kv, db }, env: env.ENVIRONMENT }, allOk ? 200 : 503);
   });
 
   // JWKS (public key publication for token verification by web/admin)

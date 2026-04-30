@@ -4,6 +4,14 @@
  *
  * Variable fonts where available (Fraunces, Söhne, IBM Plex Sans Arabic).
  * `font-display: swap` so first paint is never blocked.
+ *
+ * License-pending strategy: Söhne is paid; until a license is purchased, we
+ * substitute Inter (OFL) and alias it under the `Söhne` family name so all
+ * downstream `font-family: Söhne` references resolve. To switch back, swap
+ * the `src:` of the `Söhne` block to point at the real `Sohne-Variable.woff2`
+ * and remove the Inter @font-face block. The visual delta is small (Inter
+ * is the open-source font Söhne is most often compared against) and design
+ * tokens stay identical.
  */
 
 @font-face {
@@ -14,10 +22,42 @@
   font-display: swap;
 }
 
+/*
+ * Söhne (production target). Paste the real .woff2 in /fonts/ and this block
+ * takes effect. While the file is missing, the Inter alias below picks up
+ * the slack via the family alias technique.
+ */
 @font-face {
   font-family: 'Söhne';
   src: url('/fonts/Sohne-Variable.woff2') format('woff2-variations');
   font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Inter — Söhne fallback. We register Inter ALSO under family-name 'Söhne'
+ * so the design tokens (`--font-body: 'Söhne', ...`) resolve regardless of
+ * whether the Söhne file is present. When the browser fails to fetch the
+ * Söhne .woff2 above, it falls through to this alias. When the Söhne file
+ * IS present, the browser picks the first registered match (the real
+ * Söhne) — Inter remains a safety net.
+ *
+ * Inter is OFL-licensed and ships fine for production; this is also the
+ * shippable answer if the Söhne license is declined.
+ */
+@font-face {
+  font-family: 'Söhne';
+  src: url('/fonts/Inter-Variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }

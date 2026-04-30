@@ -378,7 +378,6 @@ adminRouter.post(
     }),
   ),
   async (c) => {
-    const env = c.env;
     const container = c.get('container') as Container;
     const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
     const body = c.req.valid('json');
@@ -412,7 +411,6 @@ adminRouter.post(
     }),
   ),
   async (c) => {
-    const env = c.env;
     const container = c.get('container') as Container;
     const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
     const body = c.req.valid('json');

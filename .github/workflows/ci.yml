@@ -61,13 +61,23 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - name: Brand-voice lint (banned superlatives in marketing/)
+      - name: Brand-voice lint (banned superlatives in patient-facing copy)
         run: |
-          # Hard-fails the build if any of the banned phrases appear in
-          # marketing/. Mirrors `memory/dr-bak-locked-decisions.md`.
+          # Hard-fails the build if any of the banned phrases appear in the
+          # *patient-facing* marketing copy. Scoped to:
+          #   marketing/landing-copy/*.{tr,en,ar,fr,es}.md
+          #   marketing/email-sequences/<seq>/{tr,en,ar,fr,es}.md
+          # Excludes README.md, launch-plan.md, seo-plan.md, the calendar
+          # CSV, and other process docs — those mention the banned words
+          # specifically to ban them.
+          # Source list mirrors `memory/dr-bak-locked-decisions.md`.
           set -euo pipefail
-          if grep -RnE 'mucize|garantili|%100 başarı|Türkiye'\''nin en iyisi|son teknoloji|guaranteed result|miracle cure' marketing/ 2>/dev/null; then
-            echo "::error::Banned phrase found in marketing/ copy"
+          if rg --no-messages -nE \
+              'mucize|garantili|%100 başarı|Türkiye'\''nin en iyisi|son teknoloji|guaranteed result|miracle cure' \
+              marketing/landing-copy marketing/email-sequences \
+              --glob '!**/README.md' \
+              --glob '*.md'; then
+            echo "::error::Banned phrase found in patient-facing marketing copy"
             exit 1
           fi
           echo "Brand-voice lint clean"
