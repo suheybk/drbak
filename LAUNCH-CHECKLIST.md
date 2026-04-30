@@ -130,21 +130,39 @@ Currently `packages/ui/src/fonts.css` registers Inter under both `Inter` AND `S�
 - [ ] Update `clinics.hours_json` for `clinic_kartal` row (shape: `{ mon: [['09:00','18:00']], ... }`)
 - [ ] Replace the `hoursPlaceholder` rendering with the real schedule
 
-### C4. Markdown renderer upgrade
+### C4. Markdown renderer upgrade — DEFERRED to post-launch
 
-`apps/web/src/lib/markdown.ts` is intentionally minimal. Before launching CMS-authored content, swap to remark/rehype + rehype-sanitize:
+`apps/web/src/lib/markdown.ts` is intentionally minimal. The CMS authors are
+admin-role and trusted, the simple impl already escapes HTML defensively, and
+the unified-pipeline upgrade introduces deps (`vfile`) that externalise
+`node:path` / `node:process` / `node:url` at build time. Those resolve fine
+under CF's `nodejs_compat` flag, but verifying behaviour in CF Pages SSR
+runtime requires a deploy I haven't yet run. Pre-launch this risk isn't
+worth taking; revisit after v0.1.0 is stable.
 
-- [ ] `pnpm add -F @dr-bak/web remark remark-rehype rehype-sanitize rehype-stringify unified`
-- [ ] Replace `renderMarkdown` body with the unified pipeline; preserve the same export signature
-- [ ] Keep the HTML escape pass as a defence-in-depth layer
+Post-launch upgrade plan:
 
-### C5. Localised URL slugs
+- [ ] `pnpm add -F @dr-bak/web remark-parse remark-rehype rehype-sanitize rehype-stringify unified unist-util-visit @types/hast`
+- [ ] Replace `renderMarkdown` body with `unified().use(remarkParse).use(remarkRehype).use(rehypeSanitize, schema).use(externaliseLinks).use(rehypeStringify)` — keep the synchronous `processSync` shape and string→string signature so callers don't change.
+- [ ] Sanitize schema = `defaultSchema` extended to allow `target` + `rel` on `<a>` (added by an externalise-links transform AFTER sanitize so it isn't filtered out).
+- [ ] Verify `nodejs_compat` is enabled on the CF Pages project (Settings → Functions → Compatibility flags).
+- [ ] Smoke /faq and /kvkk in production after deploy — those are the markdown-heavy pages.
 
-Currently `/services/tms` is the URL for every locale. Phase 3+ enhancement:
+### C5. Localised URL slugs — DEFERRED to post-launch
+
+Currently `/services/tms` is the URL for every locale. Localising the slugs
+(`/hizmetler/tms`, `/الخدمات/tms`, etc.) is real SEO upside but requires
+renaming ~50 page files (Astro is file-based-routed) plus 301 setup, which
+is a high-risk refactor right before launch. The English slugs work
+cross-locale today; SEO loss vs. localised slugs is small for the first
+cohort because we own the brand-name and condition keywords either way.
+
+Post-launch plan:
 
 - [ ] Add `/hizmetler/tms` (TR), `/الخدمات/tms` (AR), etc., reading from `service_translations.slug_localised`
-- [ ] 301 from English slugs to localised slugs in non-default locales
+- [ ] 301 from English slugs to localised slugs in non-default locales (Cloudflare Bulk Redirects, sourced from `service_translations`)
 - [ ] Update `apps/web/src/lib/routes.ts` to consult the slug map
+- [ ] CI check that every `service_translations.slug_localised` is unique within `(service_id, locale)`
 
 ### C6. Programmatic SEO matrix
 

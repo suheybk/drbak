@@ -7,7 +7,7 @@ import {
   LOCALES as KEYS_LOCALES,
   type Locale,
 } from '@dr-bak/i18n-keys';
-import { DEFAULT_LOCALE, LOCALES } from './locales.mjs';
+import { DEFAULT_LOCALE, LOCALES } from './locales.constants.mjs';
 
 // Type-level cross-check: if you change one list and forget the other, this fails to compile.
 type _Check = (typeof LOCALES)[number] extends Locale

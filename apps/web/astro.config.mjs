@@ -3,7 +3,7 @@ import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
-import { DEFAULT_LOCALE, LOCALES } from './src/lib/locales.mjs';
+import { DEFAULT_LOCALE, LOCALES } from './src/lib/locales.constants.mjs';
 
 /**
  * Astro config — SSR on Cloudflare Workers via the Pages adapter.
