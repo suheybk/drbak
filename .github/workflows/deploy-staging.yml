@@ -1,0 +1,122 @@
+name: Deploy to staging
+
+# Auto-deploys to staging on every push to `main` after CI is green.
+# Uses Wrangler v3. Two parallel jobs: web (CF Pages) and api (CF Workers).
+# Secrets:
+#   CLOUDFLARE_API_TOKEN  — token scoped: Pages:Edit, Workers:Edit, KV:Edit, R2:Edit, DNS:Read for the zone
+#   CLOUDFLARE_ACCOUNT_ID
+#
+# Worker secrets (DATABASE_URL, JWT_SIGNING_PRIVATE_KEY, etc.) are NOT set here;
+# they live in the Worker's secret store via `wrangler secret put` and are
+# rotated per `docs/runbook.md`.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false  # never cancel a deploy mid-flight
+
+permissions:
+  contents: read
+  deployments: write
+
+env:
+  NODE_VERSION: '20.11.0'
+  PNPM_VERSION: '9.12.0'
+
+jobs:
+  wait-for-ci:
+    name: Wait for CI to be green on this commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for CI checks
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Lint (Biome)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 15
+      - name: Wait for typecheck
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Typecheck (all packages)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 15
+
+  deploy-api-staging:
+    name: API → staging
+    needs: wait-for-ci
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Wrangler deploy (staging)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: deploy --env staging
+          packageManager: pnpm
+
+  deploy-web-staging:
+    name: Web → staging (CF Pages)
+    needs: wait-for-ci
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build web (staging env)
+        run: pnpm --filter @dr-bak/web build
+        env:
+          PUBLIC_API_BASE: https://staging-api.uzmdroguzbak.com/api/v1
+          PUBLIC_BASE_URL: https://staging.uzmdroguzbak.com
+      - name: Wrangler Pages deploy (staging)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/web/dist --project-name dr-bak-web-staging --branch=staging --commit-hash=${{ github.sha }}
+          packageManager: pnpm
+
+  smoke-staging:
+    name: Smoke check staging
+    needs: [deploy-api-staging, deploy-web-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit /healthz on staging
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://staging-api.uzmdroguzbak.com/healthz || true)
+            if [ "$code" = "200" ]; then echo "healthz ok"; exit 0; fi
+            echo "attempt $i: $code, retrying..."; sleep 6
+          done
+          echo "::error::staging healthz did not reach 200 after 5 attempts"
+          exit 1
+      - name: Hit staging home page
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://staging.uzmdroguzbak.com/)
+          test "$code" = "200" || (echo "::error::staging home returned $code" && exit 1)

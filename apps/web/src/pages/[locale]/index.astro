@@ -1,0 +1,86 @@
+---
+/**
+ * Home page for non-default locales: /ar, /en, /fr, /es.
+ * Astro routes the default locale (TR) at /, and prefixed locales here.
+ */
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { type AppLocale, LOCALES, DEFAULT_LOCALE } from '~/lib/locales';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { DoctorNote } from '@dr-bak/ui';
+
+export const getStaticPaths = () =>
+  LOCALES.filter((l) => l !== DEFAULT_LOCALE).map((locale) => ({ params: { locale } }));
+
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.home(l));
+
+const pillars = [
+  t('home.pillarBoardCertified'),
+  t('home.pillarHolistic'),
+  t('home.pillarHumility'),
+  t('home.pillarContinuity'),
+  t('home.pillarAccessibility'),
+  t('home.pillarMindBody'),
+];
+---
+<BaseLayout
+  title={t('home.heroTitle')}
+  description={t('home.heroLead')}
+  alternates={alternates}
+>
+  <section class="hero">
+    <h1 class="hero__title">{t('home.heroTitle')}</h1>
+    <p class="hero__lead">{t('home.heroLead')}</p>
+    <div class="hero__ctas">
+      <a class="drb-btn drb-btn--primary drb-btn--lg" href={routes.book(locale)}>
+        {t('home.heroCta')}
+      </a>
+      <a class="drb-btn drb-btn--secondary drb-btn--lg" href={routes.services(locale)}>
+        {t('home.heroSecondaryCta')}
+      </a>
+    </div>
+  </section>
+
+  <section class="app-section">
+    <h2>{t('home.pillarsTitle')}</h2>
+    <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-5); list-style: none; padding: 0; margin: var(--space-6) 0;">
+      {pillars.map((p) => (
+        <li class="card">
+          <p style="font-family: var(--font-display); font-size: var(--type-display-sm); margin: 0;">{p}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <hr class="divider-anatomy" />
+
+  <section class="app-section">
+    <div class="card" style="background: var(--color-primary); color: var(--color-primary-on); border: 0; padding: var(--space-12);">
+      <h2 style="color: inherit;">{t('home.marqueeServiceTitle')}</h2>
+      <p style="color: rgba(244,241,234,0.85); font-size: var(--type-body-lg); max-width: 56ch;">
+        {t('home.marqueeServiceLead')}
+      </p>
+      <a class="drb-btn drb-btn--accent" href={routes.serviceDetail(locale, 'tms')}>
+        {t('home.marqueeServiceCta')}
+      </a>
+    </div>
+  </section>
+
+  <DoctorNote
+    label={t('blog.doctorNoteLabel')}
+    doctorName={t('brand.doctor')}
+    doctorTitle={t('brand.doctorTitle')}
+  >
+    <p style="margin: 0;">
+      {locale === 'ar'
+        ? 'أبدأ دائمًا بالإصغاء. الألم تجربة غالبًا ما تكون موحشة، وفهم تلك التجربة أهم من السرعة في التشخيص.'
+        : locale === 'fr'
+          ? 'Je commence toujours par écouter. La douleur est souvent une expérience solitaire ; la comprendre prime sur un diagnostic rapide.'
+          : locale === 'es'
+            ? 'Empiezo siempre por escuchar. El dolor suele ser una experiencia solitaria; entenderla importa más que apresurar un diagnóstico.'
+            : 'I like to start by listening. Pain is often a lonely experience; understanding that experience matters more than rushing to a diagnosis.'}
+    </p>
+  </DoctorNote>
+</BaseLayout>

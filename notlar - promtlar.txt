@@ -1,0 +1,366 @@
+You are a senior software architect and staff-level backend - frontend and fullstack engineer. Design and build a production-grade software application - web page from scratch using Node.js, NestJS principles, and deploy it to Cloudflare Serverless (Cloudflare Workers).
+
+Your job is to act like a disciplined engineering team and produce a secure, maintainable, testable, readable, extensible, and production-ready system optimized for edge/serverless execution.
+
+I need you to investigate the following website https://uzmdroguzbak.com/ and this instagram page https://www.instagram.com/uzm_dr_oguzbak and create a doctor website/app with an appointment scheduling system while promoting the stated services in the website. I want you to use marketingskills and agents in C:\Users\tugba\Downloads\suheybindirlenler\marketingskills-main folder and create a marketting campaing. All of the following website, app and the campaing should be trendy, in Turkish, Arabic, English, French and Spanish while having the similar features of the website and the social media. While having questions&answer videos-animations, testemonials of the patients etc.
+
+Follow these requirements strictly.
+
+DISTILLED_AESTHETICS_PROMPT = """
+<frontend_aesthetics>
+You tend to converge toward generic, "on distribution" outputs. In frontend design, this creates what users call the "AI slop" aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight. Focus on:
+ 
+Typography: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics.
+ 
+Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes. Draw from IDE themes and cultural aesthetics for inspiration.
+ 
+Motion: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions.
+ 
+Backgrounds: Create atmosphere and depth rather than defaulting to solid colors. Layer CSS gradients, use geometric patterns, or add contextual effects that match the overall aesthetic.
+ 
+Avoid generic AI-generated aesthetics:
+- Overused font families (Inter, Roboto, Arial, system fonts)
+- Clichéd color schemes (particularly purple gradients on white backgrounds)
+- Predictable layouts and component patterns
+- Cookie-cutter design that lacks context-specific character
+ 
+Interpret creatively and make unexpected choices that feel genuinely designed for the context. Vary between light and dark themes, different fonts, different aesthetics. You still tend to converge on common choices (Space Grotesk, for example) across generations. Avoid this: it is critical that you think outside the box!
+</frontend_aesthetics>
+"""
+
+# 1) Core stack requirements (Cloudflare-aware)
+
+Use:
+
+- TypeScript (strict mode)
+- NestJS architectural principles (NOT necessarily full runtime if incompatible)
+- Cloudflare Workers (edge runtime)
+- Hono or lightweight adapter if needed (NestJS may need adaptation)
+- PostgreSQL (Cloudflare-compatible approach)
+  - Prefer:
+    - Cloudflare Hyperdrive (for Postgres)
+    - OR serverless Postgres (Neon / Supabase / RDS proxy)
+- Prisma (edge-compatible) OR Drizzle ORM (preferred for edge)
+- JWT-based authentication (stateless preferred)
+- Cloudflare KV / Durable Objects / D1 where appropriate
+- Cloudflare R2 for storage if file handling exists
+- Wrangler for deployment
+- OpenAPI / Swagger (static or generated)
+- Jest (unit testing)
+- Miniflare or Wrangler test tools (integration/e2e simulation)
+
+If a library is incompatible with Workers runtime, replace it with an edge-compatible alternative and explain why.
+
+# 2) Important Cloudflare constraints
+
+You MUST design for Cloudflare Workers limitations:
+
+- No traditional Node.js APIs (fs, net, etc.)
+- No long-lived connections
+- No native TCP (must use HTTP-based DB proxies like Hyperdrive)
+- Cold starts are minimal but execution time is limited
+- Stateless execution model
+- Limited CPU time per request
+- No in-memory shared state between requests
+
+Design accordingly:
+- stateless services
+- short-lived operations
+- externalized state
+- async-friendly flows
+- no blocking operations
+
+# 3) Architecture requirements
+
+Use:
+- Hexagonal Architecture (Ports and Adapters)
+- SOLID principles
+- Separation of Concerns
+- Clean Code
+- Domain-driven design where appropriate
+
+Structure:
+
+- Domain (pure, framework-agnostic)
+- Application (use cases)
+- Infrastructure (Cloudflare bindings, DB, auth providers)
+- Interface (HTTP handlers)
+
+IMPORTANT:
+Do NOT tightly couple to NestJS runtime if it conflicts with Workers.
+You may:
+- emulate NestJS structure
+- or use a lightweight framework (e.g., Hono) while preserving NestJS architecture patterns
+
+All business logic MUST remain framework-independent.
+
+# 4) NestJS adaptation for serverless
+
+If NestJS cannot run natively:
+- replicate its patterns:
+  - modules → logical folders
+  - providers → services
+  - controllers → route handlers
+  - guards → middleware
+  - pipes → validation layer
+  - interceptors → middleware/hooks
+
+Avoid:
+- heavy decorators tied to Node runtime
+- reflection-heavy features if not supported
+- blocking DI containers
+
+Prefer:
+- lightweight DI or manual composition
+- functional composition where helpful
+
+# 5) Development process (TDD)
+
+Apply strict TDD:
+- write tests first
+- red → green → refactor
+
+Testing must include:
+- unit tests (pure domain + use cases)
+- integration tests (DB, auth, adapters)
+- edge simulation tests (Miniflare)
+- e2e tests for HTTP flows
+- security tests
+
+# 6) Database design (PostgreSQL)
+
+Use PostgreSQL via:
+- Cloudflare Hyperdrive OR
+- serverless Postgres provider (Neon preferred)
+
+Apply:
+- migrations
+- indexing
+- constraints
+- transactions (with serverless-safe patterns)
+- connection pooling awareness (important!)
+
+Avoid:
+- long transactions
+- connection exhaustion
+- synchronous blocking queries
+
+Prefer:
+- short queries
+- batched operations
+- pagination from day 1
+
+# 7) Security (OWASP Top 10)
+
+The application MUST be secure by default.
+
+Protect against:
+- SQL Injection
+- XSS
+- CSRF (if cookies used)
+- Broken Access Control
+- Authentication flaws
+- SSRF
+- RFI/LFI
+- Path traversal
+- Mass assignment
+- Brute-force attacks
+- Insecure uploads
+- CORS misconfiguration
+- Sensitive data leaks
+- Dependency vulnerabilities
+
+Cloudflare-specific protections:
+- use Cloudflare WAF
+- rate limiting (Workers / rules)
+- bot protection if applicable
+
+Application-level protections:
+- strict validation
+- parameterized queries
+- JWT validation
+- secure headers
+- input/output sanitization
+- request size limits
+- audit logs
+
+# 8) Authentication & Google Login
+
+Implement:
+
+- JWT-based authentication (preferred for serverless)
+- short-lived access tokens
+- refresh token rotation (stored securely, e.g., KV or DB)
+- stateless verification
+
+Google login:
+- OAuth 2.0 / OpenID Connect
+- validate tokens server-side
+- verify audience, issuer, expiration
+- use state parameter for CSRF protection
+- link accounts securely
+- prevent duplicate accounts
+
+Also include:
+- email verification
+- password reset
+- brute-force protection
+- account lock / throttling
+
+# 9) Authorization
+
+Implement:
+- role-based or policy-based access control
+- resource-level checks
+- deny-by-default
+
+Must:
+- run on server
+- not trust client
+- be centralized (middleware or use-case layer)
+
+# 10) API design
+
+Use REST:
+
+- consistent routes
+- DTO validation
+- pagination/filtering
+- versioning if needed
+- proper HTTP status codes
+
+Ensure:
+- small payloads (edge optimization)
+- fast responses (<100ms target where possible)
+- no heavy synchronous processing
+
+# 11) Cloudflare-specific components
+
+Use where appropriate:
+
+- KV → caching, session metadata
+- Durable Objects → coordination / locking / real-time state
+- R2 → file storage
+- Queues → async processing
+- Cron Triggers → scheduled jobs
+
+Design patterns:
+- event-driven processing
+- async workflows
+- idempotent handlers
+
+# 12) Observability
+
+Include:
+- structured logging
+- request IDs
+- edge logging strategy
+- error tracking hooks
+- metrics-friendly outputs
+
+# 13) Performance considerations
+
+Optimize for edge:
+
+- minimize DB calls
+- cache aggressively (KV / CDN)
+- avoid large payloads
+- avoid unnecessary serialization
+- batch queries
+- use streaming if needed
+
+# 14) Configuration
+
+Use:
+- Wrangler environment variables
+- bindings (KV, R2, DO, DB)
+
+Ensure:
+- no secrets in code
+- validation of config at startup
+- separate dev/staging/prod configs
+
+# 15) Folder structure
+
+Use:
+
+- src/
+  - domain/
+  - application/
+  - infrastructure/
+  - interfaces/
+  - config/
+  - modules/
+  - shared/
+
+Keep:
+- framework-independent core
+- Cloudflare-specific code isolated
+
+# 16) Additional best practices
+
+Include:
+
+- idempotency for write operations
+- retry-safe operations
+- outbox/event pattern if needed
+- audit logging
+- correlation IDs
+- strict typing everywhere
+- dependency audit
+- CI pipeline
+
+# 17) Deployment (Cloudflare)
+
+Provide:
+
+- wrangler.toml
+- environment bindings
+- build step
+- deployment commands
+- local dev setup (wrangler dev)
+
+Include:
+- routes config
+- KV bindings
+- R2 bindings
+- secrets setup
+
+# 18) Output format
+
+Work in this order:
+
+1. Assumptions
+2. Architecture
+3. Module structure
+4. Tech stack
+5. Domain model
+6. Auth & security model
+7. DB schema
+8. API design
+9. Tests (first)
+10. Implementation
+11. Cloudflare deployment config
+12. Documentation
+13. Self-review
+
+# 19) Self-review checklist
+
+Ensure:
+
+- Works on Cloudflare Workers
+- No Node-only APIs used
+- Stateless design
+- Secure by default
+- OWASP protections included
+- PostgreSQL used correctly
+- Google login implemented
+- TDD followed
+- Clean architecture preserved
+- Loosely coupled
+- Production-ready
+- Edge-optimized
+
+If any area is weak, fix it before finalizing.
+
+Now design and build the application.

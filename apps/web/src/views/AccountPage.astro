@@ -1,0 +1,137 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT, loadDict } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import type { AppLocale } from '~/lib/locales';
+import AppointmentActions from '~/islands/AppointmentActions';
+import DocumentUploader from '~/islands/DocumentUploader';
+import TmsScreeningForm from '~/islands/TmsScreeningForm';
+
+interface Props { locale: AppLocale; request: Request }
+const { locale, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.portal(l));
+const dict = loadDict(locale);
+
+type Me = { userId: string; emailVerified: boolean; role: string };
+const me = await serverFetch<Me>(request, '/auth/me');
+if (!me.ok) {
+  return Astro.redirect(`${routes.login(locale)}?next=${encodeURIComponent(routes.portal(locale))}`);
+}
+
+type Appt = {
+  id: string;
+  serviceId: string;
+  startsAt: string;
+  endsAt: string;
+  deliveryMode: 'in_person' | 'home_visit' | 'telehealth';
+  status: string;
+  telehealthJoinUrl: string | null;
+};
+type Doc = {
+  id: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  scanStatus: 'pending' | 'clean' | 'infected' | 'failed';
+  description: string | null;
+  createdAt: string;
+};
+const apptsR = await serverFetch<{ items: Appt[] }>(request, '/patient/me/appointments');
+const docsR = await serverFetch<{ items: Doc[] }>(request, '/patient/me/documents');
+const appointments = apptsR.ok ? apptsR.value.items : [];
+const documents = docsR.ok ? docsR.value.items : [];
+
+const fmtTime = (iso: string) =>
+  new Intl.DateTimeFormat(locale, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    hour12: false,
+    timeZone: 'Europe/Istanbul',
+    numberingSystem: 'latn',
+  }).format(new Date(iso));
+
+const isFuture = (iso: string) => new Date(iso).getTime() > Date.now();
+const TERMINAL = new Set(['cancelled_by_patient', 'cancelled_by_clinic', 'no_show', 'completed', 'late_cancellation']);
+---
+<BaseLayout title={t('portal.title')} description={t('portal.title')} alternates={alternates}>
+  <header class="app-section" style="margin-block-start: 0;">
+    <h1>{t('portal.title')}</h1>
+  </header>
+
+  {!me.value.emailVerified ? (
+    <div class="drb-banner drb-banner--warning"><p style="margin: 0;">{t('errors.EMAIL_NOT_VERIFIED')}</p></div>
+  ) : null}
+
+  <section class="app-section">
+    <h2>{t('portal.appointmentsTitle')}</h2>
+    {appointments.length === 0 ? (
+      <p style="color: var(--color-ink-subtle);">{t('portal.appointmentsEmpty')}</p>
+    ) : (
+      <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4);">
+        {appointments.map((a) => {
+          const cancelable = isFuture(a.startsAt) && !TERMINAL.has(a.status);
+          return (
+            <li class="card">
+              <p class="card__title" style="margin: 0;">
+                <span class="digit-western" dir="ltr">{fmtTime(a.startsAt)}</span>
+              </p>
+              <p class="card__meta">
+                <span>{t(`services.deliveryMode.${a.deliveryMode}` as never)}</span>
+                <span>· {a.status}</span>
+              </p>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center;">
+                {a.telehealthJoinUrl ? (
+                  <a class="drb-btn drb-btn--accent drb-btn--sm" rel="noopener noreferrer" href={a.telehealthJoinUrl}>
+                    {t('portal.joinTelehealth')}
+                  </a>
+                ) : null}
+                <AppointmentActions
+                  client:visible
+                  locale={locale}
+                  dict={dict}
+                  appointmentId={a.id}
+                  cancelable={cancelable}
+                  rescheduleHref={`${routes.book(locale)}?reschedule=${a.id}`}
+                />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+
+  <section class="app-section">
+    <h2>{t('portal.documentsTitle')}</h2>
+    <div style="display: flex; gap: var(--space-3); align-items: center; margin-block-end: var(--space-4);">
+      <DocumentUploader client:visible locale={locale} dict={dict} />
+    </div>
+    {documents.length === 0 ? (
+      <p style="color: var(--color-ink-subtle);">{t('portal.documentsEmpty')}</p>
+    ) : (
+      <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2);">
+        {documents.map((d) => (
+          <li class="card" style="flex-direction: row; align-items: center; gap: var(--space-4);">
+            <span style="flex: 1;">{d.filename}</span>
+            <span class="card__meta digit-western" dir="ltr">{Math.round(d.sizeBytes / 1024)} KB</span>
+            <span class="card__meta">{d.scanStatus}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  <section class="app-section">
+    <h2>{t('portal.tmsTitle')}</h2>
+    <p style="color: var(--color-ink-subtle); max-width: 56ch;">{t('portal.tmsLead')}</p>
+    <TmsScreeningForm client:visible locale={locale} dict={dict} />
+  </section>
+
+  <section class="app-section">
+    <form action={`${import.meta.env.PUBLIC_API_BASE ?? '/api/v1'}/auth/logout`} method="post">
+      <button type="submit" class="drb-btn drb-btn--ghost">{t('portal.logout')}</button>
+    </form>
+  </section>
+</BaseLayout>

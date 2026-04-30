@@ -1,0 +1,67 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import type { AppLocale } from '~/lib/locales';
+import { renderMarkdown } from '~/lib/markdown';
+
+interface Props { locale: AppLocale; request: Request }
+const { locale, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.faq(l));
+
+type Item = {
+  id: string;
+  type: 'faq';
+  slug: string;
+  title: string;
+  leadParagraph: string | null;
+};
+type Detail = { title: string; bodyMarkdown: string };
+
+const list = await serverFetch<{ items: Item[] }>(request, `/public/content?type=faq&locale=${locale}`);
+const items = list.ok ? list.value.items : [];
+
+// Fetch each FAQ body for inline render. The FAQ page is the ONE page that
+// renders detail bodies inline so search engines can pick up every Q&A.
+const details: Array<{ q: string; aMd: string }> = [];
+for (const it of items) {
+  const r = await serverFetch<Detail>(request, `/public/content/faq/${it.slug}?locale=${locale}`);
+  if (r.ok) details.push({ q: r.value.title, aMd: r.value.bodyMarkdown });
+}
+
+const faqSchema = details.length > 0
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: details.map((d) => ({
+        '@type': 'Question',
+        name: d.q,
+        acceptedAnswer: { '@type': 'Answer', text: d.aMd },
+      })),
+    }
+  : null;
+---
+<BaseLayout
+  title={t('faq.title')}
+  description={t('faq.lead')}
+  alternates={alternates}
+  schemas={faqSchema ? [faqSchema] : []}
+>
+  <header class="app-section" style="margin-block-start: 0;">
+    <h1>{t('faq.title')}</h1>
+    <p class="hero__lead">{t('faq.lead')}</p>
+  </header>
+
+  <div class="app-prose">
+    {details.map((d) => (
+      <details style="border-block-end: 1px solid var(--color-border); padding-block: var(--space-4);">
+        <summary style="font-family: var(--font-display); font-size: var(--type-display-sm); cursor: pointer;">
+          {d.q}
+        </summary>
+        <div style="margin-block-start: var(--space-3);" set:html={renderMarkdown(d.aMd)} />
+      </details>
+    ))}
+  </div>
+</BaseLayout>

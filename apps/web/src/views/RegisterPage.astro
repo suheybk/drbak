@@ -1,0 +1,32 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT, loadDict } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import type { AppLocale } from '~/lib/locales';
+import AuthForm from '~/islands/AuthForm';
+
+interface Props { locale: AppLocale }
+const { locale } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.register(l));
+const dict = loadDict(locale);
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'https://api.uzmdroguzbak.com/api/v1';
+const oauthBegin = `${apiBase}/auth/oauth/google/begin?locale=${locale}`;
+const consentVersion = (import.meta.env as never as { CONSENT_DOCUMENT_VERSION?: string }).CONSENT_DOCUMENT_VERSION ?? 'v1.2026-04';
+---
+<BaseLayout title={t('auth.registerTitle')} description={t('auth.registerTitle')} alternates={alternates}>
+  <article class="app-prose" style="max-width: 520px;">
+    <h1>{t('auth.registerTitle')}</h1>
+    <AuthForm
+      client:load
+      locale={locale}
+      dict={dict}
+      mode="register"
+      consentDocumentVersion={consentVersion}
+      oauthBeginPath={oauthBegin}
+    />
+    <p style="margin-block-start: var(--space-6);">
+      {t('auth.alreadyRegistered')} <a href={routes.login(locale)}>{t('auth.loginTitle')}</a>
+    </p>
+  </article>
+</BaseLayout>

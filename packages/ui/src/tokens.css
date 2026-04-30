@@ -1,0 +1,127 @@
+/**
+ * Sage Clinical design tokens — single source of truth for the entire web app.
+ * Matches `memory/dr-bak-locked-decisions.md` "Visual identity (Sage Clinical = Option A)".
+ *
+ * Why CSS custom properties: Astro components, React islands and Tailwind v4
+ * theming all consume the same variables. Tailwind 4's `@theme` block in
+ * `apps/web/src/styles/global.css` references these.
+ *
+ * Why two surface tones: ".surface" is warm paper for the body; "ink" is the
+ * type colour. Pure white is intentionally absent — we never use #fff because
+ * the brand is "we kept your green, we just disciplined it."
+ */
+
+:root {
+  /* Brand */
+  --color-primary: #2F5D50;          /* deep clinical sage */
+  --color-primary-hover: #264C42;
+  --color-primary-pressed: #1F3F37;
+  --color-primary-on: #F4F1EA;       /* text on primary */
+
+  --color-accent: #C46A3D;           /* warm clay — CTAs only */
+  --color-accent-hover: #B05D34;
+  --color-accent-on: #F4F1EA;
+
+  --color-surface: #F4F1EA;          /* warm paper */
+  --color-surface-elevated: #ECE7DB;
+  --color-surface-sunken: #DCD5C4;
+
+  --color-ink: #1A1F1C;
+  --color-ink-muted: #4D5852;
+  --color-ink-subtle: #6E7A73;
+
+  /* States */
+  --color-success: #2F6B4F;
+  --color-warning: #B0762A;
+  --color-danger: #8C2A1F;
+  --color-danger-on: #F4F1EA;
+  --color-info: #2A5A78;
+
+  /* Borders */
+  --color-border: #C9C3B4;
+  --color-border-strong: #8E8775;
+
+  /* Type */
+  --font-display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
+  --font-body: 'Söhne', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', 'Söhne', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --type-display-xl: clamp(2.5rem, 1.8rem + 3vw, 4.25rem);  /* hero */
+  --type-display-lg: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);  /* page title */
+  --type-display-md: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem); /* section */
+  --type-display-sm: 1.25rem;
+  --type-body-lg: 1.125rem;
+  --type-body: 1rem;
+  --type-body-sm: 0.875rem;
+  --type-meta: 0.8125rem;
+
+  /* Spacing — 4pt grid */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-pill: 9999px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px hsl(150 12% 8% / 0.06);
+  --shadow-md: 0 4px 12px hsl(150 12% 8% / 0.08), 0 1px 3px hsl(150 12% 8% / 0.04);
+  --shadow-lg: 0 12px 32px hsl(150 12% 8% / 0.10), 0 4px 8px hsl(150 12% 8% / 0.04);
+
+  /* Focus — visible on every interactive surface */
+  --focus-ring: 0 0 0 3px hsl(150 33% 28% / 0.5);
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-base: 220ms;
+  --motion-slow: 380ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layout */
+  --content-max: 72ch;
+  --shell-max: 1200px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 1ms;
+    --motion-base: 1ms;
+    --motion-slow: 1ms;
+  }
+}
+
+/* Locale-aware base font: Arabic uses IBM Plex Sans Arabic */
+html[lang='ar'] body {
+  font-family: var(--font-arabic);
+}
+
+/* Force Western digits in elements that show clinical numbers in AR.
+ * Use `dir="ltr"` on the digit container to flip number rendering. */
+.digit-western {
+  font-feature-settings: 'lnum' 1;
+  unicode-bidi: isolate;
+}
+
+/* Subtle film-grain — 3% opacity, applied as a body overlay in apps/web */
+.bg-grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+}

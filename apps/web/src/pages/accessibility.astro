@@ -1,0 +1,5 @@
+---
+import AccessibilityPage from '~/views/AccessibilityPage.astro';
+const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+---
+<AccessibilityPage locale={locale} />

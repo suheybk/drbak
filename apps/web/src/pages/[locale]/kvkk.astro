@@ -1,0 +1,6 @@
+---
+import KvkkPage from '~/views/KvkkPage.astro';
+import { DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+---
+<KvkkPage locale={locale} request={Astro.request} />

@@ -1,0 +1,22 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props { locale: AppLocale }
+const { locale } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.accessibility(l));
+---
+<BaseLayout title={t('accessibility.title')} description={t('accessibility.lead')} alternates={alternates}>
+  <article class="app-prose">
+    <h1>{t('accessibility.title')}</h1>
+    <p class="hero__lead">{t('accessibility.lead')}</p>
+    <p>{t('accessibility.wcagStatement')}</p>
+    <p>{t('accessibility.contactNote')}</p>
+    <p style="margin-block-start: var(--space-6);">
+      <a class="drb-btn drb-btn--secondary" href={routes.contact(locale)}>{t('contact.title')}</a>
+    </p>
+  </article>
+</BaseLayout>

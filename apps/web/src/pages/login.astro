@@ -1,0 +1,6 @@
+---
+import LoginPage from '~/views/LoginPage.astro';
+const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+const next = Astro.url.searchParams.get('next') ?? undefined;
+---
+<LoginPage locale={locale} next={next} />

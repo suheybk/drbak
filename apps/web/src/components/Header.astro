@@ -1,0 +1,51 @@
+---
+import { LocaleSwitcher } from '@dr-bak/ui';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { buildT } from '~/lib/i18n';
+import { routes } from '~/lib/routes';
+
+interface Props {
+  alternates: Record<AppLocale, string>;
+}
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+const navLinks = [
+  { href: routes.services(locale), label: t('nav.services') },
+  { href: routes.conditions(locale), label: t('nav.conditions') },
+  { href: routes.about(locale), label: t('nav.about') },
+  { href: routes.blog(locale), label: t('nav.blog') },
+  { href: routes.faq(locale), label: t('nav.faq') },
+  { href: routes.contact(locale), label: t('nav.contact') },
+];
+const current = Astro.url.pathname.replace(/\/$/, '');
+---
+<header class="app-header">
+  <div class="app-header__inner">
+    <a class="app-header__brand" href={routes.home(locale)}>
+      <strong>{t('brand.doctor')}</strong>
+      <small>{t('brand.clinic')}</small>
+    </a>
+    <nav class="app-nav" aria-label={t('nav.home')}>
+      {navLinks.map((l) => {
+        const isCurrent = (l.href.replace(/\/$/, '') || '/') === (current || '/');
+        return (
+          <a href={l.href} aria-current={isCurrent ? 'page' : undefined}>
+            {l.label}
+          </a>
+        );
+      })}
+      <a class="drb-btn drb-btn--primary drb-btn--sm" href={routes.book(locale)}>
+        {t('nav.book')}
+      </a>
+      <a class="drb-btn drb-btn--ghost drb-btn--sm" href={routes.portal(locale)}>
+        {t('nav.portal')}
+      </a>
+    </nav>
+    <LocaleSwitcher
+      client:idle
+      current={locale}
+      localeHrefs={Astro.props.alternates}
+      label={'Language'}
+    />
+  </div>
+</header>

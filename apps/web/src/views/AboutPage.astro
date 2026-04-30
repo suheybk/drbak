@@ -1,0 +1,62 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props { locale: AppLocale }
+const { locale } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.about(l));
+
+/**
+ * Per memory/dr-bak-locked-decisions.md §12.16, the 22 certificate titles
+ * arrive later. Until then we render a placeholder strip so the visual
+ * scaffold is in place but the page doesn't claim credentials we can't list.
+ */
+const certificatesPlaceholder = Array.from({ length: 6 }, (_, i) => `Certificate ${i + 1}`);
+---
+<BaseLayout title={t('about.title')} description={t('brand.tagline')} alternates={alternates}>
+  <article class="app-prose">
+    <header class="app-section" style="margin-block-start: 0;">
+      <h1>{t('about.title')}</h1>
+      <p class="hero__lead">{t('brand.doctor')} — {t('brand.doctorTitle')}</p>
+    </header>
+
+    <section class="app-section">
+      <h2>{t('about.biographyTitle')}</h2>
+      <p>
+        {locale === 'tr'
+          ? 'Aralık 1998\'de tıp fakültesinden mezun, 28 yıllık nöroloji ve yan dal algoloji deneyimine sahip. Helis More Residence (Kartal/İstanbul) bünyesindeki AĞRI ve KRONİK HASTALIKLAR KLİNİĞİ\'nde hasta kabul etmektedir.'
+          : locale === 'ar'
+            ? 'تخرج في كانون الأول/ديسمبر 1998، ولديه 28 عامًا من الخبرة في طب الأعصاب وتخصص دقيق في طب الألم. يستقبل المرضى في عيادة الألم والأمراض المزمنة في Helis More Residence — كارتال، إسطنبول.'
+            : locale === 'fr'
+              ? 'Diplômé en décembre 1998, il dispose de 28 ans d\'expérience en neurologie et en médecine de la douleur en sur-spécialité. Il consulte à la Clinique Douleur et Maladies Chroniques (Helis More Residence, Kartal/Istanbul).'
+              : locale === 'es'
+                ? 'Graduado en diciembre de 1998, cuenta con 28 años de experiencia en neurología y subespecialidad en medicina del dolor. Atiende en la Clínica del Dolor y Enfermedades Crónicas (Helis More Residence, Kartal/Estambul).'
+                : 'Graduated in December 1998 with 28 years of experience in neurology and a sub-specialty in pain medicine. He sees patients at the Pain and Chronic Illnesses Clinic (Helis More Residence, Kartal/İstanbul).'}
+      </p>
+    </section>
+
+    <section class="app-section">
+      <h2>{t('about.philosophyTitle')}</h2>
+      <p>{t('brand.tagline')}</p>
+    </section>
+
+    <section class="app-section">
+      <h2>{t('about.certificatesTitle')}</h2>
+      <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3); list-style: none; padding: 0;">
+        {certificatesPlaceholder.map((c) => (
+          <li class="card" style="font-size: var(--type-body-sm); color: var(--color-ink-subtle);">{c}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="app-section">
+      <h2>{t('about.locationTitle')}</h2>
+      <p>{t('about.address')}</p>
+      <h3 style="margin-block-start: var(--space-6);">{t('about.hoursTitle')}</h3>
+      <p style="color: var(--color-ink-subtle);">{t('about.hoursPlaceholder')}</p>
+    </section>
+  </article>
+</BaseLayout>

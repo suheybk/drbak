@@ -1,0 +1,7 @@
+---
+import VerifyEmailPage from '~/views/VerifyEmailPage.astro';
+import { DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+const token = Astro.url.searchParams.get('token') ?? undefined;
+---
+<VerifyEmailPage locale={locale} token={token} request={Astro.request} />

@@ -1,0 +1,96 @@
+---
+/**
+ * Base layout for every page.
+ *
+ * Inputs:
+ *   title         — used in <title> with brand suffix
+ *   description   — meta description; we fall back to brand tagline
+ *   alternates    — locale → href mapping for hreflang + locale switcher
+ *   pageT         — `t(key)` (Astro can't pass closures across components, so
+ *                   we re-derive it in components by reading Astro.locals)
+ *
+ * Behaviour:
+ *   - sets html[lang]/html[dir] from `Astro.currentLocale`
+ *   - injects design tokens, fonts and components.css via global.css
+ *   - renders skip-link + accessible header/footer
+ *   - sets canonical + hreflang from `alternates`
+ */
+import '~/styles/global.css';
+import { dirOf, type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Mapping locale → href for the equivalent page. Default = same path on each locale. */
+  alternates?: Record<AppLocale, string>;
+  /** OpenGraph image URL (absolute). */
+  ogImage?: string;
+  /** Optional JSON-LD blocks (already-stringified). */
+  schemas?: ReadonlyArray<Record<string, unknown>>;
+}
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+const dir = dirOf(locale);
+const alternates: Record<AppLocale, string> =
+  Astro.props.alternates ?? localeHrefsFor((l) => routes.home(l));
+
+const baseUrl = (import.meta.env.PUBLIC_BASE_URL ?? 'https://uzmdroguzbak.com').replace(/\/$/, '');
+const canonical = `${baseUrl}${Astro.url.pathname}`;
+const fullTitle = `${Astro.props.title} — ${t('brand.doctor')}`;
+const description = Astro.props.description ?? t('brand.tagline');
+const ogImage = Astro.props.ogImage ?? `${baseUrl}/og/default.jpg`;
+---
+<!doctype html>
+<html lang={locale} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    {/* hreflang */}
+    {Object.entries(alternates).map(([loc, href]) => (
+      <link rel="alternate" hreflang={loc} href={`${baseUrl}${href}`} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={`${baseUrl}${alternates.tr}`} />
+
+    {/* OpenGraph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {/* Favicons */}
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    {/* JSON-LD blocks */}
+    {Astro.props.schemas?.map((schema) => (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
+  </head>
+  <body class="bg-grain">
+    <a class="drb-skiplink" href="#main">{t('common.skipToContent')}</a>
+    <div class="app-shell">
+      <Header alternates={alternates} />
+      <main id="main" class="app-main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>
+<style is:global>
+  /* Make sure the grain overlay sits behind page content */
+  .app-shell { position: relative; z-index: 1; }
+</style>

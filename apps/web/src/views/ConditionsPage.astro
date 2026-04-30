@@ -1,0 +1,44 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props {
+  locale: AppLocale;
+  request: Request;
+}
+const { locale, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.conditions(l));
+
+type Item = {
+  id: string;
+  type: 'condition';
+  slug: string;
+  slugLocalised: string;
+  title: string;
+  leadParagraph: string | null;
+};
+const r = await serverFetch<{ items: Item[] }>(request, `/public/content?type=condition&locale=${locale}`);
+const items = r.ok ? r.value.items : [];
+---
+<BaseLayout title={t('conditions.title')} description={t('conditions.lead')} alternates={alternates}>
+  <header class="app-section" style="margin-block-start: 0;">
+    <h1>{t('conditions.title')}</h1>
+    <p class="hero__lead">{t('conditions.lead')}</p>
+  </header>
+  {items.length === 0 ? (
+    <p style="color: var(--color-ink-subtle);">—</p>
+  ) : (
+    <div class="card-grid">
+      {items.map((c) => (
+        <a class="card" href={routes.conditionDetail(locale, c.slug)}>
+          <p class="card__title">{c.title}</p>
+          {c.leadParagraph ? <p class="card__lead">{c.leadParagraph}</p> : null}
+        </a>
+      ))}
+    </div>
+  )}
+</BaseLayout>

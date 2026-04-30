@@ -1,0 +1,66 @@
+week,date_iso,locale,channel,asset_type,working_title,target_url_or_handle,owner,kpi,status,compliance_notes
+1,T-2_Mon,tr,instagram,reel_60s,"TMS nedir? 60 saniyede özet",ig:reel,OB+AG,reach_2k,planned,no_superlatives
+1,T-2_Wed,tr,instagram,reel_60s,"Ağrı nasıl başlar? Bütüncül bakış",ig:reel,OB+AG,reach_2k,planned,info-only
+1,T-2_Thu,tr,threads,thread,"TMS tedavisi: 5 yanlış bilinen şey",threads,AG,reach_1k,planned,info-only
+1,T-2_Fri,tr,linkedin,post,"Bütüncül nöroloji nedir? Bir hekimin notu",linkedin,AG,impressions_500,planned,info-only
+2,T-1_Mon,tr,instagram,reel_60s,"Evde EEG mümkün mü?",ig:reel,OB+AG,reach_2k,planned,info-only
+2,T-1_Wed,tr,blog,article,"TMS Nedir? Mekanizma ve Klinik Kullanım",/blog/tms-nedir,AG,publish,drafted,evidence_cited
+2,T-1_Wed,en,blog,article,"What is TMS? Mechanism and Clinical Use",/en/blog/tms-nedir,AG,publish,drafted,evidence_cited
+2,T-1_Thu,tr,instagram,carousel,"TMS prep checklist (ön hazırlık)",ig:carousel,AG,saves_50,planned,info-only
+2,T-1_Fri,tr,instagram,reel_45s,"Konuşmak için 30 dakika — ilk muayenede ne olur?",ig:reel,OB+AG,reach_2k,planned,info-only
+3,T0_Mon,tr,email,broadcast,"Yeni randevu sistemi yayında — eski hastalarımıza",email_existing_list_tr,CL,open_rate_30%,drafted,marketing_consent_only
+3,T0_Mon,en,email,broadcast,"Our new appointment system is live",email_existing_list_en,CL,open_rate_30%,drafted,marketing_consent_only
+3,T0_Mon,tr,instagram,post,"Yeni site + ilk randevu sistemimiz açıldı",ig:post,AG,reach_5k,drafted,info-only
+3,T0_Mon,tr,whatsapp,broadcast,"Doktor Bak ile artık online randevu — opt-in liste",whatsapp_business,CL,delivered_500,drafted,wa_template_approved
+3,T0_Wed,tr,blog,article,"Migren ve TMS: Klinik Yaklaşım",/blog/migren-tms,AG,publish,drafted,evidence_cited
+3,T0_Wed,tr,instagram,reel_60s,"Migrenden mucize beklemeyin — beklemeniz gerekenleri anlatalım",ig:reel,OB+AG,reach_3k,planned,never_use_word_mucize_in_caption
+3,T0_Fri,tr,blog,article,"Tedaviye Dirençli Depresyon: Yeni Seçenekler",/blog/tedaviye-direncli-depresyon,AG,publish,drafted,evidence_cited
+4,T+1_Mon,tr,instagram,reel_60s,"Nöral terapi sonrası nasıl hissedersiniz?",ig:reel,OB+AG,reach_2k,planned,no_outcome_guarantee
+4,T+1_Tue,tr,blog,article,"Nöropatik Ağrı: Tanı ve Tedavi Yaklaşımları",/blog/noropatik-agri-tedavi,AG,publish,drafted,evidence_cited
+4,T+1_Wed,tr,blog,article,"Glutatyon IV: Bilinen ve Bilinmeyen",/blog/glutatyon-iv,AG,publish,drafted,from_info_txt
+4,T+1_Thu,en,blog,article,"Glutathione IV: What the Evidence Says",/en/blog/glutatyon-iv,AG,publish,drafted,from_info_txt
+4,T+1_Fri,tr,instagram,carousel,"Huzursuz Bacak Sendromu — 5 sık soru",ig:carousel,AG,saves_60,planned,info-only
+4,T+1_Fri,tr,threads,thread,"Pediatrik nörolojide bekleme süreleri ve evde değerlendirme",threads,AG,reach_1k,planned,info-only
+5,T+2_Mon,tr,blog,article,"Anksiyete Bozukluğunda TMS: Kimler İçin?",/blog/anksiyete-tms,AG,publish,planned,evidence_cited
+5,T+2_Tue,tr,instagram,reel_60s,"OKB ve TMS: gerçekçi beklentiler",ig:reel,OB+AG,reach_2k,planned,no_outcome_guarantee
+5,T+2_Wed,ar,blog,article,"ما هو TMS؟ آلية العمل والاستخدام السريري",/ar/blog/tms-nedir,AG_translator,publish,review_pending,medical_translator_signoff_required
+5,T+2_Wed,fr,blog,article,"Qu'est-ce que la TMS? Mécanisme et usage clinique",/fr/blog/tms-nedir,AG_translator,publish,review_pending,medical_translator_signoff_required
+5,T+2_Wed,es,blog,article,"¿Qué es la TMS? Mecanismo y uso clínico",/es/blog/tms-nedir,AG_translator,publish,review_pending,medical_translator_signoff_required
+5,T+2_Thu,tr,blog,article,"Parkinson Hastalığında TMS: Mevcut Kanıtlar",/blog/parkinson-tms,AG,publish,planned,evidence_cited
+5,T+2_Fri,tr,instagram,reel_60s,"Tinnitus (kulak çınlaması) ve TMS",ig:reel,OB+AG,reach_2k,planned,info-only
+6,T+3_Mon,tr,blog,article,"Bipolar Bozuklukta Manyetik Beyin Uyarımı",/blog/bipolar-tms,AG,publish,planned,evidence_cited
+6,T+3_Tue,tr,instagram,carousel,"Algoloji nedir? Ağrı yan dal uzmanlığı",ig:carousel,AG,saves_50,planned,info-only
+6,T+3_Wed,en,blog,article,"Treatment-Resistant Depression: New Options",/en/blog/tedaviye-direncli-depresyon,AG,publish,drafted,evidence_cited
+6,T+3_Thu,tr,blog,article,"Travma Sonrası Stres Bozukluğu (PTSD) ve TMS",/blog/ptsd-tms,AG,publish,planned,evidence_cited
+6,T+3_Fri,tr,instagram,reel_45s,"İlk muayeneye gelirken yanınızda ne getirin?",ig:reel,OB+AG,reach_2k,planned,info-only
+7,T+4_Mon,tr,blog,article,"Yetişkinde DEHB: Tanı, Tedavi ve TMS",/blog/dehb-tms,AG,publish,planned,evidence_cited
+7,T+4_Tue,tr,instagram,reel_60s,"Hekimin günü: bir hasta hikayesi (anonim)",ig:reel,OB+AG,reach_2k,planned,no_personal_data_no_outcome_promise
+7,T+4_Wed,tr,blog,article,"İnme Sonrası Rehabilitasyonda TMS",/blog/inme-sonrasi-tms,AG,publish,planned,evidence_cited
+7,T+4_Thu,tr,faq,faq_entry,"Telesağlık görüşmesi nasıl çalışır?",/faq#telehealth,AG,publish,drafted,info-only
+7,T+4_Fri,tr,instagram,carousel,"Evde nöroloji muayenesi — neler yapılır?",ig:carousel,AG,saves_50,planned,info-only
+8,T+5_Mon,tr,blog,article,"Alzheimer Hastalığında TMS: Erken Bulgular",/blog/alzheimer-tms,AG,publish,planned,evidence_cited
+8,T+5_Tue,tr,email,nurture_step1,"Yeni randevu rehberi: ilk muayeneye nasıl hazırlanmalı",email_post_visit_nurture,CL,open_rate_25%,drafted,marketing_consent_only
+8,T+5_Wed,tr,instagram,reel_45s,"Otizm spektrumda TMS — ne biliyoruz, ne bilmiyoruz",ig:reel,OB+AG,reach_2k,planned,regulatory_caution_high
+8,T+5_Thu,en,blog,article,"What is Neural Therapy? An Evidence-Based Overview",/en/blog/noral-terapi-nedir,AG,publish,planned,evidence_cited
+8,T+5_Fri,tr,blog,article,"Fibromiyalji: Bütüncül Bakış",/blog/fibromyalji-butuncul,AG,publish,planned,info-only
+9,T+6_Mon,tr,blog,article,"Epilepsi mi, Nöbet mi? Sık Karıştırılan Bir Ayrım",/blog/epilepsi-vs-nobet,AG,publish,drafted,from_info_txt
+9,T+6_Tue,tr,instagram,reel_60s,"Uyku apnesi: ev testi nasıl çalışır?",ig:reel,OB+AG,reach_2k,planned,info-only
+9,T+6_Wed,tr,blog,article,"Vertigo ve Baş Dönmesi: Nörolojik Yaklaşım",/blog/vertigo-noroloji,AG,publish,planned,info-only
+9,T+6_Thu,en,blog,article,"Migraine Treatment with TMS: A Clinical View",/en/blog/migren-tms,AG,publish,planned,evidence_cited
+9,T+6_Fri,tr,instagram,carousel,"24h iptal politikamız neden var? KVKK ve hasta hakkı",ig:carousel,CL+AG,saves_30,planned,info-only_no_fees
+10,T+7_Mon,tr,blog,article,"Trigeminal Nevralji Tedavisi: Seçenekler",/blog/trigeminal-nevralji,AG,publish,planned,evidence_cited
+10,T+7_Tue,tr,instagram,reel_45s,"Bel-boyun fıtığı ve ağrı yönetimi: Yan dal uzmanı görüşü",ig:reel,OB+AG,reach_2k,planned,no_comparative_claim
+10,T+7_Wed,fr,blog,article,"La TMS dans la dépression résistante",/fr/blog/tedaviye-direncli-depresyon,AG_translator,publish,review_pending,medical_translator_signoff_required
+10,T+7_Wed,es,blog,article,"TMS en depresión resistente al tratamiento",/es/blog/tedaviye-direncli-depresyon,AG_translator,publish,review_pending,medical_translator_signoff_required
+10,T+7_Thu,tr,blog,article,"Kronik Yorgunluk: Hangi Tetkikler İlk Sırada?",/blog/kronik-yorgunluk-tetkik,AG,publish,planned,info-only
+10,T+7_Fri,tr,instagram,reel_60s,"Hekim notu: tedavi süreci nasıl planlanır?",ig:reel,OB+AG,reach_2k,planned,info-only
+11,T+8_Mon,tr,blog,article,"Multipas Ozon (EBOO): Ne İçin Uygulanır?",/blog/multipas-ozon-eboo,AG,publish,planned,evidence_cited
+11,T+8_Tue,tr,instagram,reel_60s,"Karotis doppler nedir, kimlerde gerekir?",ig:reel,OB+AG,reach_2k,planned,info-only
+11,T+8_Wed,en,blog,article,"Restless Legs Syndrome: A Clinical Primer",/en/blog/huzursuz-bacak-sendromu,AG,publish,planned,from_info_txt
+11,T+8_Thu,tr,faq,faq_entry,"Çocuklarda nöroloji muayenesi nasıl yapılır?",/faq#pediatric,AG,publish,planned,info-only
+11,T+8_Fri,tr,instagram,carousel,"Ozon tedavisi: 5 sık sorulan soru",ig:carousel,AG,saves_50,planned,evidence_cited
+12,T+9_Mon,tr,blog,article,"Donuk Omuz: Nöral Terapi Yaklaşımı",/blog/donuk-omuz-noral-terapi,AG,publish,planned,info-only
+12,T+9_Tue,tr,instagram,reel_45s,"Yan dal nedir? (Algoloji penceresinden)",ig:reel,OB+AG,reach_2k,planned,info-only
+12,T+9_Wed,tr,blog,article,"Diyabetik Ayak ve Ozon: Bilim ne diyor?",/blog/diyabetik-ayak-ozon,AG,publish,planned,evidence_cited
+12,T+9_Thu,tr,email,nurture_step2,"İkinci ay özeti: en çok merak edilen sorular",email_post_visit_nurture,CL,open_rate_22%,planned,marketing_consent_only
+12,T+9_Fri,tr,blog,article,"Hipnoterapi: Klinik Bağlamda Ne Yapar, Ne Yapmaz",/blog/hipnoterapi,AG,publish,planned,evidence_cited

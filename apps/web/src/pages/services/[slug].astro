@@ -1,0 +1,6 @@
+---
+import ServiceDetailPage from '~/views/ServiceDetailPage.astro';
+const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+const slug = Astro.params.slug as string;
+---
+<ServiceDetailPage locale={locale} slug={slug} request={Astro.request} />

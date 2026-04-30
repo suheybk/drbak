@@ -1,0 +1,6 @@
+---
+import FaqPage from '~/views/FaqPage.astro';
+import { DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+---
+<FaqPage locale={locale} request={Astro.request} />

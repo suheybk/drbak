@@ -1,0 +1,65 @@
+---
+/**
+ * Services index — fetches the full service list from /api/v1/public/services
+ * and renders a grid. The card label uses the localised service title returned
+ * by the API (the API joins service_translations on the request locale).
+ */
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props {
+  locale: AppLocale;
+  request: Request;
+}
+const { locale, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.services(l));
+
+type ServiceRow = {
+  id: string;
+  slug: string;
+  pillar: string;
+  title: string;
+  leadParagraph: string | null;
+  durationMinutes: number;
+  deliveryModes: ReadonlyArray<'in_person' | 'home_visit' | 'telehealth'>;
+  requiresTmsScreening: boolean;
+};
+
+const r = await serverFetch<{ items: ServiceRow[] }>(
+  request,
+  `/public/services?locale=${locale}`,
+);
+const services: ServiceRow[] = r.ok ? r.value.items : [];
+---
+<BaseLayout title={t('services.title')} description={t('services.lead')} alternates={alternates}>
+  <header class="app-section" style="margin-block-start: 0;">
+    <h1>{t('services.title')}</h1>
+    <p class="hero__lead">{t('services.lead')}</p>
+  </header>
+
+  {services.length === 0 ? (
+    <p style="color: var(--color-ink-subtle);">—</p>
+  ) : (
+    <div class="card-grid">
+      {services.map((s) => (
+        <a class="card" href={routes.serviceDetail(locale, s.slug)}>
+          <p class="card__title">{s.title}</p>
+          {s.leadParagraph ? <p class="card__lead">{s.leadParagraph}</p> : null}
+          <div class="card__meta">
+            <span class="digit-western" dir="ltr">{t('services.duration', { minutes: s.durationMinutes })}</span>
+            {s.deliveryModes.map((m) => (
+              <span>· {t(`services.deliveryMode.${m}`)}</span>
+            ))}
+            {s.requiresTmsScreening ? (
+              <span>· {t('services.tmsRequired')}</span>
+            ) : null}
+          </div>
+        </a>
+      ))}
+    </div>
+  )}
+</BaseLayout>

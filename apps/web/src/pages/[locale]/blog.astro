@@ -1,0 +1,6 @@
+---
+import BlogPage from '~/views/BlogPage.astro';
+import { DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+---
+<BlogPage locale={locale} request={Astro.request} />

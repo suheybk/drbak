@@ -1,0 +1,60 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import { DoctorNote } from '@dr-bak/ui';
+import { renderMarkdown } from '~/lib/markdown';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props { locale: AppLocale; slug: string; request: Request }
+const { locale, slug, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.blogPost(l, slug));
+
+type Detail = {
+  title: string;
+  leadParagraph: string | null;
+  bodyMarkdown: string;
+  doctorNoteMarkdown: string | null;
+  publishedAt: string | null;
+  readingMinutes: number | null;
+  schemaJsonLd: Record<string, unknown> | null;
+};
+const r = await serverFetch<Detail>(request, `/public/content/blog/${slug}?locale=${locale}`);
+const data = r.ok ? r.value : null;
+const schemas = data?.schemaJsonLd ? [data.schemaJsonLd] : [];
+---
+<BaseLayout
+  title={data?.title ?? t('blog.title')}
+  description={data?.leadParagraph ?? t('blog.lead')}
+  alternates={alternates}
+  schemas={schemas}
+>
+  {data ? (
+    <article class="app-prose">
+      <h1>{data.title}</h1>
+      {data.publishedAt ? (
+        <p style="color: var(--color-ink-subtle); font-size: var(--type-meta);">
+          <time class="digit-western" dir="ltr" datetime={data.publishedAt}>
+            {new Date(data.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-u-nu-latn' : locale)}
+          </time>
+          {data.readingMinutes ? <> · <span class="digit-western" dir="ltr">{t('blog.minutesRead', { minutes: data.readingMinutes })}</span></> : null}
+        </p>
+      ) : null}
+      {data.leadParagraph ? <p class="hero__lead">{data.leadParagraph}</p> : null}
+      <div set:html={renderMarkdown(data.bodyMarkdown)} />
+      {data.doctorNoteMarkdown ? (
+        <DoctorNote
+          label={t('blog.doctorNoteLabel')}
+          doctorName={t('brand.doctor')}
+          doctorTitle={t('brand.doctorTitle')}
+        >
+          <div set:html={renderMarkdown(data.doctorNoteMarkdown)} />
+        </DoctorNote>
+      ) : null}
+    </article>
+  ) : (
+    <p>—</p>
+  )}
+</BaseLayout>

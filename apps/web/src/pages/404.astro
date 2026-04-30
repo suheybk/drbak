@@ -1,0 +1,15 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.home(l));
+---
+<BaseLayout title="404" description={t('errors.NOT_FOUND')} alternates={alternates}>
+  <article class="app-prose" style="text-align: center; padding-block: var(--space-16);">
+    <h1 class="digit-western" dir="ltr" style="font-size: clamp(4rem, 14vw, 8rem); margin: 0;">404</h1>
+    <p style="font-size: var(--type-body-lg); color: var(--color-ink-muted);">{t('errors.NOT_FOUND')}</p>
+    <a class="drb-btn drb-btn--primary" href={routes.home(locale)}>{t('nav.home')}</a>
+  </article>
+</BaseLayout>

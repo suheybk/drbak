@@ -1,0 +1,76 @@
+---
+/**
+ * Service detail — fetches /public/content/service/:slug and renders body markdown.
+ *
+ * Markdown rendering: we keep the inbound markdown as plaintext for now and
+ * pre-render it via a tiny safe transformer; rich rendering with @astrojs/md
+ * + a sanitizer is a Phase 1 close item. CMS authors are trusted (admin role),
+ * but we still escape HTML before insertion.
+ */
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import { DoctorNote } from '@dr-bak/ui';
+import type { AppLocale } from '~/lib/locales';
+import { renderMarkdown } from '~/lib/markdown';
+
+interface Props {
+  locale: AppLocale;
+  slug: string;
+  request: Request;
+}
+
+const { locale, slug, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.serviceDetail(l, slug));
+
+type Detail = {
+  id: string;
+  type: string;
+  slug: string;
+  title: string;
+  leadParagraph: string | null;
+  bodyMarkdown: string;
+  doctorNoteMarkdown: string | null;
+  publishedAt: string | null;
+  schemaJsonLd: Record<string, unknown> | null;
+};
+
+const r = await serverFetch<Detail>(request, `/public/content/service/${slug}?locale=${locale}`);
+const data: Detail | null = r.ok ? r.value : null;
+const schemas = data?.schemaJsonLd ? [data.schemaJsonLd] : [];
+const bodyHtml = data ? renderMarkdown(data.bodyMarkdown) : '';
+---
+<BaseLayout
+  title={data?.title ?? t('services.title')}
+  description={data?.leadParagraph ?? t('services.lead')}
+  alternates={alternates}
+  schemas={schemas}
+>
+  {data ? (
+    <article class="app-prose">
+      <p style="color: var(--color-ink-subtle); font-size: var(--type-meta); text-transform: uppercase; letter-spacing: 0.08em;">
+        {t('services.title')}
+      </p>
+      <h1>{data.title}</h1>
+      {data.leadParagraph ? <p class="hero__lead">{data.leadParagraph}</p> : null}
+      <div set:html={bodyHtml} />
+      {data.doctorNoteMarkdown ? (
+        <DoctorNote
+          label={t('conditions.doctorNoteTitle')}
+          doctorName={t('brand.doctor')}
+          doctorTitle={t('brand.doctorTitle')}
+        >
+          <div set:html={renderMarkdown(data.doctorNoteMarkdown)} />
+        </DoctorNote>
+      ) : null}
+      <div style="display: flex; gap: var(--space-3); margin-block-start: var(--space-8);">
+        <a class="drb-btn drb-btn--primary" href={routes.book(locale)}>{t('services.bookNow')}</a>
+        <a class="drb-btn drb-btn--ghost" href={routes.contact(locale)}>{t('contact.title')}</a>
+      </div>
+    </article>
+  ) : (
+    <p>—</p>
+  )}
+</BaseLayout>

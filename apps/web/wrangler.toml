@@ -1,0 +1,27 @@
+# Cloudflare Pages config — apps/web
+# Astro builds to ./dist with the @astrojs/cloudflare adapter; the bundle is
+# deployed via `wrangler pages deploy` (see scripts in package.json).
+#
+# Per memory/dr-bak-locked-decisions.md the API lives under api.uzmdroguzbak.com
+# (separate Worker). The web app calls it through `PUBLIC_API_BASE`.
+
+name = "dr-bak-web"
+compatibility_date = "2026-04-30"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+# ─── Shared vars ────────────────────────────────────
+[vars]
+ENVIRONMENT = "production"
+PUBLIC_API_BASE = "https://api.uzmdroguzbak.com/api/v1"
+PUBLIC_BASE_URL = "https://uzmdroguzbak.com"
+DEFAULT_LOCALE = "tr"
+SUPPORTED_LOCALES = "tr,ar,en,fr,es"
+CONTACT_EMAIL = "info@uzmdroguzbak.com"
+CONTACT_PHONE_E164 = "+905300874391"
+
+# ─── Preview (local dev / staging) ──────────────────
+[env.preview.vars]
+ENVIRONMENT = "preview"
+PUBLIC_API_BASE = "https://staging-api.uzmdroguzbak.com/api/v1"
+PUBLIC_BASE_URL = "https://staging.uzmdroguzbak.com"

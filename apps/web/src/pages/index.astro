@@ -1,0 +1,113 @@
+---
+/**
+ * Home page — Turkish (default locale, unprefixed).
+ *
+ * The page deliberately keeps the visible content shallow:
+ *  - hero with two CTAs
+ *  - six brand pillars
+ *  - the marquee TMS service block
+ *  - testimonials (stub — populated as records arrive)
+ *
+ * Heavy clinical copy lives in service + condition detail pages.
+ */
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { DoctorNote } from '@dr-bak/ui';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.home(l));
+
+const pillars = [
+  t('home.pillarBoardCertified'),
+  t('home.pillarHolistic'),
+  t('home.pillarHumility'),
+  t('home.pillarContinuity'),
+  t('home.pillarAccessibility'),
+  t('home.pillarMindBody'),
+];
+
+const physicianSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Physician',
+  name: t('brand.doctor'),
+  medicalSpecialty: ['Neurology', 'Pain Medicine'],
+  worksFor: {
+    '@type': 'MedicalClinic',
+    name: t('brand.clinic'),
+    address: t('about.address'),
+  },
+  email: import.meta.env.CONTACT_EMAIL,
+  telephone: import.meta.env.CONTACT_PHONE_E164,
+  url: import.meta.env.PUBLIC_BASE_URL,
+};
+---
+<BaseLayout
+  title={t('home.heroTitle')}
+  description={t('home.heroLead')}
+  alternates={alternates}
+  schemas={[physicianSchema]}
+>
+  <section class="hero">
+    <h1 class="hero__title">{t('home.heroTitle')}</h1>
+    <p class="hero__lead">{t('home.heroLead')}</p>
+    <div class="hero__ctas">
+      <a class="drb-btn drb-btn--primary drb-btn--lg" href={routes.book(locale)}>
+        {t('home.heroCta')}
+      </a>
+      <a class="drb-btn drb-btn--secondary drb-btn--lg" href={routes.services(locale)}>
+        {t('home.heroSecondaryCta')}
+      </a>
+    </div>
+  </section>
+
+  <section class="app-section" aria-labelledby="pillars-heading">
+    <h2 id="pillars-heading">{t('home.pillarsTitle')}</h2>
+    <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-5); list-style: none; padding: 0; margin: var(--space-6) 0;">
+      {pillars.map((p) => (
+        <li class="card">
+          <p style="font-family: var(--font-display); font-size: var(--type-display-sm); margin: 0;">{p}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <hr class="divider-anatomy" />
+
+  <section class="app-section" aria-labelledby="marquee-heading">
+    <div class="card" style="background: var(--color-primary); color: var(--color-primary-on); border: 0; padding: var(--space-12);">
+      <h2 id="marquee-heading" style="color: inherit;">{t('home.marqueeServiceTitle')}</h2>
+      <p style="color: rgba(244,241,234,0.85); font-size: var(--type-body-lg); max-width: 56ch;">
+        {t('home.marqueeServiceLead')}
+      </p>
+      <a class="drb-btn drb-btn--accent" href={routes.serviceDetail(locale, 'tms')}>
+        {t('home.marqueeServiceCta')}
+      </a>
+    </div>
+  </section>
+
+  <DoctorNote
+    label={t('blog.doctorNoteLabel')}
+    doctorName={t('brand.doctor')}
+    doctorTitle={t('brand.doctorTitle')}
+  >
+    <p style="margin: 0;">
+      {/* placeholder first-party voice — replace with real quote from owner */}
+      {locale === 'tr'
+        ? 'Hastalarımı dinleyerek başlamayı seviyorum. Ağrı çoğu zaman yalnız bir deneyimdir; teşhis koymadan önce o deneyimi anlamak gerekir.'
+        : locale === 'ar'
+          ? 'أبدأ دائمًا بالإصغاء. الألم تجربة غالبًا ما تكون موحشة، وفهم تلك التجربة أهم من السرعة في التشخيص.'
+          : 'I like to start by listening. Pain is often a lonely experience; understanding that experience matters more than rushing to a diagnosis.'}
+    </p>
+  </DoctorNote>
+
+  <section class="app-section" aria-labelledby="testimonials-heading">
+    <h2 id="testimonials-heading">{t('home.testimonialsTitle')}</h2>
+    <p style="color: var(--color-ink-subtle); font-size: var(--type-meta);">
+      {t('home.testimonialsConsentNote')}
+    </p>
+    <p style="color: var(--color-ink-muted);">— {/* populated as approved consent records arrive */}</p>
+  </section>
+</BaseLayout>

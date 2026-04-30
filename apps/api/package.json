@@ -1,0 +1,46 @@
+{
+  "name": "@dr-bak/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --env dev",
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:integration": "vitest run test/integration",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "openapi:emit": "tsx src/interfaces/http/openapi.emit.ts > ../../docs/openapi.yaml",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:prod": "wrangler deploy --env production"
+  },
+  "dependencies": {
+    "@dr-bak/contracts": "workspace:*",
+    "@dr-bak/i18n-keys": "workspace:*",
+    "hono": "4.6.5",
+    "@hono/zod-validator": "0.4.1",
+    "@hono/zod-openapi": "0.16.4",
+    "drizzle-orm": "0.36.1",
+    "@neondatabase/serverless": "0.10.1",
+    "zod": "3.23.8",
+    "uuid": "10.0.0",
+    "@oslojs/jwt": "0.2.0",
+    "@oslojs/crypto": "1.0.1",
+    "@oslojs/encoding": "1.1.0",
+    "argon2-browser": "1.18.0",
+    "ulid": "2.3.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20241011.0",
+    "wrangler": "3.84.0",
+    "drizzle-kit": "0.28.0",
+    "vitest": "2.1.3",
+    "@cloudflare/vitest-pool-workers": "0.5.13",
+    "tsx": "4.19.1",
+    "typescript": "5.6.3"
+  }
+}

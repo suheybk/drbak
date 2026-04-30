@@ -1,0 +1,117 @@
+name: Deploy to production
+
+# Production deploys are tag-gated and require manual approval via the
+# `production` GitHub environment. To cut a release:
+#   1. Bump the version in package.json
+#   2. Tag with `v<semver>` (e.g. v0.4.0) and push
+#   3. Approve the deploy in the GitHub UI
+#
+# The job runs the same wrangler deploy as staging but against `--env production`
+# for the api and the prod CF Pages project for the web.
+#
+# Roll-back: re-run a previous green tag's deploy via workflow_dispatch with
+# `ref: <previous-tag>`. Because Workers and CF Pages keep prior versions,
+# this is fast (<60s).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag or commit SHA to deploy (e.g. v0.4.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+env:
+  NODE_VERSION: '20.11.0'
+  PNPM_VERSION: '9.12.0'
+
+jobs:
+  deploy-api-prod:
+    name: API → production
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.uzmdroguzbak.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @dr-bak/api typecheck
+      - run: pnpm --filter @dr-bak/api test:unit
+      - name: Wrangler deploy (production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: deploy --env production
+          packageManager: pnpm
+
+  deploy-web-prod:
+    name: Web → production (CF Pages)
+    runs-on: ubuntu-latest
+    needs: deploy-api-prod  # api before web so the web has a backend to point at
+    environment:
+      name: production
+      url: https://uzmdroguzbak.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build web (production env)
+        run: pnpm --filter @dr-bak/web build
+        env:
+          PUBLIC_API_BASE: https://api.uzmdroguzbak.com/api/v1
+          PUBLIC_BASE_URL: https://uzmdroguzbak.com
+      - name: Wrangler Pages deploy (production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/web/dist --project-name dr-bak-web --branch=main --commit-hash=${{ github.sha }}
+          packageManager: pnpm
+
+  smoke-prod:
+    name: Smoke check production
+    needs: [deploy-api-prod, deploy-web-prod]
+    runs-on: ubuntu-latest
+    steps:
+      - name: API healthz
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://api.uzmdroguzbak.com/healthz || true)
+            if [ "$code" = "200" ]; then echo "healthz ok"; exit 0; fi
+            echo "attempt $i: $code"; sleep 6
+          done
+          echo "::error::prod healthz did not reach 200"; exit 1
+      - name: Web home reachable in 5 locales
+        run: |
+          set -euo pipefail
+          for path in / /ar /en /fr /es; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L "https://uzmdroguzbak.com${path}")
+            test "$code" = "200" || (echo "::error::path $path returned $code" && exit 1)
+          done
+          echo "All 5 locale home pages return 200"

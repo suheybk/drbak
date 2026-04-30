@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /book
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /*/account
+Disallow: /*/book
+Disallow: /*/verify-email
+Disallow: /*/reset-password
+
+Sitemap: https://uzmdroguzbak.com/sitemap.xml

@@ -1,0 +1,40 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props { locale: AppLocale }
+const { locale } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.contact(l));
+const env = (import.meta as never as { env: Record<string, string> }).env;
+const email = env.CONTACT_EMAIL ?? 'info@uzmdroguzbak.com';
+const phone = env.CONTACT_PHONE_E164 ?? '+905300874391';
+const waLink = `https://wa.me/${phone.replace('+', '')}`;
+---
+<BaseLayout title={t('contact.title')} description={t('contact.lead')} alternates={alternates}>
+  <header class="app-section" style="margin-block-start: 0;">
+    <h1>{t('contact.title')}</h1>
+    <p class="hero__lead">{t('contact.lead')}</p>
+  </header>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-6);">
+    <article class="card">
+      <h2 style="font-size: var(--type-display-sm);">{t('contact.email')}</h2>
+      <p><a href={`mailto:${email}`}>{email}</a></p>
+    </article>
+    <article class="card">
+      <h2 style="font-size: var(--type-display-sm);">{t('contact.phone')}</h2>
+      <p><span class="digit-western" dir="ltr"><a href={`tel:${phone}`}>{phone}</a></span></p>
+    </article>
+    <article class="card">
+      <h2 style="font-size: var(--type-display-sm);">{t('contact.whatsapp')}</h2>
+      <p><a rel="noopener noreferrer" href={waLink}>WhatsApp</a></p>
+    </article>
+    <article class="card">
+      <h2 style="font-size: var(--type-display-sm);">{t('contact.addressLabel')}</h2>
+      <p>{t('about.address')}</p>
+    </article>
+  </div>
+</BaseLayout>

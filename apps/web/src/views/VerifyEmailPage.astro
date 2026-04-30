@@ -1,0 +1,42 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props { locale: AppLocale; token?: string; request: Request }
+const { locale, token, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.verifyEmail(l));
+
+let state: 'idle' | 'success' | 'error' = 'idle';
+let errMsg = '';
+if (token) {
+  const r = await serverFetch<undefined>(request, '/auth/email/verify', {
+    method: 'POST',
+    body: { token },
+  });
+  if (r.ok) state = 'success';
+  else { state = 'error'; errMsg = r.error.code; }
+}
+---
+<BaseLayout title={t('auth.verifyTitle')} description={t('auth.verifyTitle')} alternates={alternates}>
+  <article class="app-prose" style="max-width: 480px;">
+    <h1>{t('auth.verifyTitle')}</h1>
+    {state === 'success' ? (
+      <div class="drb-banner drb-banner--success">
+        <p style="margin: 0;">{t('auth.verifySuccess')}</p>
+      </div>
+    ) : state === 'error' ? (
+      <div class="drb-banner drb-banner--danger">
+        <p style="margin: 0;">{errMsg === 'TOKEN_EXPIRED' ? t('auth.verifyExpired') : t(`errors.${errMsg}` as never)}</p>
+      </div>
+    ) : (
+      <p>—</p>
+    )}
+    <p style="margin-block-start: var(--space-6);">
+      <a class="drb-btn drb-btn--primary" href={routes.login(locale)}>{t('auth.loginTitle')}</a>
+    </p>
+  </article>
+</BaseLayout>

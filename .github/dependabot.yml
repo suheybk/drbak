@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Europe/Istanbul
+    open-pull-requests-limit: 10
+    groups:
+      patch-and-minor:
+        update-types:
+          - patch
+          - minor
+        exclude-patterns:
+          - 'wrangler'  # always want to read CF release notes
+          - '@cloudflare/*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

@@ -1,0 +1,164 @@
+/**
+ * Global stylesheet for apps/web.
+ *
+ * Order matters:
+ * 1) tokens — CSS custom properties (the design tokens)
+ * 2) fonts — @font-face declarations
+ * 3) tailwind v4 — uses the CSS-first @theme block; no JS config file
+ * 4) components — primitive component styles from @dr-bak/ui
+ * 5) layout — typography, base reset, layout primitives specific to this app
+ */
+
+@import '@dr-bak/ui/tokens.css';
+@import '@dr-bak/ui/fonts.css';
+
+@import 'tailwindcss';
+
+/* Map Tailwind utilities to our tokens. */
+@theme {
+  --color-primary: #2F5D50;
+  --color-primary-on: #F4F1EA;
+  --color-accent: #C46A3D;
+  --color-surface: #F4F1EA;
+  --color-surface-elevated: #ECE7DB;
+  --color-ink: #1A1F1C;
+  --color-ink-muted: #4D5852;
+  --color-ink-subtle: #6E7A73;
+  --color-border: #C9C3B4;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Söhne', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-arabic: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+}
+
+@import '@dr-bak/ui/components.css';
+
+/* ── Reset + base typography ────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { color-scheme: light; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.6;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+img, picture, svg, video { display: block; max-width: 100%; height: auto; }
+a { color: var(--color-primary); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--color-primary-hover); }
+a:focus-visible { outline: 3px solid hsl(150 33% 28% / 0.5); outline-offset: 2px; border-radius: 2px; }
+
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 500; line-height: 1.2; margin: 0; color: var(--color-ink); }
+h1 { font-size: var(--type-display-xl); }
+h2 { font-size: var(--type-display-lg); }
+h3 { font-size: var(--type-display-md); }
+h4 { font-size: var(--type-display-sm); }
+p { margin: 0 0 1em; max-width: var(--content-max); }
+hr { border: 0; border-top: 1px solid var(--color-border); margin: var(--space-12) 0; }
+
+/* RTL adjustments — most layout uses logical properties, but a few need help */
+html[dir='rtl'] body { font-family: var(--font-arabic); }
+
+/* App shell layout */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.app-main {
+  flex: 1;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-5);
+  width: 100%;
+  max-width: var(--shell-max);
+}
+.app-section { margin-block: var(--space-12); }
+.app-prose { max-width: var(--content-max); }
+
+/* Header / Footer */
+.app-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 50;
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-block-end: 1px solid var(--color-border);
+}
+.app-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  max-width: var(--shell-max);
+  margin: 0 auto;
+}
+.app-header__brand {
+  display: flex; flex-direction: column;
+  text-decoration: none; color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+.app-header__brand strong { font-family: var(--font-display); font-size: var(--type-body-lg); line-height: 1.1; }
+.app-header__brand small { color: var(--color-ink-subtle); font-size: var(--type-meta); }
+.app-nav { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.app-nav a { color: var(--color-ink-muted); text-decoration: none; font-size: var(--type-body-sm); }
+.app-nav a:hover, .app-nav a[aria-current='page'] { color: var(--color-primary); }
+
+.app-footer {
+  background: var(--color-primary);
+  color: var(--color-primary-on);
+  padding: var(--space-12) var(--space-5) var(--space-8);
+  margin-block-start: var(--space-16);
+}
+.app-footer__inner {
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-8);
+}
+.app-footer a { color: var(--color-primary-on); text-decoration-color: rgba(244,241,234,0.4); }
+
+/* Hero */
+.hero {
+  display: grid;
+  gap: var(--space-6);
+  padding-block: var(--space-16);
+  position: relative;
+}
+.hero__title { max-width: 22ch; }
+.hero__lead { max-width: 56ch; font-size: var(--type-body-lg); color: var(--color-ink-muted); }
+.hero__ctas { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+/* Card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+.card {
+  display: flex; flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--motion-base) var(--ease-out), box-shadow var(--motion-base) var(--ease-out);
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.card__title { font-family: var(--font-display); font-size: var(--type-display-sm); }
+.card__lead { color: var(--color-ink-muted); font-size: var(--type-body-sm); }
+.card__meta { display: flex; gap: var(--space-2); flex-wrap: wrap; font-size: var(--type-meta); color: var(--color-ink-subtle); }
+
+/* Section divider — anatomical line-art motif (placeholder gradient until SVG arrives) */
+.divider-anatomy {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-border), transparent);
+  margin: var(--space-12) 0;
+}

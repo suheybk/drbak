@@ -1,0 +1,32 @@
+node_modules/
+.pnpm-store/
+dist/
+build/
+.astro/
+.wrangler/
+.turbo/
+*.log
+.DS_Store
+
+# env / secrets — never commit
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# editors
+.vscode/
+.idea/
+*.swp
+
+# test
+coverage/
+playwright-report/
+test-results/
+.nyc_output/
+
+# generated
+apps/api/src/infrastructure/db/__generated__/
+docs/openapi.yaml

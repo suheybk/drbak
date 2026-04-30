@@ -1,0 +1,252 @@
+# Wrangler config — apps/api
+# Three environments: dev (local), staging, production.
+# Secrets (DATABASE_URL, JWT_SIGNING_KEY, RESEND_API_KEY, NETGSM_*, META_WHATSAPP_*, GOOGLE_OAUTH_*) are
+# managed via `wrangler secret put` per env. Never commit secrets.
+
+name = "dr-bak-api"
+main = "src/interfaces/workers/fetch.ts"
+compatibility_date = "2026-04-30"
+compatibility_flags = ["nodejs_compat"]
+account_id = ""  # filled per-environment via CI
+
+# ---------- shared variables ----------
+[vars]
+LOG_LEVEL = "info"
+DEFAULT_LOCALE = "tr"
+SUPPORTED_LOCALES = "tr,ar,en,fr,es"
+PUBLIC_BASE_URL = "https://uzmdroguzbak.com"
+APP_BASE_URL = "https://uzmdroguzbak.com"
+SLOT_HOLD_TTL_SECONDS = "300"
+TOKEN_ACCESS_TTL_SECONDS = "900"
+TOKEN_REFRESH_TTL_SECONDS = "1209600"  # 14 days
+RATE_LIMIT_ANON_RPM = "60"
+RATE_LIMIT_AUTH_RPM = "600"
+RATE_LIMIT_LOGIN_PER_15M = "5"
+CONSENT_DOCUMENT_VERSION = "v1.2026-04"
+CLINIC_TIMEZONE = "Europe/Istanbul"
+DEFAULT_SLOT_DURATION_MINUTES = "40"
+TMS_SCREENING_VALIDITY_DAYS = "365"
+APPOINTMENT_RESCHEDULE_WINDOW_HOURS = "24"
+APPOINTMENT_CANCEL_WINDOW_HOURS = "24"
+
+# ---------- DEV environment ----------
+[env.dev]
+workers_dev = true
+[env.dev.vars]
+ENVIRONMENT = "dev"
+LOG_LEVEL = "debug"
+PUBLIC_BASE_URL = "http://localhost:4321"
+APP_BASE_URL = "http://localhost:4321"
+
+# Bindings: KV
+[[env.dev.kv_namespaces]]
+binding = "KV_SESSIONS"
+id = "REPLACE_WITH_DEV_KV_ID"
+[[env.dev.kv_namespaces]]
+binding = "KV_RATELIMIT"
+id = "REPLACE_WITH_DEV_KV_ID"
+[[env.dev.kv_namespaces]]
+binding = "KV_IDEMPOTENCY"
+id = "REPLACE_WITH_DEV_KV_ID"
+[[env.dev.kv_namespaces]]
+binding = "KV_CACHE"
+id = "REPLACE_WITH_DEV_KV_ID"
+
+# Bindings: R2
+[[env.dev.r2_buckets]]
+binding = "R2_DOCUMENTS"
+bucket_name = "drbak-documents-dev"
+[[env.dev.r2_buckets]]
+binding = "R2_MEDIA"
+bucket_name = "drbak-media-dev"
+
+# Bindings: Durable Objects
+[[env.dev.durable_objects.bindings]]
+name = "DOCTOR_DAY_LOCK"
+class_name = "DoctorDayLock"
+
+# Bindings: Queues — producers
+[[env.dev.queues.producers]]
+queue = "drbak-notifications-dev"
+binding = "QUEUE_NOTIFICATIONS"
+
+[[env.dev.queues.producers]]
+queue = "drbak-webhooks-dev"
+binding = "QUEUE_WEBHOOKS"
+
+# Bindings: Queues — consumers
+[[env.dev.queues.consumers]]
+queue = "drbak-notifications-dev"
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 5
+dead_letter_queue = "drbak-notifications-dlq-dev"
+
+[[env.dev.queues.consumers]]
+queue = "drbak-webhooks-dev"
+max_batch_size = 5
+max_batch_timeout = 10
+max_retries = 3
+dead_letter_queue = "drbak-webhooks-dlq-dev"
+
+# Bindings: Hyperdrive
+[[env.dev.hyperdrive]]
+binding = "HYPERDRIVE_DB"
+id = "REPLACE_WITH_DEV_HYPERDRIVE_ID"
+
+# Cron triggers
+[env.dev.triggers]
+crons = [
+  "*/5 * * * *",     # appointment reminder dispatcher (T-24h, T-1h)
+  "0 3 * * *",       # daily KVKK audit-log archival
+  "*/10 * * * *"     # expired slot-hold reaper (also done lazily on read)
+]
+
+# ---------- DO migrations (shared across envs) ----------
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DoctorDayLock"]
+
+# ---------- STAGING environment ----------
+[env.staging]
+routes = [{ pattern = "staging-api.uzmdroguzbak.com/*", zone_name = "uzmdroguzbak.com" }]
+[env.staging.vars]
+ENVIRONMENT = "staging"
+LOG_LEVEL = "info"
+PUBLIC_BASE_URL = "https://staging.uzmdroguzbak.com"
+APP_BASE_URL = "https://staging.uzmdroguzbak.com"
+
+[[env.staging.kv_namespaces]]
+binding = "KV_SESSIONS"
+id = "REPLACE_WITH_STAGING_KV_ID"
+[[env.staging.kv_namespaces]]
+binding = "KV_RATELIMIT"
+id = "REPLACE_WITH_STAGING_KV_ID"
+[[env.staging.kv_namespaces]]
+binding = "KV_IDEMPOTENCY"
+id = "REPLACE_WITH_STAGING_KV_ID"
+[[env.staging.kv_namespaces]]
+binding = "KV_CACHE"
+id = "REPLACE_WITH_STAGING_KV_ID"
+
+[[env.staging.r2_buckets]]
+binding = "R2_DOCUMENTS"
+bucket_name = "drbak-documents-staging"
+[[env.staging.r2_buckets]]
+binding = "R2_MEDIA"
+bucket_name = "drbak-media-staging"
+
+[[env.staging.durable_objects.bindings]]
+name = "DOCTOR_DAY_LOCK"
+class_name = "DoctorDayLock"
+
+[[env.staging.queues.producers]]
+queue = "drbak-notifications-staging"
+binding = "QUEUE_NOTIFICATIONS"
+[[env.staging.queues.producers]]
+queue = "drbak-webhooks-staging"
+binding = "QUEUE_WEBHOOKS"
+
+[[env.staging.queues.consumers]]
+queue = "drbak-notifications-staging"
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 5
+dead_letter_queue = "drbak-notifications-dlq-staging"
+[[env.staging.queues.consumers]]
+queue = "drbak-webhooks-staging"
+max_batch_size = 5
+max_batch_timeout = 10
+max_retries = 3
+dead_letter_queue = "drbak-webhooks-dlq-staging"
+
+[[env.staging.hyperdrive]]
+binding = "HYPERDRIVE_DB"
+id = "REPLACE_WITH_STAGING_HYPERDRIVE_ID"
+
+[env.staging.triggers]
+crons = ["*/5 * * * *", "0 3 * * *", "*/10 * * * *"]
+
+# ---------- PRODUCTION environment ----------
+[env.production]
+routes = [{ pattern = "api.uzmdroguzbak.com/*", zone_name = "uzmdroguzbak.com" }]
+[env.production.vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
+
+[[env.production.kv_namespaces]]
+binding = "KV_SESSIONS"
+id = "REPLACE_WITH_PROD_KV_ID"
+[[env.production.kv_namespaces]]
+binding = "KV_RATELIMIT"
+id = "REPLACE_WITH_PROD_KV_ID"
+[[env.production.kv_namespaces]]
+binding = "KV_IDEMPOTENCY"
+id = "REPLACE_WITH_PROD_KV_ID"
+[[env.production.kv_namespaces]]
+binding = "KV_CACHE"
+id = "REPLACE_WITH_PROD_KV_ID"
+
+[[env.production.r2_buckets]]
+binding = "R2_DOCUMENTS"
+bucket_name = "drbak-documents"
+[[env.production.r2_buckets]]
+binding = "R2_MEDIA"
+bucket_name = "drbak-media"
+
+[[env.production.durable_objects.bindings]]
+name = "DOCTOR_DAY_LOCK"
+class_name = "DoctorDayLock"
+
+[[env.production.queues.producers]]
+queue = "drbak-notifications"
+binding = "QUEUE_NOTIFICATIONS"
+[[env.production.queues.producers]]
+queue = "drbak-webhooks"
+binding = "QUEUE_WEBHOOKS"
+
+[[env.production.queues.consumers]]
+queue = "drbak-notifications"
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 5
+dead_letter_queue = "drbak-notifications-dlq"
+[[env.production.queues.consumers]]
+queue = "drbak-webhooks"
+max_batch_size = 5
+max_batch_timeout = 10
+max_retries = 3
+dead_letter_queue = "drbak-webhooks-dlq"
+
+[[env.production.hyperdrive]]
+binding = "HYPERDRIVE_DB"
+id = "REPLACE_WITH_PROD_HYPERDRIVE_ID"
+
+[env.production.triggers]
+crons = ["*/5 * * * *", "0 3 * * *", "*/10 * * * *"]
+
+# ---------- Observability ----------
+[observability]
+enabled = true
+head_sampling_rate = 1.0
+
+# Secrets to set per env (NOT in this file):
+#   DATABASE_URL
+#   JWT_SIGNING_PRIVATE_KEY     (ES256 PEM)
+#   JWT_SIGNING_PUBLIC_KEY      (ES256 PEM)
+#   JWT_SIGNING_KID             (current key id; rotate quarterly)
+#   RESEND_API_KEY
+#   NETGSM_USERNAME
+#   NETGSM_PASSWORD
+#   NETGSM_SENDER_ID            (must be İYS-registered)
+#   TWILIO_ACCOUNT_SID
+#   TWILIO_AUTH_TOKEN
+#   TWILIO_FROM_NUMBER
+#   META_WA_ACCESS_TOKEN
+#   META_WA_PHONE_NUMBER_ID
+#   META_WA_VERIFY_TOKEN        (for incoming webhooks)
+#   GOOGLE_OAUTH_CLIENT_ID
+#   GOOGLE_OAUTH_CLIENT_SECRET
+#   JITSI_APP_ID                (for telehealth signed-room JWT)
+#   JITSI_APP_SECRET
+#   ADMIN_BOOTSTRAP_EMAIL       (one-time bootstrap admin)

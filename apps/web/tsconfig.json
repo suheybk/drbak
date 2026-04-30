@@ -1,0 +1,21 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@dr-bak/contracts": ["./packages/contracts/src"],
+      "@dr-bak/contracts/*": ["./packages/contracts/src/*"],
+      "@dr-bak/i18n-keys": ["./packages/i18n-keys/src"],
+      "@dr-bak/i18n-keys/*": ["./packages/i18n-keys/src/*"],
+      "@dr-bak/ui": ["./packages/ui/src"],
+      "@dr-bak/ui/*": ["./packages/ui/src/*"],
+      "~/*": ["./apps/web/src/*"]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "include": ["src/**/*", "astro.config.mjs", "playwright.config.ts"],
+  "exclude": ["dist", ".astro", "node_modules"]
+}

@@ -1,0 +1,9 @@
+---
+import ServiceDetailPage from '~/views/ServiceDetailPage.astro';
+import { LOCALES, DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+const slug = Astro.params.slug as string;
+if (!LOCALES.includes(locale)) return Astro.redirect('/404');
+---
+<ServiceDetailPage locale={locale} slug={slug} request={Astro.request} />

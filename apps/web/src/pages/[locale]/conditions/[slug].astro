@@ -1,0 +1,7 @@
+---
+import ConditionDetailPage from '~/views/ConditionDetailPage.astro';
+import { DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+const slug = Astro.params.slug as string;
+---
+<ConditionDetailPage locale={locale} slug={slug} request={Astro.request} />

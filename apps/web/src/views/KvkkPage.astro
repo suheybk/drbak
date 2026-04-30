@@ -1,0 +1,29 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import { renderMarkdown } from '~/lib/markdown';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props { locale: AppLocale; request: Request }
+const { locale, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.kvkk(l));
+
+type Detail = { title: string; bodyMarkdown: string; publishedAt: string | null };
+const r = await serverFetch<Detail>(request, `/public/content/legal/kvkk?locale=${locale}`);
+const data = r.ok ? r.value : null;
+---
+<BaseLayout title={t('kvkk.title')} description={t('kvkk.lead')} alternates={alternates}>
+  <article class="app-prose">
+    <h1>{t('kvkk.title')}</h1>
+    <p class="hero__lead">{t('kvkk.lead')}</p>
+    {data?.publishedAt ? (
+      <p style="color: var(--color-ink-subtle); font-size: var(--type-meta);">
+        <span class="digit-western" dir="ltr">{t('kvkk.lastUpdated', { date: new Date(data.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-u-nu-latn' : locale) })}</span>
+      </p>
+    ) : null}
+    {data ? <div set:html={renderMarkdown(data.bodyMarkdown)} /> : null}
+  </article>
+</BaseLayout>

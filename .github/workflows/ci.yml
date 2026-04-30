@@ -1,0 +1,180 @@
+name: CI
+
+# Lint + typecheck + test runs on every push to any branch and on PRs to main.
+# Build runs on the same trigger but only on main + PRs (not arbitrary feature
+# branches) so we don't pay CF cache cost on noisy work-in-progress.
+#
+# All jobs share the same install step via a setup-node + pnpm cache. The web
+# build emits a Pages-compatible `dist/` and the api build is a tsc --noEmit
+# typecheck (Wrangler bundles at deploy time; we don't pre-bundle here).
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '20.11.0'
+  PNPM_VERSION: '9.12.0'
+
+jobs:
+  setup:
+    name: Setup workspace
+    runs-on: ubuntu-latest
+    outputs:
+      pnpm-store-path: ${{ steps.pnpm-store.outputs.path }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - id: pnpm-store
+        name: Resolve pnpm store path
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+  lint:
+    name: Lint (Biome)
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - name: Brand-voice lint (banned superlatives in marketing/)
+        run: |
+          # Hard-fails the build if any of the banned phrases appear in
+          # marketing/. Mirrors `memory/dr-bak-locked-decisions.md`.
+          set -euo pipefail
+          if grep -RnE 'mucize|garantili|%100 başarı|Türkiye'\''nin en iyisi|son teknoloji|guaranteed result|miracle cure' marketing/ 2>/dev/null; then
+            echo "::error::Banned phrase found in marketing/ copy"
+            exit 1
+          fi
+          echo "Brand-voice lint clean"
+
+  typecheck:
+    name: Typecheck (all packages)
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  test-api:
+    name: API unit + integration tests
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Vitest (workers pool)
+        run: pnpm --filter @dr-bak/api test
+        env:
+          # Miniflare runs locally; nothing escapes to real CF infra.
+          ENVIRONMENT: dev
+
+  test-web-e2e:
+    name: Web Playwright (RTL contract)
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm --filter @dr-bak/web exec playwright install --with-deps chromium
+      - name: Run Playwright
+        run: pnpm --filter @dr-bak/web test:e2e
+        env:
+          # The RTL spec doesn't hit the real API; it only renders Astro pages
+          # and checks dir/lang/digit invariants. PUBLIC_API_BASE points at a
+          # localhost stub that the test mocks.
+          PUBLIC_API_BASE: http://127.0.0.1:8787/api/v1
+      - name: Upload trace on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-trace
+          path: apps/web/playwright-report/
+          retention-days: 7
+
+  build-web:
+    name: Build web (Astro → CF Pages bundle)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @dr-bak/web build
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist-${{ github.sha }}
+          path: apps/web/dist/
+          retention-days: 14
+
+  build-api:
+    name: Typecheck API (Wrangler bundles at deploy)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @dr-bak/api build

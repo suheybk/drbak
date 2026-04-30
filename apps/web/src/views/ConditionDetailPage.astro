@@ -1,0 +1,60 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import { routes, localeHrefsFor } from '~/lib/routes';
+import { serverFetch } from '~/lib/api';
+import { DoctorNote } from '@dr-bak/ui';
+import { renderMarkdown } from '~/lib/markdown';
+import type { AppLocale } from '~/lib/locales';
+
+interface Props {
+  locale: AppLocale;
+  slug: string;
+  request: Request;
+}
+const { locale, slug, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.conditionDetail(l, slug));
+
+type Detail = {
+  title: string;
+  leadParagraph: string | null;
+  bodyMarkdown: string;
+  doctorNoteMarkdown: string | null;
+  schemaJsonLd: Record<string, unknown> | null;
+};
+const r = await serverFetch<Detail>(request, `/public/content/condition/${slug}?locale=${locale}`);
+const data = r.ok ? r.value : null;
+const schemas = data?.schemaJsonLd ? [data.schemaJsonLd] : [];
+---
+<BaseLayout
+  title={data?.title ?? t('conditions.title')}
+  description={data?.leadParagraph ?? t('conditions.lead')}
+  alternates={alternates}
+  schemas={schemas}
+>
+  {data ? (
+    <article class="app-prose">
+      <p style="color: var(--color-ink-subtle); font-size: var(--type-meta); text-transform: uppercase; letter-spacing: 0.08em;">
+        {t('conditions.title')}
+      </p>
+      <h1>{data.title}</h1>
+      {data.leadParagraph ? <p class="hero__lead">{data.leadParagraph}</p> : null}
+      <div set:html={renderMarkdown(data.bodyMarkdown)} />
+      {data.doctorNoteMarkdown ? (
+        <DoctorNote
+          label={t('conditions.doctorNoteTitle')}
+          doctorName={t('brand.doctor')}
+          doctorTitle={t('brand.doctorTitle')}
+        >
+          <div set:html={renderMarkdown(data.doctorNoteMarkdown)} />
+        </DoctorNote>
+      ) : null}
+      <div style="display: flex; gap: var(--space-3); margin-block-start: var(--space-8);">
+        <a class="drb-btn drb-btn--primary" href={routes.book(locale)}>{t('services.bookNow')}</a>
+      </div>
+    </article>
+  ) : (
+    <p>—</p>
+  )}
+</BaseLayout>
