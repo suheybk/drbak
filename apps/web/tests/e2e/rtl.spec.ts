@@ -30,9 +30,13 @@ test.describe('AR locale (RTL)', () => {
     const brandBox = await brand.boundingBox();
     const navBox = await nav.boundingBox();
     if (!brandBox || !navBox) throw new Error('header layout not measurable');
-    // Under RTL with the flex header, the brand link is rendered to the right
-    // (i.e. its visual x is greater than the nav's right edge LTR-equivalent).
-    expect(brandBox.x).toBeLessThan(navBox.x + navBox.width);
+    // Header source order is [brand, nav, LocaleSwitcher]; brand has `flex: 1`.
+    // Under LTR row-flex the brand expands from x=0 to the left of nav, so its
+    // left edge is to the LEFT of nav. Under RTL the visual order reverses —
+    // brand still grows but anchors to the RIGHT, so its left edge sits to
+    // the RIGHT of nav's right edge. Asserting the latter is what proves the
+    // layout actually mirrored.
+    expect(brandBox.x).toBeGreaterThan(navBox.x);
   });
 
   test('digit-western elements contain only Latin digits', async ({ page }) => {
