@@ -8,6 +8,12 @@ build/
 *.log
 .DS_Store
 
+# TS incremental build cache
+*.tsbuildinfo
+
+# Local Claude Code settings (user-specific)
+.claude/settings.local.json
+
 # env / secrets — never commit
 .env
 .env.*
