@@ -21,6 +21,10 @@ build/
 .idea/
 *.swp
 
+# LibreOffice / OpenOffice transient lock files
+.~lock.*#
+~$*
+
 # test
 coverage/
 playwright-report/
