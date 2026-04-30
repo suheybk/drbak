@@ -1,11 +1,13 @@
 ---
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
+import { buildT } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
-interface Props { locale: AppLocale; request: Request }
+interface Props {
+  locale: AppLocale;
+  request: Request;
+}
 const { locale, request } = Astro.props;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.blog(l));
@@ -20,7 +22,10 @@ type Item = {
   publishedAt: string | null;
   readingMinutes: number | null;
 };
-const r = await serverFetch<{ items: Item[] }>(request, `/public/content?type=blog&locale=${locale}`);
+const r = await serverFetch<{ items: Item[] }>(
+  request,
+  `/public/content?type=blog&locale=${locale}`,
+);
 const items = r.ok ? r.value.items : [];
 ---
 <BaseLayout title={t('blog.title')} description={t('blog.lead')} alternates={alternates}>

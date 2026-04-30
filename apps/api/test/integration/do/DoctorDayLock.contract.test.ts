@@ -10,8 +10,8 @@
  */
 
 import { env, runInDurableObject } from 'cloudflare:test';
-import { describe, expect, it } from 'vitest';
 import type { DurableObjectStub } from '@cloudflare/workers-types';
+import { describe, expect, it } from 'vitest';
 
 declare module 'cloudflare:test' {
   interface ProvidedEnv {

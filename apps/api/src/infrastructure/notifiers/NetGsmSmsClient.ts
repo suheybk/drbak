@@ -41,7 +41,8 @@ export class NetGsmSmsClient {
       },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new NetGsmError(`NetGSM error: ${res.status} ${await res.text()}`, res.status);
+    if (!res.ok)
+      throw new NetGsmError(`NetGSM error: ${res.status} ${await res.text()}`, res.status);
     const json = (await res.json()) as { jobid?: string; code?: string };
     if (json.code && json.code !== '00' && json.code !== '0') {
       throw new NetGsmError(`NetGSM declined: code=${json.code}`, 400);
@@ -51,7 +52,10 @@ export class NetGsmSmsClient {
 }
 
 export class NetGsmError extends Error {
-  constructor(message: string, readonly status: number) {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
     super(message);
     this.name = 'NetGsmError';
   }

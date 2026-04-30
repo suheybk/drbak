@@ -1,9 +1,8 @@
 ---
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
+import { buildT } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
 interface Props {
   locale: AppLocale;
@@ -21,7 +20,10 @@ type Item = {
   title: string;
   leadParagraph: string | null;
 };
-const r = await serverFetch<{ items: Item[] }>(request, `/public/content?type=condition&locale=${locale}`);
+const r = await serverFetch<{ items: Item[] }>(
+  request,
+  `/public/content?type=condition&locale=${locale}`,
+);
 const items = r.ok ? r.value.items : [];
 ---
 <BaseLayout title={t('conditions.title')} description={t('conditions.lead')} alternates={alternates}>

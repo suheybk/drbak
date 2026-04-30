@@ -19,11 +19,11 @@ import { eq } from 'drizzle-orm';
 import type { Env } from '../../interfaces/workers/env.js';
 import { buildDb } from '../db/client.js';
 import { notifications } from '../db/schema.js';
+import { MetaWhatsappClient, MetaWhatsappError } from '../notifiers/MetaWhatsappClient.js';
+import { NetGsmError, NetGsmSmsClient } from '../notifiers/NetGsmSmsClient.js';
 import type { NotificationJob } from '../notifiers/QueueNotifierEnqueuers.js';
 import { ResendEmailClient, ResendError } from '../notifiers/ResendEmailClient.js';
-import { NetGsmSmsClient, NetGsmError } from '../notifiers/NetGsmSmsClient.js';
 import { TwilioSmsClient } from '../notifiers/TwilioSmsClient.js';
-import { MetaWhatsappClient, MetaWhatsappError } from '../notifiers/MetaWhatsappClient.js';
 import { renderEmail, renderSms, renderWhatsapp } from '../notifiers/templates.js';
 
 export const handleNotificationBatch = async (
@@ -32,19 +32,34 @@ export const handleNotificationBatch = async (
 ): Promise<void> => {
   const db = buildDb({ connectionString: env.HYPERDRIVE_DB.connectionString });
   const resend = new ResendEmailClient(env.RESEND_API_KEY);
-  const netgsm = new NetGsmSmsClient(env.NETGSM_USERNAME, env.NETGSM_PASSWORD, env.NETGSM_SENDER_ID);
-  const twilio = env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM_NUMBER
-    ? new TwilioSmsClient(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN, env.TWILIO_FROM_NUMBER)
-    : null;
+  const netgsm = new NetGsmSmsClient(
+    env.NETGSM_USERNAME,
+    env.NETGSM_PASSWORD,
+    env.NETGSM_SENDER_ID,
+  );
+  const twilio =
+    env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM_NUMBER
+      ? new TwilioSmsClient(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN, env.TWILIO_FROM_NUMBER)
+      : null;
   const wa = new MetaWhatsappClient(env.META_WA_ACCESS_TOKEN, env.META_WA_PHONE_NUMBER_ID);
 
   for (const message of batch.messages) {
     const job = message.body;
     try {
-      const rows = await db.select().from(notifications).where(eq(notifications.id, job.rowId)).limit(1);
+      const rows = await db
+        .select()
+        .from(notifications)
+        .where(eq(notifications.id, job.rowId))
+        .limit(1);
       const row = rows[0];
-      if (!row) { message.ack(); continue; }
-      if (row.status === 'sent') { message.ack(); continue; }
+      if (!row) {
+        message.ack();
+        continue;
+      }
+      if (row.status === 'sent') {
+        message.ack();
+        continue;
+      }
 
       // Dispatch
       const payload = (row.payloadJson as Record<string, unknown>) ?? {};
@@ -95,25 +110,33 @@ export const handleNotificationBatch = async (
         }
       }
 
-      await db.update(notifications)
+      await db
+        .update(notifications)
         .set({ status: 'sent', sentAt: new Date(), attempts: row.attempts + 1, lastError: null })
         .where(eq(notifications.id, row.id));
       message.ack();
     } catch (e) {
-      const retryable = e instanceof ResendError ? e.retryable
-        : e instanceof NetGsmError ? e.retryable
-        : e instanceof MetaWhatsappError ? e.retryable
-        : true;
+      const retryable =
+        e instanceof ResendError
+          ? e.retryable
+          : e instanceof NetGsmError
+            ? e.retryable
+            : e instanceof MetaWhatsappError
+              ? e.retryable
+              : true;
       const errMsg = e instanceof Error ? e.message : String(e);
       try {
-        await db.update(notifications)
+        await db
+          .update(notifications)
           .set({
             status: retryable ? 'queued' : 'failed',
             attempts: 1, // approximate — true count tracked on retry below
             lastError: errMsg.slice(0, 500),
           })
           .where(eq(notifications.id, job.rowId));
-      } catch {/* swallow — outbox update is best-effort */}
+      } catch {
+        /* swallow — outbox update is best-effort */
+      }
 
       if (retryable) message.retry({ delaySeconds: backoffSeconds(message.attempts) });
       else message.ack();
@@ -121,8 +144,7 @@ export const handleNotificationBatch = async (
   }
 };
 
-const backoffSeconds = (attempts: number): number =>
-  Math.min(2 ** attempts * 30, 30 * 60); // 30s, 60s, 2m, 4m, 8m, 16m, capped 30m
+const backoffSeconds = (attempts: number): number => Math.min(2 ** attempts * 30, 30 * 60); // 30s, 60s, 2m, 4m, 8m, 16m, capped 30m
 
 const localeMetaCode = (l: string): string =>
   ({ tr: 'tr_TR', en: 'en_US', ar: 'ar_SA', fr: 'fr_FR', es: 'es_ES' })[l] ?? 'tr_TR';

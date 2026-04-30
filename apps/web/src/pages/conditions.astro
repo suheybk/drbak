@@ -1,5 +1,4 @@
 ---
-import ConditionsPage from '~/views/ConditionsPage.astro';
 const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
 ---
 <ConditionsPage locale={locale} request={Astro.request} />

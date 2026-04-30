@@ -1,5 +1,5 @@
 import type { Clock } from '../../application/ports/index.js';
-import { instantFromMillis, type Instant } from '../../domain/shared/time.js';
+import { type Instant, instantFromMillis } from '../../domain/shared/time.js';
 
 export class SystemClock implements Clock {
   now(): Instant {

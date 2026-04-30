@@ -19,7 +19,10 @@ export const Checkbox = ({
   const inputId = id ?? `cb-${fallbackId}`;
   const descId = description ? `${inputId}-desc` : undefined;
   return (
-    <label className={clsx('drb-checkbox', { 'drb-checkbox--invalid': invalid }, className)} htmlFor={inputId}>
+    <label
+      className={clsx('drb-checkbox', { 'drb-checkbox--invalid': invalid }, className)}
+      htmlFor={inputId}
+    >
       <input
         id={inputId}
         type="checkbox"

@@ -1,11 +1,11 @@
+import type { Locale } from '@dr-bak/i18n-keys';
+import { Banner, Button, Field, TextInput, useTranslator } from '@dr-bak/ui';
 /**
  * Two-mode password reset form: request (enter email) and confirm (token+pwd).
  * Server response is intentionally generic on `request` — never reveals
  * whether the email exists.
  */
 import { useState } from 'react';
-import { Banner, Button, Field, TextInput, useTranslator } from '@dr-bak/ui';
-import type { Locale } from '@dr-bak/i18n-keys';
 import { apiFetch, errorMessageFor } from '~/lib/api';
 
 interface Props {
@@ -48,14 +48,20 @@ export default function PasswordResetForm({ locale, dict, mode, token }: Props) 
   if (done) {
     return (
       <Banner variant="success">
-        <p style={{ margin: 0 }}>{mode === 'request' ? t('auth.resetSent') : t('auth.verifySuccess')}</p>
+        <p style={{ margin: 0 }}>
+          {mode === 'request' ? t('auth.resetSent') : t('auth.verifySuccess')}
+        </p>
       </Banner>
     );
   }
 
   return (
     <form onSubmit={onSubmit} style={{ display: 'grid', gap: 'var(--space-5)' }}>
-      {error ? <Banner variant="danger"><p style={{ margin: 0 }}>{error}</p></Banner> : null}
+      {error ? (
+        <Banner variant="danger">
+          <p style={{ margin: 0 }}>{error}</p>
+        </Banner>
+      ) : null}
       {mode === 'request' ? (
         <Field label={t('auth.emailLabel')} required>
           {({ inputId }) => (
@@ -84,7 +90,9 @@ export default function PasswordResetForm({ locale, dict, mode, token }: Props) 
           )}
         </Field>
       )}
-      <Button type="submit" variant="primary" loading={submitting}>{t('auth.submit')}</Button>
+      <Button type="submit" variant="primary" loading={submitting}>
+        {t('auth.submit')}
+      </Button>
     </form>
   );
 }

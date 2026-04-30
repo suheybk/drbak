@@ -1,3 +1,7 @@
+import { CancellationPolicy } from '../../../domain/appointment/CancellationPolicy.js';
+import { AppointmentNotFound, AppointmentTerminal } from '../../../domain/appointment/errors.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import type { AppointmentId, CorrelationId, DoctorId, UserId } from '../../../domain/shared/ids.js';
 import type {
   AppointmentRepository,
   AuditLogger,
@@ -7,18 +11,6 @@ import type {
   SlotLockService,
   SmsNotifier,
 } from '../../ports/index.js';
-import { CancellationPolicy } from '../../../domain/appointment/CancellationPolicy.js';
-import {
-  AppointmentNotFound,
-  AppointmentTerminal,
-} from '../../../domain/appointment/errors.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import {
-  type AppointmentId,
-  type CorrelationId,
-  type UserId,
-  type DoctorId,
-} from '../../../domain/shared/ids.js';
 
 export interface CancelAppointmentDeps {
   readonly clock: Clock;
@@ -49,7 +41,9 @@ export interface CancelAppointmentInput {
 
 export const cancelAppointment =
   (deps: CancelAppointmentDeps) =>
-  async (input: CancelAppointmentInput): Promise<Result<{ status: string; verdict: 'allowed' | 'late' }, DomainError>> => {
+  async (
+    input: CancelAppointmentInput,
+  ): Promise<Result<{ status: string; verdict: 'allowed' | 'late' }, DomainError>> => {
     const now = deps.clock.now();
     const appt = await deps.appointments.findById(input.appointmentId);
     if (!appt) return err(new AppointmentNotFound());
@@ -60,7 +54,11 @@ export const cancelAppointment =
       const patient = await deps.patients.findByUserId(input.actorUserId);
       if (!patient || patient.id !== appt.snapshot.patientId) {
         return err(
-          new DomainError({ code: 'PERMISSION_DENIED', message: 'Not your appointment.', httpStatus: 403 }),
+          new DomainError({
+            code: 'PERMISSION_DENIED',
+            message: 'Not your appointment.',
+            httpStatus: 403,
+          }),
         );
       }
     }

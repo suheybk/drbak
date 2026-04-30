@@ -53,8 +53,8 @@ export const mapErrorToResponse = (e: unknown, c: Context): Response => {
     );
   }
   console.error('unhandled error', e);
-  return new Response(
-    JSON.stringify(envelope('INTERNAL', 'Unexpected error.', c)),
-    { status: 500, headers: { 'content-type': 'application/json' } },
-  );
+  return new Response(JSON.stringify(envelope('INTERNAL', 'Unexpected error.', c)), {
+    status: 500,
+    headers: { 'content-type': 'application/json' },
+  });
 };

@@ -3,13 +3,13 @@
  * One file because the operations share heavy types and validators.
  */
 
+import type { Locale } from '@dr-bak/contracts';
 import { eq } from 'drizzle-orm';
-import type { AuditLogger, Clock, IdGenerator } from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
 import type { CorrelationId, UserId } from '../../../domain/shared/ids.js';
 import type { Db } from '../../../infrastructure/db/client.js';
 import { contentEntries, contentEntryTranslations } from '../../../infrastructure/db/schema.js';
-import type { Locale } from '@dr-bak/contracts';
+import type { AuditLogger, Clock, IdGenerator } from '../../ports/index.js';
 
 export type ContentType = 'blog' | 'condition' | 'service' | 'faq' | 'guide' | 'legal';
 
@@ -92,7 +92,11 @@ export const createContentEntry =
       correlationId: input.correlationId,
       ipAddress: input.ipAddress,
       userAgent: input.userAgent,
-      metadata: { type: input.type, slug: input.slug, locales: input.translations.map((t) => t.locale) },
+      metadata: {
+        type: input.type,
+        slug: input.slug,
+        locales: input.translations.map((t) => t.locale),
+      },
     });
     return ok({ id });
   };
@@ -106,8 +110,15 @@ export const publishContentEntry =
     ipAddress: string | null;
     userAgent: string | null;
   }): Promise<Result<{ id: string; publishedAt: string }, DomainError>> => {
-    const rows = await deps.db.select().from(contentEntries).where(eq(contentEntries.id, input.id)).limit(1);
-    if (!rows[0]) return err(new DomainError({ code: 'NOT_FOUND', message: 'Entry missing.', httpStatus: 404 }));
+    const rows = await deps.db
+      .select()
+      .from(contentEntries)
+      .where(eq(contentEntries.id, input.id))
+      .limit(1);
+    if (!rows[0])
+      return err(
+        new DomainError({ code: 'NOT_FOUND', message: 'Entry missing.', httpStatus: 404 }),
+      );
     const trCount = await deps.db
       .select({ id: contentEntryTranslations.contentEntryId })
       .from(contentEntryTranslations)
@@ -124,7 +135,12 @@ export const publishContentEntry =
     const now = new Date(deps.clock.now() as number);
     await deps.db
       .update(contentEntries)
-      .set({ status: 'published', publishedAt: now, updatedAt: now, reviewerUserId: input.actorUserId })
+      .set({
+        status: 'published',
+        publishedAt: now,
+        updatedAt: now,
+        reviewerUserId: input.actorUserId,
+      })
       .where(eq(contentEntries.id, input.id));
     await deps.audit.record({
       actorUserId: input.actorUserId,

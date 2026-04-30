@@ -1,22 +1,16 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
-import type {
-  ConsentRepository,
-  RecordConsentInput,
-} from '../../../application/ports/index.js';
+import type { Locale } from '@dr-bak/contracts';
+import { and, eq, isNull } from 'drizzle-orm';
+import type { ConsentRepository, RecordConsentInput } from '../../../application/ports/index.js';
+import type { ConsentPurpose, ConsentRecord } from '../../../domain/patient/Consent.js';
 import {
-  type ConsentPurpose,
-  type ConsentRecord,
-} from '../../../domain/patient/Consent.js';
-import {
+  type ConsentRecordId,
   asConsentDocumentId,
   asConsentRecordId,
   asUserId,
-  type ConsentRecordId,
 } from '../../../domain/shared/ids.js';
 import { instantFromMillis } from '../../../domain/shared/time.js';
 import type { Db } from '../client.js';
 import { consentDocuments, consentRecords } from '../schema.js';
-import type { Locale } from '@dr-bak/contracts';
 
 const toRecord = (r: typeof consentRecords.$inferSelect): ConsentRecord => ({
   id: asConsentRecordId(r.id),

@@ -22,7 +22,11 @@ export type PatientProfile = z.infer<typeof PatientProfileSchema>;
 
 export const PatientUpdateRequestSchema = z.object({
   fullName: z.string().min(2).max(160).optional(),
-  phoneE164: z.string().regex(/^\+\d{8,15}$/).nullable().optional(),
+  phoneE164: z
+    .string()
+    .regex(/^\+\d{8,15}$/)
+    .nullable()
+    .optional(),
   addressLine1: z.string().max(200).nullable().optional(),
   addressLine2: z.string().max(200).nullable().optional(),
   city: z.string().max(100).nullable().optional(),
@@ -61,7 +65,11 @@ export type PatientDocument = z.infer<typeof PatientDocumentSchema>;
 export const RequestUploadSchema = z.object({
   filename: z.string().min(1).max(255),
   mimeType: z.string().min(1).max(127),
-  sizeBytes: z.number().int().positive().max(50 * 1024 * 1024), // 50 MB cap
+  sizeBytes: z
+    .number()
+    .int()
+    .positive()
+    .max(50 * 1024 * 1024), // 50 MB cap
   description: z.string().max(500).optional(),
   appointmentId: z.string().optional(),
 });

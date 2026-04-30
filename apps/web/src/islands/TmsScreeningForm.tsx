@@ -1,3 +1,5 @@
+import type { Locale } from '@dr-bak/i18n-keys';
+import { Banner, Button, Checkbox, Field, useTranslator } from '@dr-bak/ui';
 /**
  * TMS pre-screening form. Posts to /patient/me/tms-screening.
  *
@@ -6,8 +8,6 @@
  * to refresh.
  */
 import { useState } from 'react';
-import { Banner, Button, Checkbox, Field, TextInput, useTranslator } from '@dr-bak/ui';
-import type { Locale } from '@dr-bak/i18n-keys';
 import { apiFetch, errorMessageFor } from '~/lib/api';
 
 interface Props {
@@ -67,19 +67,21 @@ export default function TmsScreeningForm({ locale, dict }: Props) {
   if (done) {
     return (
       <Banner variant="success" title={t('tms.submit')}>
-        <p style={{ margin: 0 }}>{t('portal.tmsValid', { date: new Date().toISOString().slice(0, 10) })}</p>
+        <p style={{ margin: 0 }}>
+          {t('portal.tmsValid', { date: new Date().toISOString().slice(0, 10) })}
+        </p>
       </Banner>
     );
   }
 
-  const ynField = (
-    label: string,
-    value: YN,
-    onChange: (v: YN) => void,
-  ) => (
+  const ynField = (label: string, value: YN, onChange: (v: YN) => void) => (
     <Field label={label} required>
       {({ inputId }) => (
-        <div role="radiogroup" aria-labelledby={inputId} style={{ display: 'flex', gap: 'var(--space-4)' }}>
+        <div
+          role="radiogroup"
+          aria-labelledby={inputId}
+          style={{ display: 'flex', gap: 'var(--space-4)' }}
+        >
           <label style={{ display: 'inline-flex', gap: 'var(--space-2)', alignItems: 'center' }}>
             <input type="radio" checked={value === 'yes'} onChange={() => onChange('yes')} />
             {t('tms.yes')}
@@ -115,11 +117,25 @@ export default function TmsScreeningForm({ locale, dict }: Props) {
               {t('tms.notApplicable')}
             </label>
             <label style={{ display: 'inline-flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-              <input type="radio" checked={!isPregnantNA && isPregnant === 'yes'} onChange={() => { setPregnantNA(false); setPregnant('yes'); }} />
+              <input
+                type="radio"
+                checked={!isPregnantNA && isPregnant === 'yes'}
+                onChange={() => {
+                  setPregnantNA(false);
+                  setPregnant('yes');
+                }}
+              />
               {t('tms.yes')}
             </label>
             <label style={{ display: 'inline-flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-              <input type="radio" checked={!isPregnantNA && isPregnant === 'no'} onChange={() => { setPregnantNA(false); setPregnant('no'); }} />
+              <input
+                type="radio"
+                checked={!isPregnantNA && isPregnant === 'no'}
+                onChange={() => {
+                  setPregnantNA(false);
+                  setPregnant('no');
+                }}
+              />
               {t('tms.no')}
             </label>
           </div>
@@ -175,7 +191,9 @@ export default function TmsScreeningForm({ locale, dict }: Props) {
         onChange={(e) => setConsent(e.currentTarget.checked)}
         label={t('tms.consentLabel')}
       />
-      <Button type="submit" variant="primary" loading={submitting}>{t('tms.submit')}</Button>
+      <Button type="submit" variant="primary" loading={submitting}>
+        {t('tms.submit')}
+      </Button>
     </form>
   );
 }

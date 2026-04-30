@@ -31,14 +31,18 @@ export class TwilioSmsClient {
       },
       body,
     });
-    if (!res.ok) throw new TwilioError(`Twilio error: ${res.status} ${await res.text()}`, res.status);
+    if (!res.ok)
+      throw new TwilioError(`Twilio error: ${res.status} ${await res.text()}`, res.status);
     const json = (await res.json()) as { sid: string };
     return { providerMessageId: json.sid };
   }
 }
 
 export class TwilioError extends Error {
-  constructor(message: string, readonly status: number) {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
     super(message);
     this.name = 'TwilioError';
   }

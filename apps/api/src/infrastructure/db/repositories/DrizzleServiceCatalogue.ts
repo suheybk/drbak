@@ -1,10 +1,7 @@
 import { eq } from 'drizzle-orm';
-import type {
-  ServiceCatalogue,
-  ServiceCatalogueEntry,
-} from '../../../application/ports/index.js';
+import type { ServiceCatalogue, ServiceCatalogueEntry } from '../../../application/ports/index.js';
 import type { DeliveryMode } from '../../../domain/appointment/Appointment.js';
-import { asServiceId, type ServiceId } from '../../../domain/shared/ids.js';
+import { type ServiceId, asServiceId } from '../../../domain/shared/ids.js';
 import type { Db } from '../client.js';
 import { services } from '../schema.js';
 

@@ -1,12 +1,13 @@
 ---
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
-import { renderMarkdown } from '~/lib/markdown';
+import { buildT } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
-interface Props { locale: AppLocale; request: Request }
+interface Props {
+  locale: AppLocale;
+  request: Request;
+}
 const { locale, request } = Astro.props;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.kvkk(l));

@@ -1,15 +1,20 @@
 import { and, desc, eq, gte } from 'drizzle-orm';
+import { ulid } from 'ulid';
 import type {
   TmsScreening,
   TmsScreeningRepository,
   TmsScreeningStatus,
 } from '../../../application/ports/index.js';
-import { type DoctorId, type PatientId, asPatientId, asDoctorId } from '../../../domain/shared/ids.js';
+import {
+  type DoctorId,
+  type PatientId,
+  asDoctorId,
+  asPatientId,
+} from '../../../domain/shared/ids.js';
 import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
 import type { TmsEligibilityVerdict } from '../../../domain/tms/TmsEligibility.js';
 import type { Db } from '../client.js';
 import { tmsScreenings } from '../schema.js';
-import { ulid } from 'ulid';
 
 const toScreening = (r: typeof tmsScreenings.$inferSelect): TmsScreening => ({
   patientId: asPatientId(r.patientId),
@@ -48,9 +53,7 @@ export class DrizzleTmsScreeningRepo implements TmsScreeningRepository {
     now: Instant;
     validForDays: number;
   }): Promise<TmsScreening> {
-    const expiresAt = new Date(
-      (input.now as number) + input.validForDays * 24 * 3600 * 1000,
-    );
+    const expiresAt = new Date((input.now as number) + input.validForDays * 24 * 3600 * 1000);
     const inserted = await this.db
       .insert(tmsScreenings)
       .values({

@@ -30,10 +30,16 @@ export const Button = ({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={clsx('drb-btn', `drb-btn--${variant}`, `drb-btn--${size}`, {
-        'drb-btn--full': fullWidth,
-        'drb-btn--loading': loading,
-      }, className)}
+      className={clsx(
+        'drb-btn',
+        `drb-btn--${variant}`,
+        `drb-btn--${size}`,
+        {
+          'drb-btn--full': fullWidth,
+          'drb-btn--loading': loading,
+        },
+        className,
+      )}
       {...rest}
     >
       {leadingIcon ? <span className="drb-btn__icon">{leadingIcon}</span> : null}

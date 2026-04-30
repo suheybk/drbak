@@ -26,34 +26,64 @@ export const renderMarkdown = (md: string): string => {
   for (const raw of lines) {
     const line = raw.trim();
     if (!line) {
-      if (inList) { out.push('</ul>'); inList = false; }
-      if (inOl) { out.push('</ol>'); inOl = false; }
+      if (inList) {
+        out.push('</ul>');
+        inList = false;
+      }
+      if (inOl) {
+        out.push('</ol>');
+        inOl = false;
+      }
       continue;
     }
     let m = /^(#{1,4})\s+(.+)$/.exec(line);
     if (m) {
-      if (inList) { out.push('</ul>'); inList = false; }
-      if (inOl) { out.push('</ol>'); inOl = false; }
+      if (inList) {
+        out.push('</ul>');
+        inList = false;
+      }
+      if (inOl) {
+        out.push('</ol>');
+        inOl = false;
+      }
       const level = m[1]!.length;
       out.push(`<h${level}>${inline(m[2]!)}</h${level}>`);
       continue;
     }
     m = /^[-*]\s+(.+)$/.exec(line);
     if (m) {
-      if (inOl) { out.push('</ol>'); inOl = false; }
-      if (!inList) { out.push('<ul>'); inList = true; }
+      if (inOl) {
+        out.push('</ol>');
+        inOl = false;
+      }
+      if (!inList) {
+        out.push('<ul>');
+        inList = true;
+      }
       out.push(`<li>${inline(m[1]!)}</li>`);
       continue;
     }
     m = /^(\d+)\.\s+(.+)$/.exec(line);
     if (m) {
-      if (inList) { out.push('</ul>'); inList = false; }
-      if (!inOl) { out.push('<ol>'); inOl = true; }
+      if (inList) {
+        out.push('</ul>');
+        inList = false;
+      }
+      if (!inOl) {
+        out.push('<ol>');
+        inOl = true;
+      }
       out.push(`<li>${inline(m[2]!)}</li>`);
       continue;
     }
-    if (inList) { out.push('</ul>'); inList = false; }
-    if (inOl) { out.push('</ol>'); inOl = false; }
+    if (inList) {
+      out.push('</ul>');
+      inList = false;
+    }
+    if (inOl) {
+      out.push('</ol>');
+      inOl = false;
+    }
     out.push(`<p>${inline(line)}</p>`);
   }
   if (inList) out.push('</ul>');
@@ -65,4 +95,7 @@ const inline = (s: string): string =>
   s
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|\W)\*([^*]+)\*(?!\*)/g, '$1<em>$2</em>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" rel="noopener noreferrer">$1</a>');
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" rel="noopener noreferrer">$1</a>',
+    );

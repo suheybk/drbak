@@ -8,27 +8,18 @@
  *   GET  /public/testimonials
  */
 
-import { Hono } from 'hono';
+import { AvailabilityQuerySchema, HoldSlotRequestSchema, LocaleSchema } from '@dr-bak/contracts';
 import { zValidator } from '@hono/zod-validator';
 import { and, eq } from 'drizzle-orm';
+import { Hono } from 'hono';
 import { z } from 'zod';
-import {
-  AvailabilityQuerySchema,
-  HoldSlotRequestSchema,
-  LocaleSchema,
-} from '@dr-bak/contracts';
-import type { Env } from '../../workers/env.js';
-import type { Container } from '../../../composition/container.js';
-import { T } from '../../../composition/tokens.js';
-import { Tx } from '../../../composition/buildContainer.js';
-import { token } from '../../../composition/container.js';
-import { listAvailability } from '../../../application/use-cases/booking/listAvailability.js';
 import { holdSlot } from '../../../application/use-cases/booking/holdSlot.js';
-import {
-  asServiceId,
-  type DoctorId,
-} from '../../../domain/shared/ids.js';
-import { localeOf, respond } from '../helpers.js';
+import { listAvailability } from '../../../application/use-cases/booking/listAvailability.js';
+import { Tx } from '../../../composition/buildContainer.js';
+import type { Container } from '../../../composition/container.js';
+import { token } from '../../../composition/container.js';
+import { T } from '../../../composition/tokens.js';
+import { type DoctorId, asServiceId } from '../../../domain/shared/ids.js';
 import {
   contentEntries,
   contentEntryTranslations,
@@ -36,6 +27,8 @@ import {
   services as servicesTable,
   testimonials,
 } from '../../../infrastructure/db/schema.js';
+import type { Env } from '../../workers/env.js';
+import { localeOf, respond } from '../helpers.js';
 
 export const publicRouter = new Hono<{ Bindings: Env }>();
 
@@ -49,7 +42,9 @@ const defaultDoctorId = async (container: Container): Promise<DoctorId> =>
 
 publicRouter.get('/services', async (c) => {
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
   const locale = localeOf(c);
   const rows = await db
     .select({
@@ -119,7 +114,9 @@ publicRouter.get(
   zValidator('param', z.object({ type: z.string(), slug: z.string() })),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const locale = localeOf(c);
     const { type, slug } = c.req.valid('param');
 
@@ -162,7 +159,9 @@ publicRouter.get(
   zValidator('query', z.object({ type: z.string().optional(), locale: LocaleSchema.optional() })),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const locale = localeOf(c);
     const q = c.req.valid('query');
     const where = q.type ? eq(contentEntries.type, q.type as never) : undefined;
@@ -192,7 +191,9 @@ publicRouter.get(
 
 publicRouter.get('/testimonials', async (c) => {
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
   const locale = localeOf(c);
   const rows = await db
     .select({

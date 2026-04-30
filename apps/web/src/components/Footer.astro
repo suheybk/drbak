@@ -1,13 +1,16 @@
 ---
-import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
 import { buildT } from '~/lib/i18n';
-import { routes } from '~/lib/routes';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
 
 const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
 const t = buildT(locale);
 const year = new Date().getUTCFullYear();
-const contactEmail = (import.meta as never as { env: { CONTACT_EMAIL?: string } }).env.CONTACT_EMAIL ?? 'info@uzmdroguzbak.com';
-const contactPhone = (import.meta as never as { env: { CONTACT_PHONE_E164?: string } }).env.CONTACT_PHONE_E164 ?? '+905300874391';
+const contactEmail =
+  (import.meta as never as { env: { CONTACT_EMAIL?: string } }).env.CONTACT_EMAIL ??
+  'info@uzmdroguzbak.com';
+const contactPhone =
+  (import.meta as never as { env: { CONTACT_PHONE_E164?: string } }).env.CONTACT_PHONE_E164 ??
+  '+905300874391';
 ---
 <footer class="app-footer">
   <div class="app-footer__inner">

@@ -35,8 +35,7 @@ export const subMinutes = (i: Instant, d: DurationMinutes): Instant =>
 
 export const isBefore = (a: Instant, b: Instant): boolean => (a as number) < (b as number);
 export const isAfter = (a: Instant, b: Instant): boolean => (a as number) > (b as number);
-export const isSameOrBefore = (a: Instant, b: Instant): boolean =>
-  (a as number) <= (b as number);
+export const isSameOrBefore = (a: Instant, b: Instant): boolean => (a as number) <= (b as number);
 
 export const minutesBetween = (a: Instant, b: Instant): number =>
   Math.round(((b as number) - (a as number)) / 60_000);

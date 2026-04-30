@@ -2,16 +2,17 @@
  * Tiny helpers shared across route handlers.
  */
 
+import type { Locale } from '@dr-bak/contracts';
 import type { Context } from 'hono';
 import type { Result } from '../../domain/shared/errors.js';
 import { mapErrorToResponse } from './middleware/errorMapper.js';
-import type { Locale } from '@dr-bak/contracts';
 
 export const clientIp = (c: Context): string | null =>
-  c.req.header('cf-connecting-ip') ?? c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ?? null;
+  c.req.header('cf-connecting-ip') ??
+  c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
+  null;
 
-export const userAgent = (c: Context): string | null =>
-  c.req.header('user-agent') ?? null;
+export const userAgent = (c: Context): string | null => c.req.header('user-agent') ?? null;
 
 export const localeOf = (c: Context, fallback: Locale = 'tr'): Locale => {
   const q = c.req.query('locale') as Locale | undefined;

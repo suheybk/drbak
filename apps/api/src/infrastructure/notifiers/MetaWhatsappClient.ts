@@ -52,10 +52,7 @@ export class MetaWhatsappClient {
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      throw new MetaWhatsappError(
-        `Meta WA error: ${res.status} ${await res.text()}`,
-        res.status,
-      );
+      throw new MetaWhatsappError(`Meta WA error: ${res.status} ${await res.text()}`, res.status);
     }
     const json = (await res.json()) as { messages: Array<{ id: string }> };
     return { providerMessageId: json.messages[0]?.id ?? input.idempotencyKey };
@@ -63,7 +60,10 @@ export class MetaWhatsappClient {
 }
 
 export class MetaWhatsappError extends Error {
-  constructor(message: string, readonly status: number) {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
     super(message);
     this.name = 'MetaWhatsappError';
   }

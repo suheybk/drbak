@@ -1,19 +1,9 @@
 ---
-/**
- * Service detail — fetches /public/content/service/:slug and renders body markdown.
- *
- * Markdown rendering: we keep the inbound markdown as plaintext for now and
- * pre-render it via a tiny safe transformer; rich rendering with @astrojs/md
- * + a sanitizer is a Phase 1 close item. CMS authors are trusted (admin role),
- * but we still escape HTML before insertion.
- */
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
-import { DoctorNote } from '@dr-bak/ui';
+import { buildT } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
 import { renderMarkdown } from '~/lib/markdown';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
 interface Props {
   locale: AppLocale;

@@ -19,18 +19,18 @@
 
 import { sql } from 'drizzle-orm';
 import {
-  pgTable,
-  text,
-  timestamp,
-  integer,
   boolean,
+  date,
+  index,
+  integer,
   jsonb,
   pgEnum,
-  uniqueIndex,
-  index,
+  pgTable,
   primaryKey,
-  date,
   smallint,
+  text,
+  timestamp,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 // ─── Enums ─────────────────────────────────────────────────────────────────────
@@ -39,11 +39,7 @@ export const localeEnum = pgEnum('locale', ['tr', 'ar', 'en', 'fr', 'es']);
 
 export const roleEnum = pgEnum('role', ['patient', 'staff', 'admin', 'doctor']);
 
-export const deliveryModeEnum = pgEnum('delivery_mode', [
-  'in_person',
-  'home_visit',
-  'telehealth',
-]);
+export const deliveryModeEnum = pgEnum('delivery_mode', ['in_person', 'home_visit', 'telehealth']);
 
 export const slotKindEnum = pgEnum('slot_kind', [
   'consultation_30',
@@ -136,11 +132,7 @@ export const auditActionEnum = pgEnum('audit_action', [
   'export',
 ]);
 
-export const notificationChannelEnum = pgEnum('notification_channel', [
-  'email',
-  'sms',
-  'whatsapp',
-]);
+export const notificationChannelEnum = pgEnum('notification_channel', ['email', 'sms', 'whatsapp']);
 
 export const notificationStatusEnum = pgEnum('notification_status', [
   'queued',
@@ -164,12 +156,8 @@ export const users = pgTable(
     failedLoginCount: integer('failed_login_count').notNull().default(0),
     lockedUntil: timestamp('locked_until', { withTimezone: true }),
     lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => ({
@@ -188,9 +176,7 @@ export const oauthAccounts = pgTable(
     provider: text('provider').notNull(), // 'google' for now
     providerAccountId: text('provider_account_id').notNull(),
     email: text('email').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     providerAccountUnique: uniqueIndex('oauth_provider_account_unique').on(
@@ -211,9 +197,7 @@ export const webauthnCredentials = pgTable('webauthn_credentials', {
   counter: integer('counter').notNull().default(0),
   transports: jsonb('transports').$type<string[]>(),
   label: text('label'), // user-facing nickname
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
 });
 
@@ -242,12 +226,8 @@ export const patients = pgTable(
       (): typeof patients.id => patients.id,
     ),
     notesInternal: text('notes_internal'), // staff-only; never returned to patient API
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => ({
@@ -260,8 +240,7 @@ export const patients = pgTable(
 
 export const doctors = pgTable('doctors', {
   id: text('id').primaryKey(),
-  userId: text('user_id')
-    .references(() => users.id, { onDelete: 'set null' }), // doctor login (optional)
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }), // doctor login (optional)
   fullName: text('full_name').notNull(), // 'Uzm. Dr. Oğuz Bak'
   titleShort: text('title_short').notNull().default('Uzm. Dr.'),
   primarySpecialty: text('primary_specialty').notNull().default('Nöroloji'),
@@ -269,12 +248,8 @@ export const doctors = pgTable('doctors', {
   bio: text('bio'),
   photoUrl: text('photo_url'),
   schemaJsonLd: jsonb('schema_json_ld'), // Physician schema cached
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 export const clinics = pgTable('clinics', {
@@ -292,12 +267,8 @@ export const clinics = pgTable('clinics', {
   whatsappE164: text('whatsapp_e164'),
   email: text('email'),
   hoursJson: jsonb('hours_json'), // { mon: [['09:00','18:00']], ... }
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 // Doctor's certificates (the "22 certificates" — placeholder rows initially)
@@ -312,9 +283,7 @@ export const certificates = pgTable('certificates', {
   imageUrl: text('image_url'),
   displayOnSite: boolean('display_on_site').notNull().default(true),
   sortOrder: integer('sort_order').notNull().default(0),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 // ─── Service catalogue (modality + condition cross-axis) ───────────────────────
@@ -326,18 +295,16 @@ export const services = pgTable(
     slug: text('slug').notNull(), // 'noral-terapi-konsultasyonu'
     pillar: text('pillar').notNull(), // 'integrative_neurology' | 'tms' | 'algoloji' | ...
     durationMinutes: integer('duration_minutes').notNull(),
-    deliveryModes: jsonb('delivery_modes').$type<Array<'in_person' | 'home_visit' | 'telehealth'>>().notNull(),
+    deliveryModes: jsonb('delivery_modes')
+      .$type<Array<'in_person' | 'home_visit' | 'telehealth'>>()
+      .notNull(),
     requiresTmsScreening: boolean('requires_tms_screening').notNull().default(false),
     minPatientAgeYears: smallint('min_patient_age_years').notNull().default(1),
     maxPatientAgeYears: smallint('max_patient_age_years'),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     sortOrder: integer('sort_order').notNull().default(0),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     slugUnique: uniqueIndex('services_slug_unique').on(t.slug),
@@ -373,12 +340,8 @@ export const conditions = pgTable(
     pillar: text('pillar').notNull(),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     sortOrder: integer('sort_order').notNull().default(0),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({ slugUnique: uniqueIndex('conditions_slug_unique').on(t.slug) }),
 );
@@ -436,9 +399,7 @@ export const slotTemplates = pgTable('slot_templates', {
   validFrom: date('valid_from').notNull(),
   validUntil: date('valid_until'),
   active: boolean('active').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 // Blackout dates (vacation, conference, hospital duty)
@@ -450,9 +411,7 @@ export const slotBlackouts = pgTable('slot_blackouts', {
   startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
   endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
   reasonInternal: text('reason_internal'),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 // One-off explicit slot offers (e.g., admin opens an extra TMS slot)
@@ -467,9 +426,7 @@ export const slotOverrides = pgTable('slot_overrides', {
   startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
   durationMinutes: integer('duration_minutes').notNull(),
   active: boolean('active').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 // ─── Appointments ──────────────────────────────────────────────────────────────
@@ -504,18 +461,16 @@ export const appointments = pgTable(
     completedAt: timestamp('completed_at', { withTimezone: true }),
     correlationId: text('correlation_id').notNull(),
     idempotencyKey: text('idempotency_key'),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     // The DO is the primary conflict guard, but a DB unique guards against any DO bypass
     doctorSlotUnique: uniqueIndex('appointments_doctor_slot_unique')
       .on(t.doctorId, t.startsAt)
-      .where(sql`status NOT IN ('cancelled_by_patient','cancelled_by_clinic','late_cancellation','no_show')`),
+      .where(
+        sql`status NOT IN ('cancelled_by_patient','cancelled_by_clinic','late_cancellation','no_show')`,
+      ),
     patientIdx: index('appointments_patient_idx').on(t.patientId),
     statusIdx: index('appointments_status_idx').on(t.status),
     startsAtIdx: index('appointments_starts_at_idx').on(t.startsAt),
@@ -534,9 +489,7 @@ export const appointmentStatusHistory = pgTable('appointment_status_history', {
   toStatus: appointmentStatusEnum('to_status').notNull(),
   actorUserId: text('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
   reason: text('reason'),
-  at: timestamp('at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  at: timestamp('at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 // ─── TMS pre-screening ─────────────────────────────────────────────────────────
@@ -559,9 +512,7 @@ export const tmsScreenings = pgTable(
     }),
     decisionNotes: text('decision_notes'),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({ patientIdx: index('tms_screenings_patient_idx').on(t.patientId, t.status) }),
 );
@@ -574,9 +525,7 @@ export const consentDocuments = pgTable('consent_documents', {
   version: text('version').notNull(), // 'v1.2026-04'
   locale: localeEnum('locale').notNull(),
   bodyMarkdown: text('body_markdown').notNull(),
-  publishedAt: timestamp('published_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  publishedAt: timestamp('published_at', { withTimezone: true }).notNull().default(sql`now()`),
 });
 
 export const consentRecords = pgTable(
@@ -594,9 +543,7 @@ export const consentRecords = pgTable(
     ipAddress: text('ip_address'),
     userAgent: text('user_agent'),
     locale: localeEnum('locale').notNull(),
-    grantedAt: timestamp('granted_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    grantedAt: timestamp('granted_at', { withTimezone: true }).notNull().default(sql`now()`),
     withdrawnAt: timestamp('withdrawn_at', { withTimezone: true }),
   },
   (t) => ({
@@ -625,9 +572,7 @@ export const patientDocuments = pgTable('patient_documents', {
   appointmentId: text('appointment_id').references(() => appointments.id, {
     onDelete: 'set null',
   }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
@@ -646,9 +591,7 @@ export const testimonials = pgTable('testimonials', {
     .notNull()
     .references(() => consentRecords.id, { onDelete: 'restrict' }),
   status: testimonialStatusEnum('status').notNull().default('submitted'),
-  submittedAt: timestamp('submitted_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
+  submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull().default(sql`now()`),
   approvedAt: timestamp('approved_at', { withTimezone: true }),
   approvedByUserId: text('approved_by_user_id').references(() => users.id, {
     onDelete: 'set null',
@@ -677,12 +620,8 @@ export const contentEntries = pgTable(
     relatedServiceId: text('related_service_id').references(() => services.id, {
       onDelete: 'set null',
     }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     typeSlugUnique: uniqueIndex('content_entries_type_slug_unique').on(t.type, t.slug),
@@ -708,10 +647,7 @@ export const contentEntryTranslations = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.contentEntryId, t.locale] }),
-    slugLocalisedIdx: index('content_entry_translations_slug_idx').on(
-      t.locale,
-      t.slugLocalised,
-    ),
+    slugLocalisedIdx: index('content_entry_translations_slug_idx').on(t.locale, t.slugLocalised),
   }),
 );
 
@@ -735,19 +671,12 @@ export const notifications = pgTable(
       onDelete: 'set null',
     }),
     correlationId: text('correlation_id').notNull(),
-    scheduledFor: timestamp('scheduled_for', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    scheduledFor: timestamp('scheduled_for', { withTimezone: true }).notNull().default(sql`now()`),
     sentAt: timestamp('sent_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
-    statusScheduledIdx: index('notifications_status_scheduled_idx').on(
-      t.status,
-      t.scheduledFor,
-    ),
+    statusScheduledIdx: index('notifications_status_scheduled_idx').on(t.status, t.scheduledFor),
     appointmentIdx: index('notifications_appointment_idx').on(t.appointmentId),
   }),
 );
@@ -770,9 +699,7 @@ export const auditLog = pgTable(
     ipAddress: text('ip_address'),
     userAgent: text('user_agent'),
     metadataJson: jsonb('metadata_json'),
-    at: timestamp('at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    at: timestamp('at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     targetUserIdx: index('audit_log_target_user_idx').on(t.targetUserId, t.at),
@@ -789,9 +716,7 @@ export const webhookEvents = pgTable(
     id: text('id').primaryKey(),
     provider: text('provider').notNull(), // 'meta_whatsapp' | 'resend' | 'netgsm'
     externalId: text('external_id').notNull(),
-    receivedAt: timestamp('received_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull().default(sql`now()`),
     processedAt: timestamp('processed_at', { withTimezone: true }),
     payloadJson: jsonb('payload_json').notNull(),
   },

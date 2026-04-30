@@ -1,4 +1,4 @@
-import { type Instant, isBefore, subMinutes, type DurationMinutes } from '../shared/time.js';
+import { type DurationMinutes, type Instant, isBefore, subMinutes } from '../shared/time.js';
 
 export type CancellationVerdict =
   | 'allowed' // within window — clean cancellation

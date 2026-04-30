@@ -5,10 +5,10 @@
  */
 
 import { and, eq, gte, lte } from 'drizzle-orm';
-import type { AuditLogger } from '../../ports/index.js';
 import type { CorrelationId, UserId } from '../../../domain/shared/ids.js';
 import type { Db } from '../../../infrastructure/db/client.js';
 import { appointments, patients, users } from '../../../infrastructure/db/schema.js';
+import type { AuditLogger } from '../../ports/index.js';
 
 export interface ExportAppointmentsCsvDeps {
   readonly db: Db;
@@ -62,10 +62,18 @@ export const exportAppointmentsCsv =
       .where(conditions.length > 0 ? and(...conditions) : undefined);
 
     const header = [
-      'id', 'starts_at', 'ends_at', 'status', 'delivery_mode',
-      'service_id', 'locale',
-      'patient_name', 'patient_phone', 'patient_email',
-      'cancel_reason', 'created_at',
+      'id',
+      'starts_at',
+      'ends_at',
+      'status',
+      'delivery_mode',
+      'service_id',
+      'locale',
+      'patient_name',
+      'patient_phone',
+      'patient_email',
+      'cancel_reason',
+      'created_at',
     ].join(',');
     const body = rows.map((r) =>
       [
@@ -81,7 +89,9 @@ export const exportAppointmentsCsv =
         r.patientEmail,
         r.cancelReason,
         r.createdAt.toISOString(),
-      ].map(csvCell).join(','),
+      ]
+        .map(csvCell)
+        .join(','),
     );
 
     await deps.audit.record({

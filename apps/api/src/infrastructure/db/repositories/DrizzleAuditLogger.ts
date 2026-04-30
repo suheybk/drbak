@@ -1,7 +1,7 @@
+import { ulid } from 'ulid';
 import type { AuditEvent, AuditLogger } from '../../../application/ports/index.js';
 import type { Db } from '../client.js';
 import { auditLog } from '../schema.js';
-import { ulid } from 'ulid';
 
 export class DrizzleAuditLogger implements AuditLogger {
   constructor(private readonly db: Db) {}

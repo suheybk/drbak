@@ -1,10 +1,10 @@
+import type { ConsentPurpose } from '../patient/Consent.js';
+import { type Instant, isBefore } from '../shared/time.js';
 /**
  * Pure decision: may this patient book this service at this slot?
  * No I/O. Caller assembles the inputs and acts on the answer.
  */
 import type { DeliveryMode } from './Appointment.js';
-import type { ConsentPurpose } from '../patient/Consent.js';
-import { type Instant, isBefore } from '../shared/time.js';
 
 export interface BookingContext {
   readonly patient: {

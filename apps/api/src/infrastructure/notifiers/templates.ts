@@ -47,12 +47,19 @@ const EN_DT = (iso: string): string =>
     timeZone: 'Europe/Istanbul',
   }).format(new Date(iso));
 
-export const renderEmail = (template: string, locale: Locale, payload: Record<string, unknown>): RenderedEmail => {
+export const renderEmail = (
+  template: string,
+  locale: Locale,
+  payload: Record<string, unknown>,
+): RenderedEmail => {
   switch (template) {
     case 'appointment_confirmation': {
-      const dt = locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
+      const dt =
+        locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
       const subject =
-        locale === 'tr' ? 'Randevunuz onaylandı — Uzm. Dr. Oğuz Bak' : 'Appointment confirmed — Uzm. Dr. Oğuz Bak';
+        locale === 'tr'
+          ? 'Randevunuz onaylandı — Uzm. Dr. Oğuz Bak'
+          : 'Appointment confirmed — Uzm. Dr. Oğuz Bak';
       const text =
         locale === 'tr'
           ? `Merhaba,\n\nRandevunuz ${dt} tarihine onaylanmıştır.\n\nGörüşmek üzere,\nUzm. Dr. Oğuz Bak\nAĞRI ve KRONİK HASTALIKLAR KLİNİĞİ`
@@ -105,7 +112,8 @@ const reminder = (
   locale: Locale,
   payload: Record<string, unknown>,
 ): RenderedEmail => {
-  const dt = locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
+  const dt =
+    locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
   const subject =
     locale === 'tr' ? `Randevu hatırlatma — ${trWhen}` : `Appointment reminder — ${enWhen}`;
   const text =
@@ -115,8 +123,13 @@ const reminder = (
   return { subject, text, html: `<p>${text}</p>` };
 };
 
-export const renderSms = (template: string, locale: Locale, payload: Record<string, unknown>): RenderedSms => {
-  const dt = locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
+export const renderSms = (
+  template: string,
+  locale: Locale,
+  payload: Record<string, unknown>,
+): RenderedSms => {
+  const dt =
+    locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
   const map: Record<string, Record<Locale, string>> = {
     appointment_confirmation: {
       tr: `Randevunuz ${dt} tarihine onaylandı. Dr. Oğuz Bak Klinik.`,
@@ -149,16 +162,12 @@ export const renderWhatsapp = (
   locale: Locale,
   payload: Record<string, unknown>,
 ): RenderedWhatsapp => {
-  const localeCode: Record<Locale, string> = {
-    tr: 'tr_TR',
-    en: 'en_US',
-    ar: 'ar_SA',
-    fr: 'fr_FR',
-    es: 'es_ES',
-  };
-  // Templates pre-approved in Meta Business Manager
+  // Templates pre-approved in Meta Business Manager. The locale-to-Meta-code
+  // map (tr→tr_TR, etc.) lives in `notificationConsumer.localeMetaCode` —
+  // the consumer is the only caller that needs it for the WA send.
   const templateName = `${template}_v1`;
-  const dt = locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
+  const dt =
+    locale === 'tr' ? TR_DT(String(payload.startsAtIso)) : EN_DT(String(payload.startsAtIso));
   return {
     templateName,
     params: [String(payload.serviceId ?? ''), dt],

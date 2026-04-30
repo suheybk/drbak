@@ -14,13 +14,13 @@
  * Returns the erased userId + a manifest of what was touched.
  */
 
+import type { R2Bucket } from '@cloudflare/workers-types';
 import { and, eq } from 'drizzle-orm';
-import type { AuditLogger, Clock } from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
 import type { CorrelationId, UserId } from '../../../domain/shared/ids.js';
 import type { Db } from '../../../infrastructure/db/client.js';
 import { patientDocuments, patients, users } from '../../../infrastructure/db/schema.js';
-import type { R2Bucket } from '@cloudflare/workers-types';
+import type { AuditLogger, Clock } from '../../ports/index.js';
 
 export interface DsarEraseDeps {
   readonly db: Db;
@@ -60,9 +60,15 @@ export const dsarErase =
       );
     }
 
-    const userRows = await deps.db.select().from(users).where(eq(users.id, input.targetUserId)).limit(1);
+    const userRows = await deps.db
+      .select()
+      .from(users)
+      .where(eq(users.id, input.targetUserId))
+      .limit(1);
     if (!userRows[0]) {
-      return err(new DomainError({ code: 'NOT_FOUND', message: 'User not found.', httpStatus: 404 }));
+      return err(
+        new DomainError({ code: 'NOT_FOUND', message: 'User not found.', httpStatus: 404 }),
+      );
     }
     const now = new Date(deps.clock.now() as number);
 

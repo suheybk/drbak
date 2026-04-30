@@ -1,11 +1,6 @@
-import type {
-  AuditLogger,
-  Clock,
-  OneTimeTokenStore,
-  UserRepository,
-} from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import { asUserId, type CorrelationId } from '../../../domain/shared/ids.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import { type CorrelationId, asUserId } from '../../../domain/shared/ids.js';
+import type { AuditLogger, Clock, OneTimeTokenStore, UserRepository } from '../../ports/index.js';
 
 export interface VerifyEmailDeps {
   readonly clock: Clock;

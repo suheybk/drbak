@@ -1,3 +1,5 @@
+import type { Locale } from '@dr-bak/i18n-keys';
+import { Banner, Button, useTranslator } from '@dr-bak/ui';
 /**
  * Patient document uploader.
  *
@@ -8,8 +10,6 @@
  * AV scan; the doc shows up in the documents list with `scanStatus: pending`.
  */
 import { useRef, useState } from 'react';
-import { Banner, Button, useTranslator } from '@dr-bak/ui';
-import type { Locale } from '@dr-bak/i18n-keys';
 import { PUBLIC_API_BASE, apiFetch, errorMessageFor } from '~/lib/api';
 
 interface Props {
@@ -75,7 +75,13 @@ export default function DocumentUploader({ locale, dict }: Props) {
           <p style={{ margin: 0 }}>{error}</p>
         </Banner>
       ) : null}
-      <input ref={fileRef} type="file" onChange={onChange} hidden accept="image/*,application/pdf" />
+      <input
+        ref={fileRef}
+        type="file"
+        onChange={onChange}
+        hidden
+        accept="image/*,application/pdf"
+      />
       <Button variant="secondary" onClick={() => fileRef.current?.click()} loading={busy}>
         {t('portal.uploadDocument')}
       </Button>

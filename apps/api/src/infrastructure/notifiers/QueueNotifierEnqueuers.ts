@@ -9,6 +9,7 @@
  */
 
 import type { Queue } from '@cloudflare/workers-types';
+import { ulid } from 'ulid';
 import type {
   EmailNotifier,
   OutboundEmail,
@@ -19,7 +20,6 @@ import type {
 } from '../../application/ports/index.js';
 import type { Db } from '../db/client.js';
 import { notifications } from '../db/schema.js';
-import { ulid } from 'ulid';
 
 export type NotificationJob =
   | { kind: 'email'; rowId: string }
@@ -27,7 +27,10 @@ export type NotificationJob =
   | { kind: 'whatsapp'; rowId: string };
 
 export class QueueEmailNotifier implements EmailNotifier {
-  constructor(private readonly db: Db, private readonly queue: Queue<NotificationJob>) {}
+  constructor(
+    private readonly db: Db,
+    private readonly queue: Queue<NotificationJob>,
+  ) {}
   async enqueue(m: OutboundEmail): Promise<void> {
     const id = ulid();
     // Persist icsAttachment alongside the template payload so the consumer
@@ -51,7 +54,10 @@ export class QueueEmailNotifier implements EmailNotifier {
 }
 
 export class QueueSmsNotifier implements SmsNotifier {
-  constructor(private readonly db: Db, private readonly queue: Queue<NotificationJob>) {}
+  constructor(
+    private readonly db: Db,
+    private readonly queue: Queue<NotificationJob>,
+  ) {}
   async enqueue(m: OutboundSms): Promise<void> {
     const id = ulid();
     await this.db.insert(notifications).values({
@@ -69,7 +75,10 @@ export class QueueSmsNotifier implements SmsNotifier {
 }
 
 export class QueueWhatsappNotifier implements WhatsappNotifier {
-  constructor(private readonly db: Db, private readonly queue: Queue<NotificationJob>) {}
+  constructor(
+    private readonly db: Db,
+    private readonly queue: Queue<NotificationJob>,
+  ) {}
   async enqueue(m: OutboundWhatsapp): Promise<void> {
     const id = ulid();
     await this.db.insert(notifications).values({

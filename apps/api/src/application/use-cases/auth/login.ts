@@ -13,6 +13,10 @@
  * Caller is responsible for setting the refresh-token cookie on the HTTP response.
  */
 
+import type { Locale } from '@dr-bak/contracts';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import type { CorrelationId, UserId } from '../../../domain/shared/ids.js';
+import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
 import type {
   AuditLogger,
   Clock,
@@ -24,13 +28,6 @@ import type {
   TokenIssuer,
   UserRepository,
 } from '../../ports/index.js';
-import {
-  type CorrelationId,
-  type UserId,
-} from '../../../domain/shared/ids.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
-import type { Locale } from '@dr-bak/contracts';
 
 export interface LoginDeps {
   readonly clock: Clock;
@@ -108,7 +105,11 @@ export const login =
     if (!v.ok) {
       // Record failure with conditional lock
       const nextFailureCount = user.failedLoginCount + 1;
-      const lockUntil = computeLockUntil(nextFailureCount, deps.env.LOCKOUT_THRESHOLD_FAILURES, now);
+      const lockUntil = computeLockUntil(
+        nextFailureCount,
+        deps.env.LOCKOUT_THRESHOLD_FAILURES,
+        now,
+      );
       await deps.users.recordLoginFailure(user.id, lockUntil);
       return err(invalidCredentials());
     }
@@ -171,11 +172,7 @@ const invalidCredentials = (): DomainError =>
     httpStatus: 401,
   });
 
-const computeLockUntil = (
-  failures: number,
-  threshold: number,
-  now: Instant,
-): Instant | null => {
+const computeLockUntil = (failures: number, threshold: number, now: Instant): Instant | null => {
   if (failures < threshold) return null;
   // 2^(failures - threshold) minutes, capped at 24h
   const minutes = Math.min(2 ** (failures - threshold), 24 * 60);

@@ -1,6 +1,6 @@
+import { calculateAgeYears } from '../appointment/BookingPolicy.js';
 import type { PatientId, UserId } from '../shared/ids.js';
 import type { Instant } from '../shared/time.js';
-import { calculateAgeYears } from '../appointment/BookingPolicy.js';
 
 export interface PatientSnapshot {
   readonly id: PatientId;

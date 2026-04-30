@@ -1,4 +1,4 @@
-import type { ConsentRecord, ConsentPurpose } from '../../domain/patient/Consent.js';
+import type { ConsentPurpose, ConsentRecord } from '../../domain/patient/Consent.js';
 import type { ConsentRecordId, UserId } from '../../domain/shared/ids.js';
 
 export interface RecordConsentInput {

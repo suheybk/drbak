@@ -7,10 +7,7 @@
  */
 
 import { asc } from 'drizzle-orm';
-import type {
-  DoctorCatalogue,
-  DoctorRecord,
-} from '../../../application/ports/DoctorCatalogue.js';
+import type { DoctorCatalogue, DoctorRecord } from '../../../application/ports/DoctorCatalogue.js';
 import { asDoctorId } from '../../../domain/shared/ids.js';
 import type { Db } from '../client.js';
 import { doctors } from '../schema.js';

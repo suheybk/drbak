@@ -1,6 +1,6 @@
-import type { AuditLogger, Clock, SessionStore } from '../../ports/index.js';
-import { ok, type Result, type DomainError } from '../../../domain/shared/errors.js';
+import { type DomainError, type Result, ok } from '../../../domain/shared/errors.js';
 import type { CorrelationId, UserId } from '../../../domain/shared/ids.js';
+import type { AuditLogger, Clock, SessionStore } from '../../ports/index.js';
 
 export interface LogoutDeps {
   readonly clock: Clock;

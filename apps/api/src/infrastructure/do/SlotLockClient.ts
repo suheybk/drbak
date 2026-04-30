@@ -6,20 +6,16 @@
  * 09:00 slots that morning.
  */
 
+import type { DurableObjectNamespace } from '@cloudflare/workers-types';
 import type {
   ConfirmResult,
   HoldSlotInput,
   HoldSlotResult,
   SlotLockService,
 } from '../../application/ports/index.js';
-import type {
-  AppointmentId,
-  DoctorId,
-  SlotHoldToken,
-} from '../../domain/shared/ids.js';
+import type { AppointmentId, DoctorId, SlotHoldToken } from '../../domain/shared/ids.js';
 import { asSlotHoldToken } from '../../domain/shared/ids.js';
 import { type Instant, instantFromMillis } from '../../domain/shared/time.js';
-import type { DurableObjectNamespace } from '@cloudflare/workers-types';
 
 const TZ_OFFSET_MIN_ISTANBUL = 180; // UTC+3 — Türkiye does not observe DST since 2016
 
@@ -31,11 +27,7 @@ const localDate = (i: Instant): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const stubFor = (
-  ns: DurableObjectNamespace,
-  doctorId: DoctorId,
-  startsAt: Instant,
-) => {
+const stubFor = (ns: DurableObjectNamespace, doctorId: DoctorId, startsAt: Instant) => {
   const key = `${doctorId}::${localDate(startsAt)}`;
   return ns.get(ns.idFromName(key));
 };

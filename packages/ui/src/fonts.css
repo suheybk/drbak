@@ -15,8 +15,8 @@
  */
 
 @font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/Fraunces-VF.woff2') format('woff2-variations');
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-VF.woff2") format("woff2-variations");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -28,8 +28,8 @@
  * the slack via the family alias technique.
  */
 @font-face {
-  font-family: 'Söhne';
-  src: url('/fonts/Sohne-Variable.woff2') format('woff2-variations');
+  font-family: "Söhne";
+  src: url("/fonts/Sohne-Variable.woff2") format("woff2-variations");
   font-weight: 200 800;
   font-style: normal;
   font-display: swap;
@@ -47,40 +47,40 @@
  * shippable answer if the Söhne license is declined.
  */
 @font-face {
-  font-family: 'Söhne';
-  src: url('/fonts/Inter-Variable.woff2') format('woff2-variations');
+  font-family: "Söhne";
+  src: url("/fonts/Inter-Variable.woff2") format("woff2-variations");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Variable.woff2') format('woff2-variations');
+  font-family: "Inter";
+  src: url("/fonts/Inter-Variable.woff2") format("woff2-variations");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'IBM Plex Sans Arabic';
-  src: url('/fonts/IBMPlexSansArabic-Regular.woff2') format('woff2');
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'IBM Plex Sans Arabic';
-  src: url('/fonts/IBMPlexSansArabic-SemiBold.woff2') format('woff2');
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-SemiBold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;

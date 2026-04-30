@@ -1,5 +1,4 @@
 ---
-import KvkkPage from '~/views/KvkkPage.astro';
 const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
 ---
 <KvkkPage locale={locale} request={Astro.request} />

@@ -1,3 +1,16 @@
+import type { Locale, TranslationKey } from '@dr-bak/i18n-keys';
+import {
+  Banner,
+  Button,
+  Checkbox,
+  DateTimePicker,
+  Field,
+  Select,
+  type Slot,
+  Stepper,
+  TextInput,
+  useTranslator,
+} from '@dr-bak/ui';
 /**
  * 5-step booking flow — the only large React island in the app.
  *
@@ -17,19 +30,6 @@
  * route redirects to /login if not — never trust the client-side check alone.
  */
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Banner,
-  Button,
-  Checkbox,
-  DateTimePicker,
-  Field,
-  Select,
-  Stepper,
-  TextInput,
-  type Slot,
-  useTranslator,
-} from '@dr-bak/ui';
-import type { Locale, TranslationKey } from '@dr-bak/i18n-keys';
 import { apiFetch, errorMessageFor } from '~/lib/api';
 
 type DeliveryMode = 'in_person' | 'home_visit' | 'telehealth';
@@ -66,7 +66,12 @@ const todayUtcYmd = (): string => {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
 };
 
-export default function BookingFlow({ locale, dict, consentDocumentVersion, presetServiceSlug }: Props) {
+export default function BookingFlow({
+  locale,
+  dict,
+  consentDocumentVersion,
+  presetServiceSlug,
+}: Props) {
   const t = useTranslator(dict, locale);
 
   const [step, setStep] = useState<Step>(1);
@@ -115,7 +120,9 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
         setError(errorMessageFor(r.error, t as never));
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [locale, presetServiceSlug, t]);
 
   // Reload slots whenever (service, date, deliveryMode) change while on step 2/3
@@ -137,7 +144,9 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
         setError(errorMessageFor(r.error, t as never));
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [step, serviceId, date, deliveryMode, locale, t]);
 
   const selectedService = useMemo(
@@ -146,20 +155,30 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
   );
 
   const stepDef = useMemo(
-    () => ([1, 2, 3, 4, 5] as Step[]).map((n) => ({
-      id: String(n),
-      label: t(STEP_KEYS[n]),
-    })),
+    () =>
+      ([1, 2, 3, 4, 5] as Step[]).map((n) => ({
+        id: String(n),
+        label: t(STEP_KEYS[n]),
+      })),
     [t],
   );
 
   const canAdvanceFrom = (s: Step): boolean => {
     switch (s) {
-      case 1: return !!serviceId;
-      case 2: return !!date;
-      case 3: return !!selectedSlot && selectedSlot.available;
-      case 4: return consentBooking && consentHealth && (deliveryMode !== 'home_visit' || homeAddress1.trim().length > 0);
-      case 5: return false;
+      case 1:
+        return !!serviceId;
+      case 2:
+        return !!date;
+      case 3:
+        return !!selectedSlot && selectedSlot.available;
+      case 4:
+        return (
+          consentBooking &&
+          consentHealth &&
+          (deliveryMode !== 'home_visit' || homeAddress1.trim().length > 0)
+        );
+      case 5:
+        return false;
     }
   };
 
@@ -183,7 +202,7 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
 
   const goBack = () => {
     setError(null);
-    setStep(((Math.max(1, step - 1)) as Step));
+    setStep(Math.max(1, step - 1) as Step);
   };
 
   const submit = async () => {
@@ -230,7 +249,10 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
           <p>{t('booking.successLead')}</p>
         </Banner>
         <p style={{ marginBlockStart: 'var(--space-6)' }}>
-          <a className="drb-btn drb-btn--primary" href={`/${locale === 'tr' ? '' : locale + '/'}account`}>
+          <a
+            className="drb-btn drb-btn--primary"
+            href={`/${locale === 'tr' ? '' : `${locale}/`}account`}
+          >
             {t('booking.successCta')}
           </a>
         </p>
@@ -241,8 +263,16 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
   return (
     <div>
       <Stepper steps={stepDef} currentStepId={String(step)} label={t('booking.title')} />
-      <p style={{ color: 'var(--color-ink-subtle)', fontSize: 'var(--type-meta)', marginBlockStart: 'var(--space-3)' }}>
-        <span className="digit-western" dir="ltr">{t('booking.step', { n: step })}</span>
+      <p
+        style={{
+          color: 'var(--color-ink-subtle)',
+          fontSize: 'var(--type-meta)',
+          marginBlockStart: 'var(--space-3)',
+        }}
+      >
+        <span className="digit-western" dir="ltr">
+          {t('booking.step', { n: step })}
+        </span>
       </p>
 
       {error ? (
@@ -278,8 +308,12 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
                   onChange={(e) => setDeliveryMode(e.currentTarget.value as DeliveryMode)}
                   disabled={!selectedService}
                 >
-                  {(selectedService?.deliveryModes ?? ['in_person', 'home_visit', 'telehealth']).map((m) => (
-                    <option key={m} value={m}>{t(`services.deliveryMode.${m}` as TranslationKey)}</option>
+                  {(
+                    selectedService?.deliveryModes ?? ['in_person', 'home_visit', 'telehealth']
+                  ).map((m) => (
+                    <option key={m} value={m}>
+                      {t(`services.deliveryMode.${m}` as TranslationKey)}
+                    </option>
                   ))}
                 </Select>
               )}
@@ -370,17 +404,32 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
         {step === 5 && (
           <div className="card">
             <h3 style={{ marginBlockEnd: 'var(--space-4)' }}>{t('booking.summaryTitle')}</h3>
-            <dl style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 'var(--space-4)', rowGap: 'var(--space-2)' }}>
+            <dl
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                columnGap: 'var(--space-4)',
+                rowGap: 'var(--space-2)',
+              }}
+            >
               <dt>{t('services.title')}:</dt>
               <dd>{selectedService?.title ?? '—'}</dd>
               <dt>{t('booking.selectDeliveryMode')}:</dt>
               <dd>{t(`services.deliveryMode.${deliveryMode}` as TranslationKey)}</dd>
               <dt>{t('booking.step2Title')}:</dt>
-              <dd className="digit-western" dir="ltr">{date}</dd>
+              <dd className="digit-western" dir="ltr">
+                {date}
+              </dd>
               <dt>{t('booking.step3Title')}:</dt>
               <dd className="digit-western" dir="ltr">
                 {selectedSlot
-                  ? new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Istanbul', numberingSystem: 'latn' }).format(new Date(selectedSlot.startsAt))
+                  ? new Intl.DateTimeFormat(locale, {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                      timeZone: 'Europe/Istanbul',
+                      numberingSystem: 'latn',
+                    }).format(new Date(selectedSlot.startsAt))
                   : '—'}
               </dd>
             </dl>
@@ -388,9 +437,18 @@ export default function BookingFlow({ locale, dict, consentDocumentVersion, pres
         )}
       </section>
 
-      <div style={{ display: 'flex', gap: 'var(--space-3)', marginBlockStart: 'var(--space-8)', flexWrap: 'wrap' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 'var(--space-3)',
+          marginBlockStart: 'var(--space-8)',
+          flexWrap: 'wrap',
+        }}
+      >
         {step > 1 && step < 6 ? (
-          <Button variant="ghost" onClick={goBack} disabled={submitting}>{t('booking.back')}</Button>
+          <Button variant="ghost" onClick={goBack} disabled={submitting}>
+            {t('booking.back')}
+          </Button>
         ) : null}
         {step < 5 ? (
           <Button variant="primary" onClick={goNext} disabled={!canAdvanceFrom(step)}>

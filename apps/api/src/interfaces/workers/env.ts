@@ -3,12 +3,12 @@
  * Kept here at the workers entry boundary so domain/application never know about it.
  */
 import type {
-  KVNamespace,
-  R2Bucket,
-  Queue,
   DurableObjectNamespace,
-  Hyperdrive,
   ExecutionContext,
+  Hyperdrive,
+  KVNamespace,
+  Queue,
+  R2Bucket,
 } from '@cloudflare/workers-types';
 
 export interface Env {

@@ -3,10 +3,6 @@
  * OAuth (Google) lives in Drop 3c.
  */
 
-import { Hono } from 'hono';
-import { setCookie, deleteCookie } from 'hono/cookie';
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
 import {
   LocaleSchema,
   LoginRequestSchema,
@@ -15,28 +11,31 @@ import {
   RegisterRequestSchema,
   VerifyEmailRequestSchema,
 } from '@dr-bak/contracts';
-import type { Env } from '../../workers/env.js';
-import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
-import { Tx } from '../../../composition/buildContainer.js';
-import { T } from '../../../composition/tokens.js';
-import { registerPatient } from '../../../application/use-cases/auth/registerPatient.js';
+import { zValidator } from '@hono/zod-validator';
+import { Hono } from 'hono';
+import { deleteCookie, setCookie } from 'hono/cookie';
+import { z } from 'zod';
+import {
+  beginGoogleOauth,
+  completeGoogleOauth,
+} from '../../../application/use-cases/auth/googleOauth.js';
 import { login } from '../../../application/use-cases/auth/login.js';
-import { refreshSession } from '../../../application/use-cases/auth/refreshSession.js';
-import { verifyEmail } from '../../../application/use-cases/auth/verifyEmail.js';
 import { logout } from '../../../application/use-cases/auth/logout.js';
 import {
   passwordResetConfirm,
   passwordResetRequest,
 } from '../../../application/use-cases/auth/passwordReset.js';
-import {
-  beginGoogleOauth,
-  completeGoogleOauth,
-} from '../../../application/use-cases/auth/googleOauth.js';
+import { refreshSession } from '../../../application/use-cases/auth/refreshSession.js';
+import { registerPatient } from '../../../application/use-cases/auth/registerPatient.js';
+import { verifyEmail } from '../../../application/use-cases/auth/verifyEmail.js';
+import { Tx } from '../../../composition/buildContainer.js';
+import type { Container } from '../../../composition/container.js';
+import { token } from '../../../composition/container.js';
+import { T } from '../../../composition/tokens.js';
 import { asCorrelationId, asUserId } from '../../../domain/shared/ids.js';
+import type { Env } from '../../workers/env.js';
 import { clientIp, localeOf, respond, userAgent } from '../helpers.js';
 import { requireAuth } from '../middleware/auth.js';
-import { z } from 'zod';
 
 export const authRouter = new Hono<{ Bindings: Env }>();
 
@@ -226,70 +225,85 @@ authRouter.post('/email/verify', zValidator('json', VerifyEmailRequestSchema), a
   return respond(c, r);
 });
 
-authRouter.post('/email/resend', zValidator('json', z.object({ email: z.string().email() })), async (c) => {
-  // Rate-limited at 3/day. Always returns 204 — no enumeration.
-  const env = c.env;
-  const container = c.get('container') as Container;
-  const rl = container.resolve(Tx.RateLimiter);
-  const decision = await rl.consume({
-    bucketKey: `verify:resend:${c.req.valid('json').email}`,
-    limit: 3,
-    windowSeconds: 24 * 3600,
-    now: container.resolve(T.Clock).now(),
-  });
-  if (!decision.allowed) return c.body(null, 204);
-  // Drop 3c implements the actual resend pipeline.
-  void env;
-  return c.body(null, 204);
-});
+authRouter.post(
+  '/email/resend',
+  zValidator('json', z.object({ email: z.string().email() })),
+  async (c) => {
+    // Rate-limited at 3/day. Always returns 204 — no enumeration.
+    const env = c.env;
+    const container = c.get('container') as Container;
+    const rl = container.resolve(Tx.RateLimiter);
+    const decision = await rl.consume({
+      bucketKey: `verify:resend:${c.req.valid('json').email}`,
+      limit: 3,
+      windowSeconds: 24 * 3600,
+      now: container.resolve(T.Clock).now(),
+    });
+    if (!decision.allowed) return c.body(null, 204);
+    // Drop 3c implements the actual resend pipeline.
+    void env;
+    return c.body(null, 204);
+  },
+);
 
-authRouter.post('/password/reset/request', zValidator('json', PasswordResetRequestSchema), async (c) => {
-  const env = c.env;
-  const container = c.get('container') as Container;
-  const body = c.req.valid('json');
-  const useCase = passwordResetRequest({
-    clock: container.resolve(T.Clock),
-    users: container.resolve(Tx.UserRepository),
-    tokens: container.resolve(Tx.OneTimeTokenStore),
-    random: container.resolve(token('RandomTokens') as never) as never,
-    email: container.resolve(T.EmailNotifier),
-    rateLimiter: container.resolve(Tx.RateLimiter),
-    env: { PUBLIC_BASE_URL: env.PUBLIC_BASE_URL },
-  });
-  await useCase({
-    email: body.email,
-    locale: localeOf(c),
-    correlationId: asCorrelationId(c.get('correlationId')),
-  });
-  return c.body(null, 204);
-});
+authRouter.post(
+  '/password/reset/request',
+  zValidator('json', PasswordResetRequestSchema),
+  async (c) => {
+    const env = c.env;
+    const container = c.get('container') as Container;
+    const body = c.req.valid('json');
+    const useCase = passwordResetRequest({
+      clock: container.resolve(T.Clock),
+      users: container.resolve(Tx.UserRepository),
+      tokens: container.resolve(Tx.OneTimeTokenStore),
+      random: container.resolve(token('RandomTokens') as never) as never,
+      email: container.resolve(T.EmailNotifier),
+      rateLimiter: container.resolve(Tx.RateLimiter),
+      env: { PUBLIC_BASE_URL: env.PUBLIC_BASE_URL },
+    });
+    await useCase({
+      email: body.email,
+      locale: localeOf(c),
+      correlationId: asCorrelationId(c.get('correlationId')),
+    });
+    return c.body(null, 204);
+  },
+);
 
-authRouter.post('/password/reset/confirm', zValidator('json', PasswordResetConfirmSchema), async (c) => {
-  const container = c.get('container') as Container;
-  const body = c.req.valid('json');
-  const useCase = passwordResetConfirm({
-    clock: container.resolve(T.Clock),
-    users: container.resolve(Tx.UserRepository),
-    tokens: container.resolve(Tx.OneTimeTokenStore),
-    hasher: container.resolve(token('PasswordHasher') as never) as never,
-    sessions: container.resolve(Tx.SessionStore),
-    audit: container.resolve(T.AuditLogger),
-  });
-  const r = await useCase({
-    token: body.token,
-    newPassword: body.newPassword,
-    correlationId: asCorrelationId(c.get('correlationId')),
-    ipAddress: clientIp(c),
-    userAgent: userAgent(c),
-  });
-  return respond(c, r);
-});
+authRouter.post(
+  '/password/reset/confirm',
+  zValidator('json', PasswordResetConfirmSchema),
+  async (c) => {
+    const container = c.get('container') as Container;
+    const body = c.req.valid('json');
+    const useCase = passwordResetConfirm({
+      clock: container.resolve(T.Clock),
+      users: container.resolve(Tx.UserRepository),
+      tokens: container.resolve(Tx.OneTimeTokenStore),
+      hasher: container.resolve(token('PasswordHasher') as never) as never,
+      sessions: container.resolve(Tx.SessionStore),
+      audit: container.resolve(T.AuditLogger),
+    });
+    const r = await useCase({
+      token: body.token,
+      newPassword: body.newPassword,
+      correlationId: asCorrelationId(c.get('correlationId')),
+      ipAddress: clientIp(c),
+      userAgent: userAgent(c),
+    });
+    return respond(c, r);
+  },
+);
 
 // ─── Google OAuth ──────────────────────────────────────────
 
 authRouter.get(
   '/oauth/google/begin',
-  zValidator('query', z.object({ redirectAfter: z.string().url().optional(), locale: LocaleSchema.optional() })),
+  zValidator(
+    'query',
+    z.object({ redirectAfter: z.string().url().optional(), locale: LocaleSchema.optional() }),
+  ),
   async (c) => {
     const env = c.env;
     const container = c.get('container') as Container;

@@ -37,18 +37,18 @@ import {
 import { Patient, type PatientSnapshot } from '../../src/domain/patient/Patient.js';
 import {
   type AppointmentId,
-  asConsentDocumentId,
-  asConsentRecordId,
-  asPatientId,
-  asUserId,
   type DoctorId,
   type IdempotencyKey,
   type PatientId,
   type ServiceId,
   type SlotHoldToken,
   type UserId,
+  asConsentDocumentId,
+  asConsentRecordId,
+  asPatientId,
+  asUserId,
 } from '../../src/domain/shared/ids.js';
-import { instantFromMillis, type Instant } from '../../src/domain/shared/time.js';
+import { type Instant, instantFromMillis } from '../../src/domain/shared/time.js';
 
 /* ──────────────── Clock + IdGenerator ──────────────── */
 
@@ -141,9 +141,8 @@ export class InMemoryConsentRepo implements ConsentRepository {
     }
   }
   countActiveFor(userId: UserId, purpose: ConsentPurpose): number {
-    return this.records.filter(
-      (r) => r.userId === userId && r.purpose === purpose && isActive(r),
-    ).length;
+    return this.records.filter((r) => r.userId === userId && r.purpose === purpose && isActive(r))
+      .length;
   }
 }
 
@@ -187,7 +186,10 @@ export class InMemoryAppointmentRepo implements AppointmentRepository {
 }
 
 export class InMemorySlotLock implements SlotLockService {
-  private holds = new Map<string, { token: string; expiresAt: Instant; doctorId: string; startsAt: Instant }>();
+  private holds = new Map<
+    string,
+    { token: string; expiresAt: Instant; doctorId: string; startsAt: Instant }
+  >();
   private booked = new Map<string, { appointmentId: string }>(); // `${doctorId}:${startsAtMs}` → record
   forceExpireHolds(now: Instant): void {
     for (const [k, h] of this.holds) {
@@ -205,12 +207,14 @@ export class InMemorySlotLock implements SlotLockService {
     this.forceExpireHolds(input.now);
     const key = `${input.doctorId}:${input.startsAt as number}`;
     if (this.booked.has(key)) return null;
-    if ([...this.holds.values()].some((h) => h.doctorId === input.doctorId && h.startsAt === input.startsAt))
+    if (
+      [...this.holds.values()].some(
+        (h) => h.doctorId === input.doctorId && h.startsAt === input.startsAt,
+      )
+    )
       return null;
     const token = `hold_${this.holds.size + 1}` as SlotHoldToken;
-    const expiresAt = instantFromMillis(
-      (input.now as number) + input.holdTtlSeconds * 1000,
-    );
+    const expiresAt = instantFromMillis((input.now as number) + input.holdTtlSeconds * 1000);
     this.holds.set(token, {
       token,
       expiresAt,
@@ -305,7 +309,11 @@ export class InMemoryIdempotency implements IdempotencyStore {
 }
 
 export class FakeTelehealthFactory implements TelehealthRoomFactory {
-  async createRoom(input: { appointmentId: string; startsAt: Instant; endsAt: Instant }): Promise<TelehealthRoom> {
+  async createRoom(input: {
+    appointmentId: string;
+    startsAt: Instant;
+    endsAt: Instant;
+  }): Promise<TelehealthRoom> {
     return {
       roomId: `room-${input.appointmentId}`,
       joinUrl: `https://meet.test/${input.appointmentId}`,

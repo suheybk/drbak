@@ -1,3 +1,14 @@
+import type { TmsScreeningAnswers } from '@dr-bak/contracts';
+import { calculateAgeYears } from '../../../domain/appointment/BookingPolicy.js';
+import { grantedPurposeSet } from '../../../domain/patient/Consent.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import {
+  type CorrelationId,
+  type DoctorId,
+  type UserId,
+  asConsentRecordId,
+} from '../../../domain/shared/ids.js';
+import { TmsEligibility } from '../../../domain/tms/TmsEligibility.js';
 import type {
   AuditLogger,
   Clock,
@@ -6,17 +17,6 @@ import type {
   PatientRepository,
   TmsScreeningRepository,
 } from '../../ports/index.js';
-import {
-  type DoctorId,
-  type CorrelationId,
-  type UserId,
-  asConsentRecordId,
-} from '../../../domain/shared/ids.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import type { TmsScreeningAnswers } from '@dr-bak/contracts';
-import { TmsEligibility } from '../../../domain/tms/TmsEligibility.js';
-import { calculateAgeYears } from '../../../domain/appointment/BookingPolicy.js';
-import { grantedPurposeSet } from '../../../domain/patient/Consent.js';
 
 export interface SubmitTmsScreeningDeps {
   readonly clock: Clock;
@@ -48,7 +48,9 @@ export const submitTmsScreening =
     const now = deps.clock.now();
     const patient = await deps.patients.findByUserId(input.actorUserId);
     if (!patient) {
-      return err(new DomainError({ code: 'NOT_FOUND', message: 'Patient missing.', httpStatus: 404 }));
+      return err(
+        new DomainError({ code: 'NOT_FOUND', message: 'Patient missing.', httpStatus: 404 }),
+      );
     }
     const age = calculateAgeYears(patient.snapshot.dateOfBirth, now);
 

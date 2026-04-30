@@ -1,25 +1,21 @@
-import {
-  type AppointmentStatus,
-  canTransition,
-  isTerminal,
-} from './AppointmentStatus.js';
-import {
-  type AppointmentId,
-  type CorrelationId,
-  type DoctorId,
-  type IdempotencyKey,
-  type PatientId,
-  type ServiceId,
-  type UserId,
+import { DomainError } from '../shared/errors.js';
+import type {
+  AppointmentId,
+  CorrelationId,
+  DoctorId,
+  IdempotencyKey,
+  PatientId,
+  ServiceId,
+  UserId,
 } from '../shared/ids.js';
 import {
-  addMinutes,
   type DurationMinutes,
   type Instant,
+  addMinutes,
   isAfter,
   isBefore,
 } from '../shared/time.js';
-import { DomainError } from '../shared/errors.js';
+import { type AppointmentStatus, canTransition, isTerminal } from './AppointmentStatus.js';
 import { AppointmentTerminal } from './errors.js';
 
 export type DeliveryMode = 'in_person' | 'home_visit' | 'telehealth';

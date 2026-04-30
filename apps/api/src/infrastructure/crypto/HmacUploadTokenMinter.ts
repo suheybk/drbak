@@ -64,9 +64,7 @@ export class HmacUploadTokenMinter implements UploadTokenMinter {
     return { token, expiresAtMs };
   }
 
-  async verify(
-    input: UploadTokenInput & { token: string; nowMs: number },
-  ): Promise<boolean> {
+  async verify(input: UploadTokenInput & { token: string; nowMs: number }): Promise<boolean> {
     const [payloadB64, sigB64] = input.token.split('.');
     if (!payloadB64 || !sigB64) return false;
     const payloadBytes = fromB64url(payloadB64);

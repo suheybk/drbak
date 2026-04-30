@@ -1,5 +1,5 @@
 /**
- * Cron handler — runs every 5 minutes (`*/5 * * * *`).
+ * Cron handler — runs every 5 minutes. (Cron expression in wrangler.toml.)
  *
  * Strategy: enqueue reminder jobs at T-24h ± window AND T-1h ± window.
  * Window = 5 minutes (matches cron cadence). Idempotency = `notifications` table
@@ -10,12 +10,12 @@
  * 5 minutes that has no provider response is re-enqueued.
  */
 
-import { and, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, eq, gte, isNull, lte } from 'drizzle-orm';
+import { ulid } from 'ulid';
 import type { Env } from '../../interfaces/workers/env.js';
 import { buildDb } from '../db/client.js';
 import { appointments, notifications, patients, users } from '../db/schema.js';
 import type { NotificationJob } from '../notifiers/QueueNotifierEnqueuers.js';
-import { ulid } from 'ulid';
 
 const WINDOW_MS = 5 * 60 * 1000;
 
@@ -59,12 +59,7 @@ const enqueueRemindersForOffset = async (
     const existing = await db
       .select({ id: notifications.id })
       .from(notifications)
-      .where(
-        and(
-          eq(notifications.appointmentId, row.a.id),
-          eq(notifications.template, template),
-        ),
-      )
+      .where(and(eq(notifications.appointmentId, row.a.id), eq(notifications.template, template)))
       .limit(1);
     if (existing.length > 0) continue;
 
@@ -133,7 +128,11 @@ const enqueueAll = async (
 const sweepStuckOutbox = async (db: ReturnType<typeof buildDb>, env: Env): Promise<void> => {
   const cutoff = new Date(Date.now() - 5 * 60 * 1000);
   const stuck = await db
-    .select({ id: notifications.id, channel: notifications.channel, attempts: notifications.attempts })
+    .select({
+      id: notifications.id,
+      channel: notifications.channel,
+      attempts: notifications.attempts,
+    })
     .from(notifications)
     .where(
       and(
@@ -148,6 +147,9 @@ const sweepStuckOutbox = async (db: ReturnType<typeof buildDb>, env: Env): Promi
       await db.update(notifications).set({ status: 'dlq' }).where(eq(notifications.id, n.id));
       continue;
     }
-    await env.QUEUE_NOTIFICATIONS.send({ kind: n.channel as 'email' | 'sms' | 'whatsapp', rowId: n.id } satisfies NotificationJob);
+    await env.QUEUE_NOTIFICATIONS.send({
+      kind: n.channel as 'email' | 'sms' | 'whatsapp',
+      rowId: n.id,
+    } satisfies NotificationJob);
   }
 };

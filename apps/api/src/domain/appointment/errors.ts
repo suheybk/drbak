@@ -1,11 +1,7 @@
-import { DomainError } from '../shared/errors.js';
+import { DomainError, type DomainErrorCode } from '../shared/errors.js';
 import type { CorrelationId } from '../shared/ids.js';
 
-const make = (
-  code: Parameters<typeof DomainError.prototype.constructor>[0]['code'],
-  message: string,
-  httpStatus: number,
-) =>
+const make = (code: DomainErrorCode, message: string, httpStatus: number) =>
   class extends DomainError {
     constructor(opts: { correlationId?: CorrelationId; details?: Record<string, unknown> } = {}) {
       super({ code, message, httpStatus, ...opts });
@@ -54,11 +50,7 @@ export const CancelWindowPassed = make(
   'Late cancellation. The appointment will be marked accordingly.',
   200, // not really an error — informational; surfaced via warning channel
 );
-export const AppointmentNotFound = make(
-  'APPOINTMENT_NOT_FOUND',
-  'Appointment not found.',
-  404,
-);
+export const AppointmentNotFound = make('APPOINTMENT_NOT_FOUND', 'Appointment not found.', 404);
 export const AppointmentTerminal = make(
   'APPOINTMENT_TERMINAL',
   'This appointment is in a final state and cannot be modified.',

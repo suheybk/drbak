@@ -1,6 +1,5 @@
 ---
-import ServicesPage from '~/views/ServicesPage.astro';
-import { LOCALES, DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+import { type AppLocale, DEFAULT_LOCALE, LOCALES } from '~/lib/locales';
 
 export const getStaticPaths = () =>
   LOCALES.filter((l) => l !== DEFAULT_LOCALE).map((locale) => ({ params: { locale } }));

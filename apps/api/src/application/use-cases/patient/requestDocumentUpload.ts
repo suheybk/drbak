@@ -13,6 +13,11 @@
  * accepting the PUT — no implicit trust between use case and route.
  */
 
+import type { R2Bucket } from '@cloudflare/workers-types';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import type { CorrelationId, UserId } from '../../../domain/shared/ids.js';
+import type { Db } from '../../../infrastructure/db/client.js';
+import { patientDocuments } from '../../../infrastructure/db/schema.js';
 import type {
   AuditLogger,
   Clock,
@@ -20,14 +25,6 @@ import type {
   PatientRepository,
   UploadTokenMinter,
 } from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import {
-  type CorrelationId,
-  type UserId,
-} from '../../../domain/shared/ids.js';
-import type { Db } from '../../../infrastructure/db/client.js';
-import { patientDocuments } from '../../../infrastructure/db/schema.js';
-import type { R2Bucket } from '@cloudflare/workers-types';
 
 const ALLOWED_MIME = new Set([
   'image/jpeg',
@@ -71,21 +68,41 @@ export interface PresignedUpload {
 
 export const requestDocumentUpload =
   (deps: RequestDocumentUploadDeps) =>
-  async (
-    input: RequestDocumentUploadInput,
-  ): Promise<Result<PresignedUpload, DomainError>> => {
+  async (input: RequestDocumentUploadInput): Promise<Result<PresignedUpload, DomainError>> => {
     if (!ALLOWED_MIME.has(input.mimeType)) {
-      return err(new DomainError({ code: 'VALIDATION_FAILED', message: 'Unsupported file type.', httpStatus: 400, field: 'mimeType' }));
+      return err(
+        new DomainError({
+          code: 'VALIDATION_FAILED',
+          message: 'Unsupported file type.',
+          httpStatus: 400,
+          field: 'mimeType',
+        }),
+      );
     }
     if (input.sizeBytes > MAX_BYTES) {
-      return err(new DomainError({ code: 'VALIDATION_FAILED', message: 'File too large.', httpStatus: 400, field: 'sizeBytes' }));
+      return err(
+        new DomainError({
+          code: 'VALIDATION_FAILED',
+          message: 'File too large.',
+          httpStatus: 400,
+          field: 'sizeBytes',
+        }),
+      );
     }
     const patient = await deps.patients.findByUserId(input.actorUserId);
     if (!patient) {
-      return err(new DomainError({ code: 'NOT_FOUND', message: 'Patient missing.', httpStatus: 404 }));
+      return err(
+        new DomainError({ code: 'NOT_FOUND', message: 'Patient missing.', httpStatus: 404 }),
+      );
     }
     if (!patient.isEmailVerified) {
-      return err(new DomainError({ code: 'EMAIL_NOT_VERIFIED', message: 'Verify your email first.', httpStatus: 403 }));
+      return err(
+        new DomainError({
+          code: 'EMAIL_NOT_VERIFIED',
+          message: 'Verify your email first.',
+          httpStatus: 403,
+        }),
+      );
     }
 
     const now = deps.clock.now();

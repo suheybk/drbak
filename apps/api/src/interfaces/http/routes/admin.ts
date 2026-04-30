@@ -23,21 +23,32 @@
  * GET    /admin/audit-log
  */
 
-import { Hono } from 'hono';
+import { LocaleSchema } from '@dr-bak/contracts';
 import { zValidator } from '@hono/zod-validator';
 import { and, desc, eq, gte, lte } from 'drizzle-orm';
-import { z } from 'zod';
-import { LocaleSchema } from '@dr-bak/contracts';
+import { Hono } from 'hono';
 import { ulid } from 'ulid';
-import type { Env } from '../../workers/env.js';
+import { z } from 'zod';
+import {
+  type ContentType,
+  archiveContentEntry,
+  createContentEntry,
+  publishContentEntry,
+} from '../../../application/use-cases/admin/contentEntryWrite.js';
+import { dsarErase } from '../../../application/use-cases/admin/dsarErase.js';
+import { exportAppointmentsCsv } from '../../../application/use-cases/admin/exportAppointmentsCsv.js';
+import { reviewTestimonial } from '../../../application/use-cases/admin/reviewTestimonial.js';
 import type { Container } from '../../../composition/container.js';
 import { token } from '../../../composition/container.js';
 import { T } from '../../../composition/tokens.js';
-import { requireAuth } from '../middleware/auth.js';
-import { clientIp, respond, userAgent } from '../helpers.js';
+import {
+  type DoctorId,
+  asAppointmentId,
+  asCorrelationId,
+  asUserId,
+} from '../../../domain/shared/ids.js';
 import {
   appointments,
-  appointmentStatusHistory,
   auditLog,
   patients,
   slotBlackouts,
@@ -45,21 +56,9 @@ import {
   testimonials,
   users,
 } from '../../../infrastructure/db/schema.js';
-import { exportAppointmentsCsv } from '../../../application/use-cases/admin/exportAppointmentsCsv.js';
-import { reviewTestimonial } from '../../../application/use-cases/admin/reviewTestimonial.js';
-import { dsarErase } from '../../../application/use-cases/admin/dsarErase.js';
-import {
-  archiveContentEntry,
-  createContentEntry,
-  publishContentEntry,
-  type ContentType,
-} from '../../../application/use-cases/admin/contentEntryWrite.js';
-import {
-  asAppointmentId,
-  asCorrelationId,
-  asUserId,
-  type DoctorId,
-} from '../../../domain/shared/ids.js';
+import type { Env } from '../../workers/env.js';
+import { clientIp, respond, userAgent } from '../helpers.js';
+import { requireAuth } from '../middleware/auth.js';
 
 export const adminRouter = new Hono<{ Bindings: Env }>();
 
@@ -88,7 +87,9 @@ adminRouter.get(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const q = c.req.valid('query');
     const conds = [];
     if (q.from) conds.push(gte(appointments.startsAt, new Date(q.from)));
@@ -198,10 +199,17 @@ adminRouter.get(
   zValidator('query', z.object({ status: z.string().optional() })),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const q = c.req.valid('query');
     const where = q.status ? eq(testimonials.status, q.status as never) : undefined;
-    const rows = await db.select().from(testimonials).where(where).orderBy(desc(testimonials.submittedAt)).limit(200);
+    const rows = await db
+      .select()
+      .from(testimonials)
+      .where(where)
+      .orderBy(desc(testimonials.submittedAt))
+      .limit(200);
     return c.json({ items: rows });
   },
 );
@@ -379,7 +387,9 @@ adminRouter.post(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const body = c.req.valid('json');
     const id = ulid();
     await db.insert(slotTemplates).values({
@@ -412,7 +422,9 @@ adminRouter.post(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const body = c.req.valid('json');
     const id = ulid();
     await db.insert(slotBlackouts).values({
@@ -469,7 +481,9 @@ adminRouter.get(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const q = c.req.valid('query');
     const conds = [];
     if (q.targetUserId) conds.push(eq(auditLog.targetUserId, q.targetUserId));
@@ -483,6 +497,5 @@ adminRouter.get(
       .orderBy(desc(auditLog.at))
       .limit(500);
     return c.json({ items: rows });
-    void appointmentStatusHistory; // silence unused-import
   },
 );

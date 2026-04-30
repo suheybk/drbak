@@ -29,8 +29,7 @@ export const isActive = (c: ConsentRecord): boolean => c.granted && c.withdrawnA
 export const activeFor = (
   records: ReadonlyArray<ConsentRecord>,
   purpose: ConsentPurpose,
-): ConsentRecord | null =>
-  records.filter((r) => r.purpose === purpose && isActive(r))[0] ?? null;
+): ConsentRecord | null => records.filter((r) => r.purpose === purpose && isActive(r))[0] ?? null;
 
 export const grantedPurposeSet = (
   records: ReadonlyArray<ConsentRecord>,

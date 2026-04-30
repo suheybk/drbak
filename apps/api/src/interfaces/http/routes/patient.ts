@@ -9,39 +9,39 @@
  *   POST /me/tms-screening
  */
 
-import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
 import {
   CancelAppointmentRequestSchema,
   CreateAppointmentRequestSchema,
   RequestUploadSchema,
   TmsScreeningAnswersSchema,
 } from '@dr-bak/contracts';
+import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
-import type { Env } from '../../workers/env.js';
+import { Hono } from 'hono';
+import { z } from 'zod';
+import { cancelAppointment } from '../../../application/use-cases/booking/cancelAppointment.js';
+import { createAppointment } from '../../../application/use-cases/booking/createAppointment.js';
+import { rescheduleAppointment } from '../../../application/use-cases/booking/rescheduleAppointment.js';
+import { getMyAppointments } from '../../../application/use-cases/patient/getMyAppointments.js';
+import { requestDocumentUpload } from '../../../application/use-cases/patient/requestDocumentUpload.js';
+import { submitTmsScreening } from '../../../application/use-cases/patient/submitTmsScreening.js';
 import type { Container } from '../../../composition/container.js';
 import { token } from '../../../composition/container.js';
 import { T } from '../../../composition/tokens.js';
-import { requireAuth } from '../middleware/auth.js';
-import { clientIp, idempotencyKey, localeOf, respond, userAgent } from '../helpers.js';
-import { createAppointment } from '../../../application/use-cases/booking/createAppointment.js';
-import { cancelAppointment } from '../../../application/use-cases/booking/cancelAppointment.js';
-import { rescheduleAppointment } from '../../../application/use-cases/booking/rescheduleAppointment.js';
-import { getMyAppointments } from '../../../application/use-cases/patient/getMyAppointments.js';
-import { submitTmsScreening } from '../../../application/use-cases/patient/submitTmsScreening.js';
-import { requestDocumentUpload } from '../../../application/use-cases/patient/requestDocumentUpload.js';
 import {
+  type DoctorId,
   asAppointmentId,
   asCorrelationId,
   asIdempotencyKey,
   asServiceId,
   asSlotHoldToken,
   asUserId,
-  type DoctorId,
 } from '../../../domain/shared/ids.js';
-import { instantFromIso, instantToIso } from '../../../domain/shared/time.js';
+import { instantToIso } from '../../../domain/shared/time.js';
 import { patientDocuments, patients, users } from '../../../infrastructure/db/schema.js';
+import type { Env } from '../../workers/env.js';
+import { clientIp, idempotencyKey, localeOf, respond, userAgent } from '../helpers.js';
+import { requireAuth } from '../middleware/auth.js';
 
 export const patientRouter = new Hono<{ Bindings: Env }>();
 
@@ -57,14 +57,17 @@ patientRouter.use('*', requireAuth(['patient', 'staff', 'admin']));
 patientRouter.get('/me', async (c) => {
   const auth = c.get('auth')!;
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
   const rows = await db
     .select({ p: patients, u: users })
     .from(patients)
     .innerJoin(users, eq(users.id, patients.userId))
     .where(eq(patients.userId, auth.userId))
     .limit(1);
-  if (!rows[0]) return c.json({ error: { code: 'NOT_FOUND', message: 'Patient profile missing.' } }, 404);
+  if (!rows[0])
+    return c.json({ error: { code: 'NOT_FOUND', message: 'Patient profile missing.' } }, 404);
   const { p, u } = rows[0];
   return c.json({
     id: p.id,
@@ -127,13 +130,22 @@ patientRouter.post(
     const body = c.req.valid('json');
     const idem = idempotencyKey(c);
     if (!auth.emailVerified) {
-      return c.json({ error: { code: 'EMAIL_NOT_VERIFIED', message: 'Verify your email first.' } }, 403);
+      return c.json(
+        { error: { code: 'EMAIL_NOT_VERIFIED', message: 'Verify your email first.' } },
+        403,
+      );
     }
 
     // Load patient contact for notifications
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const userRows = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
-    const patientRows = await db.select().from(patients).where(eq(patients.userId, auth.userId)).limit(1);
+    const patientRows = await db
+      .select()
+      .from(patients)
+      .where(eq(patients.userId, auth.userId))
+      .limit(1);
     if (!userRows[0] || !patientRows[0]) {
       return c.json({ error: { code: 'NOT_FOUND', message: 'Patient profile missing.' } }, 404);
     }
@@ -169,7 +181,9 @@ patientRouter.post(
       idempotencyKey: idem ? asIdempotencyKey(idem) : null,
       serviceId: asServiceId((body as never as { serviceId?: string }).serviceId ?? ''), // populated by client
       slotStartsAtIso: (body as never as { startsAt?: string }).startsAt ?? '',
-      deliveryMode: (body as never as { deliveryMode?: 'in_person' | 'home_visit' | 'telehealth' }).deliveryMode ?? 'in_person',
+      deliveryMode:
+        (body as never as { deliveryMode?: 'in_person' | 'home_visit' | 'telehealth' })
+          .deliveryMode ?? 'in_person',
       holdToken: asSlotHoldToken(body.holdToken),
       homeAddressLine1: body.homeAddressLine1 ?? null,
       homeAddressLine2: body.homeAddressLine2 ?? null,
@@ -191,20 +205,23 @@ patientRouter.post(
 
     if (!r.ok) return c.json({ error: r.error.toJSON() }, r.error.httpStatus as never);
     const a = r.value.appointment;
-    return c.json({
-      id: a.id,
-      serviceId: a.snapshot.serviceId,
-      doctorId: a.snapshot.doctorId,
-      startsAt: instantToIso(a.snapshot.startsAt),
-      endsAt: instantToIso(a.snapshot.endsAt),
-      deliveryMode: a.snapshot.deliveryMode,
-      status: a.status,
-      locale: a.snapshot.locale,
-      telehealthJoinUrl: a.snapshot.telehealthJoinUrl,
-      rescheduleUrl: r.value.rescheduleUrl,
-      cancelUrl: r.value.cancelUrl,
-      createdAt: instantToIso(a.snapshot.createdAt),
-    }, 201);
+    return c.json(
+      {
+        id: a.id,
+        serviceId: a.snapshot.serviceId,
+        doctorId: a.snapshot.doctorId,
+        startsAt: instantToIso(a.snapshot.startsAt),
+        endsAt: instantToIso(a.snapshot.endsAt),
+        deliveryMode: a.snapshot.deliveryMode,
+        status: a.status,
+        locale: a.snapshot.locale,
+        telehealthJoinUrl: a.snapshot.telehealthJoinUrl,
+        rescheduleUrl: r.value.rescheduleUrl,
+        cancelUrl: r.value.cancelUrl,
+        createdAt: instantToIso(a.snapshot.createdAt),
+      },
+      201,
+    );
   },
 );
 
@@ -219,10 +236,17 @@ patientRouter.post(
     const body = c.req.valid('json');
     const params = c.req.valid('param');
 
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const userRows = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
-    const patientRows = await db.select().from(patients).where(eq(patients.userId, auth.userId)).limit(1);
-    if (!userRows[0] || !patientRows[0]) return c.json({ error: { code: 'NOT_FOUND', message: 'Patient missing.' } }, 404);
+    const patientRows = await db
+      .select()
+      .from(patients)
+      .where(eq(patients.userId, auth.userId))
+      .limit(1);
+    if (!userRows[0] || !patientRows[0])
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Patient missing.' } }, 404);
 
     const useCase = cancelAppointment({
       clock: container.resolve(T.Clock),
@@ -272,9 +296,15 @@ patientRouter.post(
     const body = c.req.valid('json');
     const params = c.req.valid('param');
 
-    const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+    const db = container.resolve(token('Db') as never) as ReturnType<
+      typeof import('../../../infrastructure/db/client.js').buildDb
+    >;
     const userRows = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
-    const patientRows = await db.select().from(patients).where(eq(patients.userId, auth.userId)).limit(1);
+    const patientRows = await db
+      .select()
+      .from(patients)
+      .where(eq(patients.userId, auth.userId))
+      .limit(1);
     if (!userRows[0] || !patientRows[0]) {
       return c.json({ error: { code: 'NOT_FOUND', message: 'Patient missing.' } }, 404);
     }
@@ -362,8 +392,14 @@ patientRouter.put('/me/documents/:id/_upload', async (c) => {
     return c.json({ error: { code: 'TOKEN_INVALID', message: 'Upload token required.' } }, 401);
   }
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
-  const docs = await db.select().from(patientDocuments).where(eq(patientDocuments.id, docId)).limit(1);
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
+  const docs = await db
+    .select()
+    .from(patientDocuments)
+    .where(eq(patientDocuments.id, docId))
+    .limit(1);
   if (!docs[0]) return c.json({ error: { code: 'NOT_FOUND', message: 'Doc missing.' } }, 404);
   if (docs[0].uploadedByUserId !== auth.userId) {
     return c.json({ error: { code: 'PERMISSION_DENIED', message: 'Not yours.' } }, 403);
@@ -378,7 +414,10 @@ patientRouter.put('/me/documents/:id/_upload', async (c) => {
     nowMs: clock.now() as number,
   });
   if (!valid) {
-    return c.json({ error: { code: 'TOKEN_INVALID', message: 'Upload token invalid or expired.' } }, 401);
+    return c.json(
+      { error: { code: 'TOKEN_INVALID', message: 'Upload token invalid or expired.' } },
+      401,
+    );
   }
   const body = c.req.raw.body;
   if (!body) return c.json({ error: { code: 'VALIDATION_FAILED', message: 'Empty body.' } }, 400);

@@ -1,8 +1,8 @@
-import type { AvailabilityProjector } from '../../ports/AvailabilityProjector.js';
-import type { Clock } from '../../ports/index.js';
 import type { DeliveryMode } from '../../../domain/appointment/Appointment.js';
 import type { DoctorId, ServiceId } from '../../../domain/shared/ids.js';
 import { instantToIso } from '../../../domain/shared/time.js';
+import type { AvailabilityProjector } from '../../ports/AvailabilityProjector.js';
+import type { Clock } from '../../ports/index.js';
 
 export interface ListAvailabilityDeps {
   readonly projector: AvailabilityProjector;
@@ -17,8 +17,7 @@ export interface ListAvailabilityInput {
 }
 
 export const listAvailability =
-  (deps: ListAvailabilityDeps) =>
-  async (input: ListAvailabilityInput) => {
+  (deps: ListAvailabilityDeps) => async (input: ListAvailabilityInput) => {
     const slots = await deps.projector.forDay({
       doctorId: deps.env.DEFAULT_DOCTOR_ID,
       serviceId: input.serviceId,

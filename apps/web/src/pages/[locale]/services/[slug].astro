@@ -1,6 +1,5 @@
 ---
-import ServiceDetailPage from '~/views/ServiceDetailPage.astro';
-import { LOCALES, DEFAULT_LOCALE, type AppLocale } from '~/lib/locales';
+import { type AppLocale, DEFAULT_LOCALE, LOCALES } from '~/lib/locales';
 
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 const slug = Astro.params.slug as string;

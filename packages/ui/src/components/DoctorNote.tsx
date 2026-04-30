@@ -30,13 +30,23 @@ export const DoctorNote = ({
   photoUrl,
   className,
 }: DoctorNoteProps) => (
-  <aside className={clsx('drb-doctor-note', className)} role="note" aria-label={label ?? 'Doctor note'}>
+  <aside
+    className={clsx('drb-doctor-note', className)}
+    role="note"
+    aria-label={label ?? 'Doctor note'}
+  >
     {label ? <p className="drb-doctor-note__label">{label}</p> : null}
     <blockquote className="drb-doctor-note__quote">
       <div className="drb-doctor-note__body">{children}</div>
       <footer className="drb-doctor-note__attrib">
         {photoUrl ? (
-          <img src={photoUrl} alt="" loading="lazy" decoding="async" className="drb-doctor-note__photo" />
+          <img
+            src={photoUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="drb-doctor-note__photo"
+          />
         ) : null}
         <span>
           <span className="drb-doctor-note__name">{doctorName}</span>

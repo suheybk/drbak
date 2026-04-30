@@ -11,13 +11,13 @@
  *   4. Insert webhook_events row.
  */
 
-import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
-import type { Env } from '../../workers/env.js';
+import { Hono } from 'hono';
+import { ulid } from 'ulid';
 import type { Container } from '../../../composition/container.js';
 import { token } from '../../../composition/container.js';
-import { notifications, webhookEvents } from '../../../infrastructure/db/schema.js';
-import { ulid } from 'ulid';
+import { webhookEvents } from '../../../infrastructure/db/schema.js';
+import type { Env } from '../../workers/env.js';
 
 export const webhookRouter = new Hono<{ Bindings: Env }>();
 
@@ -36,10 +36,16 @@ webhookRouter.post('/resend', async (c) => {
     data?: { email_id?: string; tags?: { name: string; value: string }[] };
   };
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
   const eventId = id;
   // idempotency
-  const existing = await db.select().from(webhookEvents).where(eq(webhookEvents.externalId, eventId)).limit(1);
+  const existing = await db
+    .select()
+    .from(webhookEvents)
+    .where(eq(webhookEvents.externalId, eventId))
+    .limit(1);
   if (existing[0]) return c.body(null, 204);
   await db.insert(webhookEvents).values({
     id: ulid(),
@@ -62,8 +68,14 @@ webhookRouter.post('/netgsm', async (c) => {
   const body = JSON.parse(raw) as { jobid?: string; status?: string; partnercode?: string };
   if (!body.partnercode) return c.body(null, 400);
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
-  const existing = await db.select().from(webhookEvents).where(eq(webhookEvents.externalId, body.jobid ?? body.partnercode)).limit(1);
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
+  const existing = await db
+    .select()
+    .from(webhookEvents)
+    .where(eq(webhookEvents.externalId, body.jobid ?? body.partnercode))
+    .limit(1);
   if (existing[0]) return c.body(null, 204);
   await db.insert(webhookEvents).values({
     id: ulid(),
@@ -95,9 +107,15 @@ webhookRouter.post('/meta-whatsapp', async (c) => {
   }
   const body = JSON.parse(raw) as Record<string, unknown>;
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
   const eventId = String(body.entry ?? ulid());
-  const existing = await db.select().from(webhookEvents).where(eq(webhookEvents.externalId, eventId)).limit(1);
+  const existing = await db
+    .select()
+    .from(webhookEvents)
+    .where(eq(webhookEvents.externalId, eventId))
+    .limit(1);
   if (existing[0]) return c.body(null, 204);
   await db.insert(webhookEvents).values({
     id: ulid(),
@@ -115,7 +133,9 @@ webhookRouter.post('/meta-whatsapp', async (c) => {
 const enc = new TextEncoder();
 
 const importHmac = (secret: string) =>
-  crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+  crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [
+    'verify',
+  ]);
 
 const fromB64 = (s: string): Uint8Array => {
   const bin = atob(s);
@@ -124,9 +144,18 @@ const fromB64 = (s: string): Uint8Array => {
   return bytes;
 };
 
-const verifySvix = async (secret: string, id: string, ts: string, body: string, sigHeader: string) => {
+const verifySvix = async (
+  secret: string,
+  id: string,
+  ts: string,
+  body: string,
+  sigHeader: string,
+) => {
   // sigHeader = "v1,<sigB64> v1,<sigB64>" — Resend may rotate
-  const sigs = sigHeader.split(' ').map((s) => s.split(',')[1]).filter(Boolean) as string[];
+  const sigs = sigHeader
+    .split(' ')
+    .map((s) => s.split(',')[1])
+    .filter(Boolean) as string[];
   const message = `${id}.${ts}.${body}`;
   const key = await importHmac(secret.replace(/^whsec_/, ''));
   for (const s of sigs) {
@@ -136,7 +165,11 @@ const verifySvix = async (secret: string, id: string, ts: string, body: string, 
   return false;
 };
 
-const verifyMetaSignature = async (appSecret: string, body: string, header: string): Promise<boolean> => {
+const verifyMetaSignature = async (
+  appSecret: string,
+  body: string,
+  header: string,
+): Promise<boolean> => {
   // header = "sha256=<hex>"
   const provided = header.replace(/^sha256=/, '');
   const key = await crypto.subtle.importKey(

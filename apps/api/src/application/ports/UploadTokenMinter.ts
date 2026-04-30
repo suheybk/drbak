@@ -28,10 +28,6 @@ export interface MintedUploadToken {
 }
 
 export interface UploadTokenMinter {
-  mint(
-    input: UploadTokenInput & { ttlSeconds: number; nowMs: number },
-  ): Promise<MintedUploadToken>;
-  verify(
-    input: UploadTokenInput & { token: string; nowMs: number },
-  ): Promise<boolean>;
+  mint(input: UploadTokenInput & { ttlSeconds: number; nowMs: number }): Promise<MintedUploadToken>;
+  verify(input: UploadTokenInput & { token: string; nowMs: number }): Promise<boolean>;
 }

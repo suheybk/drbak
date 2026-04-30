@@ -10,7 +10,6 @@ import {
 } from '../../../src/domain/shared/ids.js';
 import { instantFromIso, instantFromMillis } from '../../../src/domain/shared/time.js';
 import {
-  buildVerifiedAdultPatient,
   CapturingAuditLogger,
   CapturingEmailNotifier,
   CapturingSmsNotifier,
@@ -25,6 +24,7 @@ import {
   InMemoryServiceCatalogue,
   InMemorySlotLock,
   InMemoryTmsScreeningRepo,
+  buildVerifiedAdultPatient,
 } from '../../fixtures/in-memory-adapters.js';
 
 const NOW = instantFromIso('2026-04-30T08:00:00.000Z');
@@ -111,7 +111,10 @@ const buildHarness = () => {
   };
 };
 
-const validInput = (h: ReturnType<typeof buildHarness>, overrides: Partial<Parameters<typeof h.useCase>[0]> = {}) => {
+const validInput = (
+  h: ReturnType<typeof buildHarness>,
+  overrides: Partial<Parameters<typeof h.useCase>[0]> = {},
+) => {
   // Pre-create a slot hold so the test exercises the full path
   return (async () => {
     const hold = await h.slotLock.holdSlot({
@@ -235,9 +238,7 @@ describe('createAppointment — failures', () => {
   });
 
   it('returns EMAIL_NOT_VERIFIED when the patient is not verified', async () => {
-    h.patients.put(
-      buildVerifiedAdultPatient({ emailVerifiedAt: null }),
-    );
+    h.patients.put(buildVerifiedAdultPatient({ emailVerifiedAt: null }));
     const input = await validInput(h);
     const result = await h.useCase(input);
     expect(result.ok).toBe(false);

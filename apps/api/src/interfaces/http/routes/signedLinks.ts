@@ -8,15 +8,20 @@
  * the patient uses, attributing the action to the patient (anonymous).
  */
 
-import { Hono } from 'hono';
-import type { Env } from '../../workers/env.js';
-import type { Container } from '../../../composition/container.js';
-import { T } from '../../../composition/tokens.js';
-import { token } from '../../../composition/container.js';
 import { eq } from 'drizzle-orm';
-import { appointments, patients, users } from '../../../infrastructure/db/schema.js';
+import { Hono } from 'hono';
 import { cancelAppointment } from '../../../application/use-cases/booking/cancelAppointment.js';
-import { asAppointmentId, asCorrelationId, asDoctorId, asUserId } from '../../../domain/shared/ids.js';
+import type { Container } from '../../../composition/container.js';
+import { token } from '../../../composition/container.js';
+import { T } from '../../../composition/tokens.js';
+import {
+  asAppointmentId,
+  asCorrelationId,
+  asDoctorId,
+  asUserId,
+} from '../../../domain/shared/ids.js';
+import { appointments, patients, users } from '../../../infrastructure/db/schema.js';
+import type { Env } from '../../workers/env.js';
 import { clientIp, localeOf, userAgent } from '../helpers.js';
 
 export const signedLinksRouter = new Hono<{ Bindings: Env }>();
@@ -38,11 +43,19 @@ signedLinksRouter.post('/iptal/:token', async (c) => {
     return c.json({ error: { code: 'TOKEN_INVALID', message: 'Invalid or expired link.' } }, 400);
   }
 
-  const db = container.resolve(token('Db') as never) as ReturnType<typeof import('../../../infrastructure/db/client.js').buildDb>;
-  const aRow = await db.select().from(appointments).where(eq(appointments.id, verified.appointmentId)).limit(1);
+  const db = container.resolve(token('Db') as never) as ReturnType<
+    typeof import('../../../infrastructure/db/client.js').buildDb
+  >;
+  const aRow = await db
+    .select()
+    .from(appointments)
+    .where(eq(appointments.id, verified.appointmentId))
+    .limit(1);
   if (!aRow[0]) return c.json({ error: { code: 'NOT_FOUND', message: 'Not found.' } }, 404);
   const pRow = await db.select().from(patients).where(eq(patients.id, aRow[0].patientId)).limit(1);
-  const uRow = pRow[0] ? await db.select().from(users).where(eq(users.id, pRow[0].userId)).limit(1) : [];
+  const uRow = pRow[0]
+    ? await db.select().from(users).where(eq(users.id, pRow[0].userId)).limit(1)
+    : [];
 
   const useCase = cancelAppointment({
     clock: container.resolve(T.Clock),

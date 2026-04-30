@@ -8,10 +8,7 @@
  */
 
 import type { KVNamespace } from '@cloudflare/workers-types';
-import type {
-  RateLimitDecision,
-  RateLimiter,
-} from '../../application/ports/index.js';
+import type { RateLimitDecision, RateLimiter } from '../../application/ports/index.js';
 import type { Instant } from '../../domain/shared/time.js';
 
 interface Bucket {

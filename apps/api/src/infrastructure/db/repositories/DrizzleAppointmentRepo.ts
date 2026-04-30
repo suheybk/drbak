@@ -1,7 +1,12 @@
+import type { Locale } from '@dr-bak/contracts';
 import { eq } from 'drizzle-orm';
+import { ulid } from 'ulid';
 import type { AppointmentRepository } from '../../../application/ports/index.js';
 import { Appointment, type AppointmentSnapshot } from '../../../domain/appointment/Appointment.js';
 import {
+  type AppointmentId,
+  type IdempotencyKey,
+  type PatientId,
   asAppointmentId,
   asCorrelationId,
   asDoctorId,
@@ -9,16 +14,10 @@ import {
   asPatientId,
   asServiceId,
   asUserId,
-  type AppointmentId,
-  type IdempotencyKey,
-  type PatientId,
-  type UserId,
 } from '../../../domain/shared/ids.js';
 import { instantFromMillis } from '../../../domain/shared/time.js';
 import type { Db } from '../client.js';
-import { appointments, appointmentStatusHistory } from '../schema.js';
-import { ulid } from 'ulid';
-import type { Locale } from '@dr-bak/contracts';
+import { appointmentStatusHistory, appointments } from '../schema.js';
 
 const toSnapshot = (
   a: typeof appointments.$inferSelect,
@@ -64,11 +63,7 @@ export class DrizzleAppointmentRepo implements AppointmentRepository {
   constructor(private readonly db: Db) {}
 
   async findById(id: AppointmentId): Promise<Appointment | null> {
-    const apt = await this.db
-      .select()
-      .from(appointments)
-      .where(eq(appointments.id, id))
-      .limit(1);
+    const apt = await this.db.select().from(appointments).where(eq(appointments.id, id)).limit(1);
     if (!apt[0]) return null;
     const history = await this.db
       .select()
@@ -178,9 +173,7 @@ export class DrizzleAppointmentRepo implements AppointmentRepository {
       .from(appointmentStatusHistory)
       .where(eq(appointmentStatusHistory.appointmentId, s.id));
     const knownTimes = new Set(knownAt.map((r) => r.at.getTime()));
-    const newTransitions = s.statusHistory.filter(
-      (h) => !knownTimes.has(h.at as number),
-    );
+    const newTransitions = s.statusHistory.filter((h) => !knownTimes.has(h.at as number));
     if (newTransitions.length > 0) {
       await this.db.insert(appointmentStatusHistory).values(
         newTransitions.map((h) => ({

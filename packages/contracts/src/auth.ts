@@ -7,12 +7,7 @@ const PasswordSchema = z
   .max(256)
   .transform((s) => s.normalize('NFC'));
 
-const EmailSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .email()
-  .max(254);
+const EmailSchema = z.string().trim().toLowerCase().email().max(254);
 
 export const RegisterRequestSchema = z.object({
   email: EmailSchema,
@@ -20,7 +15,10 @@ export const RegisterRequestSchema = z.object({
   fullName: z.string().min(2).max(160),
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
   locale: LocaleSchema,
-  phoneE164: z.string().regex(/^\+\d{8,15}$/).optional(),
+  phoneE164: z
+    .string()
+    .regex(/^\+\d{8,15}$/)
+    .optional(),
   consents: z
     .object({
       appointmentBooking: z.literal(true),

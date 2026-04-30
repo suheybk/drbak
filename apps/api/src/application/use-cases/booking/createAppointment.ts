@@ -19,6 +19,38 @@
  * Failure modes are typed (Result<Appointment, DomainError>).
  */
 
+import { Appointment } from '../../../domain/appointment/Appointment.js';
+import { type BookingDecision, BookingPolicy } from '../../../domain/appointment/BookingPolicy.js';
+import {
+  AppointmentNotFound,
+  ConsentMissing,
+  GuardianRequired,
+  IdempotencyConflict,
+  SlotConflict,
+  SlotHoldExpired,
+  SlotInPast,
+  SlotNotFound,
+  TmsScreeningDenied,
+  TmsScreeningRequired,
+} from '../../../domain/appointment/errors.js';
+import { type ConsentPurpose, grantedPurposeSet } from '../../../domain/patient/Consent.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import {
+  type CorrelationId,
+  type DoctorId,
+  type IdempotencyKey,
+  type ServiceId,
+  type SlotHoldToken,
+  type UserId,
+  asAppointmentId,
+  asConsentRecordId,
+} from '../../../domain/shared/ids.js';
+import {
+  type DurationMinutes,
+  type Instant,
+  addMinutes,
+  instantFromIso,
+} from '../../../domain/shared/time.js';
 import type {
   AppointmentRepository,
   AuditLogger,
@@ -35,44 +67,6 @@ import type {
   TmsScreeningRepository,
   WhatsappNotifier,
 } from '../../ports/index.js';
-import { Appointment } from '../../../domain/appointment/Appointment.js';
-import {
-  BookingPolicy,
-  type BookingDecision,
-} from '../../../domain/appointment/BookingPolicy.js';
-import {
-  AppointmentNotFound,
-  ConsentMissing,
-  GuardianRequired,
-  IdempotencyConflict,
-  SlotConflict,
-  SlotHoldExpired,
-  SlotInPast,
-  SlotNotFound,
-  TmsScreeningDenied,
-  TmsScreeningRequired,
-} from '../../../domain/appointment/errors.js';
-import {
-  asAppointmentId,
-  asConsentRecordId,
-  type CorrelationId,
-  type DoctorId,
-  type IdempotencyKey,
-  type ServiceId,
-  type SlotHoldToken,
-  type UserId,
-} from '../../../domain/shared/ids.js';
-import {
-  addMinutes,
-  type DurationMinutes,
-  type Instant,
-  instantFromIso,
-} from '../../../domain/shared/time.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import {
-  type ConsentPurpose,
-  grantedPurposeSet,
-} from '../../../domain/patient/Consent.js';
 
 export interface CreateAppointmentDeps {
   readonly clock: Clock;
@@ -296,12 +290,8 @@ export const createAppointment =
       durationMinutes: service.durationMinutes as DurationMinutes,
       correlationId: input.correlationId,
       idempotencyKey: input.idempotencyKey,
-      ...(input.homeAddressLine1 !== null
-        ? { homeAddressLine1: input.homeAddressLine1 }
-        : {}),
-      ...(input.homeAddressLine2 !== null
-        ? { homeAddressLine2: input.homeAddressLine2 }
-        : {}),
+      ...(input.homeAddressLine1 !== null ? { homeAddressLine1: input.homeAddressLine1 } : {}),
+      ...(input.homeAddressLine2 !== null ? { homeAddressLine2: input.homeAddressLine2 } : {}),
       ...(input.patientNotes !== null ? { patientNotes: input.patientNotes } : {}),
       locale: input.locale,
       now,
@@ -378,10 +368,7 @@ export const createAppointment =
 
     // 13. Cache idempotency response (best-effort; race here is acceptable — same payload)
     if (input.idempotencyKey !== null) {
-      await deps.idempotency.storeResponse(
-        input.idempotencyKey,
-        JSON.stringify({ appointmentId }),
-      );
+      await deps.idempotency.storeResponse(input.idempotencyKey, JSON.stringify({ appointmentId }));
     }
 
     return ok({ appointment, rescheduleUrl, cancelUrl });

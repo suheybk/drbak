@@ -11,15 +11,11 @@
  */
 
 import type { KVNamespace } from '@cloudflare/workers-types';
-import type {
-  RefreshConsumeResult,
-  RefreshTokenRecord,
-  SessionStore,
-} from '../../application/ports/index.js';
-import type { Instant } from '../../domain/shared/time.js';
-import { instantFromMillis } from '../../domain/shared/time.js';
+import type { RefreshConsumeResult, SessionStore } from '../../application/ports/index.js';
 import type { UserId } from '../../domain/shared/ids.js';
 import { asUserId } from '../../domain/shared/ids.js';
+import type { Instant } from '../../domain/shared/time.js';
+import { instantFromMillis } from '../../domain/shared/time.js';
 
 interface Stored {
   userId: string;

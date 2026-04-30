@@ -4,6 +4,7 @@
  * Public key as SPKI PEM in `JWT_SIGNING_PUBLIC_KEY` (also published at /.well-known/jwks.json).
  */
 
+import { decodeBase64 } from '@oslojs/encoding';
 import {
   createJWTSignatureMessage,
   encodeJWT,
@@ -11,12 +12,7 @@ import {
   parseJWT,
   validateJWT,
 } from '@oslojs/jwt';
-import { decodeBase64 } from '@oslojs/encoding';
-import type {
-  IssuedToken,
-  JwtClaims,
-  TokenIssuer,
-} from '../../application/ports/index.js';
+import type { IssuedToken, JwtClaims, TokenIssuer } from '../../application/ports/index.js';
 import { type Instant, instantFromMillis } from '../../domain/shared/time.js';
 
 interface KeyMaterial {
@@ -34,22 +30,14 @@ const pemToDer = (pem: string): ArrayBuffer => {
 };
 
 const importP256Private = async (pem: string): Promise<CryptoKey> =>
-  crypto.subtle.importKey(
-    'pkcs8',
-    pemToDer(pem),
-    { name: 'ECDSA', namedCurve: 'P-256' },
-    false,
-    ['sign'],
-  );
+  crypto.subtle.importKey('pkcs8', pemToDer(pem), { name: 'ECDSA', namedCurve: 'P-256' }, false, [
+    'sign',
+  ]);
 
 const importP256Public = async (pem: string): Promise<CryptoKey> =>
-  crypto.subtle.importKey(
-    'spki',
-    pemToDer(pem),
-    { name: 'ECDSA', namedCurve: 'P-256' },
-    true,
-    ['verify'],
-  );
+  crypto.subtle.importKey('spki', pemToDer(pem), { name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'verify',
+  ]);
 
 export class Es256TokenIssuer implements TokenIssuer {
   private keys: Promise<KeyMaterial> | null = null;
@@ -75,11 +63,7 @@ export class Es256TokenIssuer implements TokenIssuer {
     return this.keys;
   }
 
-  async issueAccess(
-    claims: JwtClaims,
-    ttlSeconds: number,
-    now: Instant,
-  ): Promise<IssuedToken> {
+  async issueAccess(claims: JwtClaims, ttlSeconds: number, now: Instant): Promise<IssuedToken> {
     const { privateKey, kid } = await this.loadKeys();
     const nowSec = Math.floor((now as number) / 1000);
     const expSec = nowSec + ttlSeconds;
@@ -98,11 +82,7 @@ export class Es256TokenIssuer implements TokenIssuer {
     };
     const message = createJWTSignatureMessage(header, payload);
     const sig = new Uint8Array(
-      await crypto.subtle.sign(
-        { name: 'ECDSA', hash: 'SHA-256' },
-        privateKey,
-        message,
-      ),
+      await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, privateKey, message),
     );
     const token = encodeJWT(header, payload, sig);
     return { token, expiresAt: instantFromMillis(expSec * 1000), jti };

@@ -42,7 +42,12 @@ export class GoogleOauthClient {
     private readonly clientSecret: string,
   ) {}
 
-  buildAuthUrl(input: { state: string; codeChallenge: string; redirectUri: string; locale?: string }): string {
+  buildAuthUrl(input: {
+    state: string;
+    codeChallenge: string;
+    redirectUri: string;
+    locale?: string;
+  }): string {
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: input.redirectUri,
@@ -88,8 +93,14 @@ export class GoogleOauthClient {
   async verifyIdToken(idToken: string, now: number): Promise<GoogleIdTokenClaims> {
     const [headerB64, payloadB64, sigB64] = idToken.split('.');
     if (!headerB64 || !payloadB64 || !sigB64) throw new Error('bad id_token');
-    const header = JSON.parse(new TextDecoder().decode(fromB64url(headerB64))) as { kid: string; alg: string };
-    const payload = JSON.parse(new TextDecoder().decode(fromB64url(payloadB64))) as Record<string, unknown>;
+    const header = JSON.parse(new TextDecoder().decode(fromB64url(headerB64))) as {
+      kid: string;
+      alg: string;
+    };
+    const payload = JSON.parse(new TextDecoder().decode(fromB64url(payloadB64))) as Record<
+      string,
+      unknown
+    >;
     if (header.alg !== 'RS256') throw new Error('unsupported alg');
 
     const jwksRes = await fetch('https://www.googleapis.com/oauth2/v3/certs');

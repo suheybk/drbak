@@ -1,8 +1,5 @@
 import type { KVNamespace } from '@cloudflare/workers-types';
-import type {
-  OneTimeTokenPurpose,
-  OneTimeTokenStore,
-} from '../../application/ports/index.js';
+import type { OneTimeTokenPurpose, OneTimeTokenStore } from '../../application/ports/index.js';
 import type { Instant } from '../../domain/shared/time.js';
 
 const keyOf = (purpose: OneTimeTokenPurpose, token: string) => `ott:${purpose}:${token}`;

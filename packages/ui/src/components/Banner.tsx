@@ -9,7 +9,10 @@ export type BannerProps = {
 };
 
 export const Banner = ({ variant, title, children, className }: BannerProps) => (
-  <div role={variant === 'danger' ? 'alert' : 'status'} className={clsx('drb-banner', `drb-banner--${variant}`, className)}>
+  <div
+    role={variant === 'danger' ? 'alert' : 'status'}
+    className={clsx('drb-banner', `drb-banner--${variant}`, className)}
+  >
     {title ? <p className="drb-banner__title">{title}</p> : null}
     <div className="drb-banner__body">{children}</div>
   </div>

@@ -4,12 +4,8 @@
  * scoped to that room and email.
  */
 
-import type {
-  TelehealthRoom,
-  TelehealthRoomFactory,
-} from '../../application/ports/index.js';
+import type { TelehealthRoom, TelehealthRoomFactory } from '../../application/ports/index.js';
 import { type Instant, instantFromMillis } from '../../domain/shared/time.js';
-import { encodeJWT } from '@oslojs/jwt';
 
 const enc = new TextEncoder();
 

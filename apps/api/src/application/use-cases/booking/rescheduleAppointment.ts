@@ -9,28 +9,13 @@
  * new time prior to calling this use case.
  */
 
-import type {
-  AppointmentRepository,
-  AuditLogger,
-  Clock,
-  ConsentRepository,
-  IdGenerator,
-  IdempotencyStore,
-  PatientRepository,
-  ServiceCatalogue,
-  SlotLockService,
-  EmailNotifier,
-  SmsNotifier,
-  WhatsappNotifier,
-  TelehealthRoomFactory,
-} from '../../ports/index.js';
 import { CancellationPolicy } from '../../../domain/appointment/CancellationPolicy.js';
 import {
   AppointmentNotFound,
   AppointmentTerminal,
   RescheduleWindowPassed,
 } from '../../../domain/appointment/errors.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
+import { DomainError, err, ok } from '../../../domain/shared/errors.js';
 import {
   type AppointmentId,
   type CorrelationId,
@@ -39,6 +24,21 @@ import {
   type UserId,
   asCorrelationId,
 } from '../../../domain/shared/ids.js';
+import type {
+  AppointmentRepository,
+  AuditLogger,
+  Clock,
+  ConsentRepository,
+  EmailNotifier,
+  IdGenerator,
+  IdempotencyStore,
+  PatientRepository,
+  ServiceCatalogue,
+  SlotLockService,
+  SmsNotifier,
+  TelehealthRoomFactory,
+  WhatsappNotifier,
+} from '../../ports/index.js';
 import { createAppointment } from './createAppointment.js';
 
 export interface RescheduleAppointmentDeps {
@@ -81,8 +81,7 @@ export interface RescheduleAppointmentInput {
 }
 
 export const rescheduleAppointment =
-  (deps: RescheduleAppointmentDeps) =>
-  async (input: RescheduleAppointmentInput) => {
+  (deps: RescheduleAppointmentDeps) => async (input: RescheduleAppointmentInput) => {
     const original = await deps.appointments.findById(input.originalAppointmentId);
     if (!original) return err(new AppointmentNotFound());
     if (original.isTerminal) return err(new AppointmentTerminal());
@@ -91,7 +90,13 @@ export const rescheduleAppointment =
     if (input.actorRole === 'patient') {
       const p = await deps.patients.findByUserId(input.actorUserId);
       if (!p || p.id !== original.snapshot.patientId) {
-        return err(new DomainError({ code: 'PERMISSION_DENIED', message: 'Not your appointment.', httpStatus: 403 }));
+        return err(
+          new DomainError({
+            code: 'PERMISSION_DENIED',
+            message: 'Not your appointment.',
+            httpStatus: 403,
+          }),
+        );
       }
     }
 

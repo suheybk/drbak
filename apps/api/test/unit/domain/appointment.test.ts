@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Appointment } from '../../../src/domain/appointment/Appointment.js';
+import { DomainError } from '../../../src/domain/shared/errors.js';
 import {
   asAppointmentId,
   asCorrelationId,
@@ -13,7 +14,6 @@ import {
   instantFromIso,
   instantFromMillis,
 } from '../../../src/domain/shared/time.js';
-import { DomainError } from '../../../src/domain/shared/errors.js';
 
 const baseInput = () => ({
   id: asAppointmentId('apt_1'),
@@ -43,9 +43,9 @@ describe('Appointment.create', () => {
   });
 
   it('rejects home_visit without homeAddressLine1', () => {
-    expect(() =>
-      Appointment.create({ ...baseInput(), deliveryMode: 'home_visit' }),
-    ).toThrow(/home visit requires homeAddressLine1/);
+    expect(() => Appointment.create({ ...baseInput(), deliveryMode: 'home_visit' })).toThrow(
+      /home visit requires homeAddressLine1/,
+    );
   });
 });
 

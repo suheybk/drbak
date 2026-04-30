@@ -46,7 +46,11 @@ export interface SlotLockService {
     endsAt: Instant;
     now: Instant;
   }): Promise<ConfirmResult>;
-  releaseHold(input: { token: SlotHoldToken; doctorId: DoctorId; startsAt: Instant }): Promise<void>;
+  releaseHold(input: {
+    token: SlotHoldToken;
+    doctorId: DoctorId;
+    startsAt: Instant;
+  }): Promise<void>;
   releaseBooking(input: {
     doctorId: DoctorId;
     startsAt: Instant;

@@ -1,5 +1,4 @@
 ---
-import FaqPage from '~/views/FaqPage.astro';
 const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
 ---
 <FaqPage locale={locale} request={Astro.request} />

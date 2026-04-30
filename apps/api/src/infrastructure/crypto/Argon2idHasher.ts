@@ -47,9 +47,7 @@ export class Argon2idHasher implements PasswordHasher {
     if (!m) return true;
     const [_, mem, time, par] = m;
     return (
-      Number(mem) < PARAMS.mem ||
-      Number(time) < PARAMS.time ||
-      Number(par) !== PARAMS.parallelism
+      Number(mem) < PARAMS.mem || Number(time) < PARAMS.time || Number(par) !== PARAMS.parallelism
     );
   }
 }

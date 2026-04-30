@@ -1,15 +1,8 @@
-import type {
-  Clock,
-  ServiceCatalogue,
-  SlotLockService,
-} from '../../ports/index.js';
-import {
-  type DoctorId,
-  type ServiceId,
-} from '../../../domain/shared/ids.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import { addMinutes, durationMinutes, type Instant, instantFromIso } from '../../../domain/shared/time.js';
 import { SlotConflict, SlotInPast, SlotNotFound } from '../../../domain/appointment/errors.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import type { DoctorId, ServiceId } from '../../../domain/shared/ids.js';
+import { addMinutes, durationMinutes, instantFromIso } from '../../../domain/shared/time.js';
+import type { Clock, ServiceCatalogue, SlotLockService } from '../../ports/index.js';
 
 export interface HoldSlotDeps {
   readonly clock: Clock;
@@ -26,7 +19,9 @@ export interface HoldSlotUseCaseInput {
 
 export const holdSlot =
   (deps: HoldSlotDeps) =>
-  async (input: HoldSlotUseCaseInput): Promise<Result<{ holdToken: string; expiresAtIso: string }, DomainError>> => {
+  async (
+    input: HoldSlotUseCaseInput,
+  ): Promise<Result<{ holdToken: string; expiresAtIso: string }, DomainError>> => {
     const now = deps.clock.now();
     const service = await deps.services.findById(input.serviceId);
     if (!service) return err(new SlotNotFound());

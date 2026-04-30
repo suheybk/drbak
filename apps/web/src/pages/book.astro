@@ -1,6 +1,7 @@
 ---
-import BookingPage from '~/views/BookingPage.astro';
 const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
-const presetServiceSlug = (Astro.url.searchParams.get('service') ?? undefined) as string | undefined;
+const presetServiceSlug = (Astro.url.searchParams.get('service') ?? undefined) as
+  | string
+  | undefined;
 ---
 <BookingPage locale={locale} request={Astro.request} presetServiceSlug={presetServiceSlug} />

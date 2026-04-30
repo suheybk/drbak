@@ -1,11 +1,14 @@
 ---
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
+import { buildT } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
-interface Props { locale: AppLocale; token?: string; request: Request }
+interface Props {
+  locale: AppLocale;
+  token?: string;
+  request: Request;
+}
 const { locale, token, request } = Astro.props;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.verifyEmail(l));
@@ -18,7 +21,10 @@ if (token) {
     body: { token },
   });
   if (r.ok) state = 'success';
-  else { state = 'error'; errMsg = r.error.code; }
+  else {
+    state = 'error';
+    errMsg = r.error.code;
+  }
 }
 ---
 <BaseLayout title={t('auth.verifyTitle')} description={t('auth.verifyTitle')} alternates={alternates}>

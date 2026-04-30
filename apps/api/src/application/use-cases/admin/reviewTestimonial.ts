@@ -5,11 +5,11 @@
  */
 
 import { and, eq } from 'drizzle-orm';
-import type { AuditLogger, Clock, ConsentRepository } from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import { asConsentRecordId, type CorrelationId, type UserId } from '../../../domain/shared/ids.js';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import type { CorrelationId, UserId } from '../../../domain/shared/ids.js';
 import type { Db } from '../../../infrastructure/db/client.js';
 import { consentRecords, testimonials } from '../../../infrastructure/db/schema.js';
+import type { AuditLogger, Clock, ConsentRepository } from '../../ports/index.js';
 
 export interface ReviewTestimonialDeps {
   readonly db: Db;
@@ -31,11 +31,20 @@ export interface ReviewTestimonialInput {
 export const reviewTestimonial =
   (deps: ReviewTestimonialDeps) =>
   async (input: ReviewTestimonialInput): Promise<Result<{ status: string }, DomainError>> => {
-    const rows = await deps.db.select().from(testimonials).where(eq(testimonials.id, input.testimonialId)).limit(1);
+    const rows = await deps.db
+      .select()
+      .from(testimonials)
+      .where(eq(testimonials.id, input.testimonialId))
+      .limit(1);
     const t = rows[0];
-    if (!t) return err(new DomainError({ code: 'NOT_FOUND', message: 'Testimonial not found.', httpStatus: 404 }));
+    if (!t)
+      return err(
+        new DomainError({ code: 'NOT_FOUND', message: 'Testimonial not found.', httpStatus: 404 }),
+      );
     if (t.status !== 'submitted') {
-      return err(new DomainError({ code: 'CONFLICT', message: 'Already reviewed.', httpStatus: 409 }));
+      return err(
+        new DomainError({ code: 'CONFLICT', message: 'Already reviewed.', httpStatus: 409 }),
+      );
     }
 
     if (input.action === 'approve') {
@@ -52,7 +61,13 @@ export const reviewTestimonial =
         )
         .limit(1);
       if (!c[0] || c[0].withdrawnAt !== null) {
-        return err(new DomainError({ code: 'CONSENT_MISSING', message: 'Consent for publication missing.', httpStatus: 403 }));
+        return err(
+          new DomainError({
+            code: 'CONSENT_MISSING',
+            message: 'Consent for publication missing.',
+            httpStatus: 403,
+          }),
+        );
       }
       await deps.db
         .update(testimonials)
@@ -83,6 +98,4 @@ export const reviewTestimonial =
     });
 
     return ok({ status: input.action === 'approve' ? 'approved' : 'rejected' });
-    // Defence in depth on `asConsentRecordId` import keeps types coherent
-    void asConsentRecordId;
   };

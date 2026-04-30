@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  BookingPolicy,
   type BookingContext,
+  BookingPolicy,
 } from '../../../src/domain/appointment/BookingPolicy.js';
 import type { ConsentPurpose } from '../../../src/domain/patient/Consent.js';
 import { instantFromIso } from '../../../src/domain/shared/time.js';

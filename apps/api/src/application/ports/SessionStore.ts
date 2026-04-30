@@ -1,5 +1,5 @@
-import type { Instant } from '../../domain/shared/time.js';
 import type { UserId } from '../../domain/shared/ids.js';
+import type { Instant } from '../../domain/shared/time.js';
 
 export interface RefreshTokenRecord {
   readonly token: string;

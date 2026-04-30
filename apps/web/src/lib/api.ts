@@ -18,8 +18,8 @@ const NETWORK_ERROR = (corr = 'client-network'): ApiError => ({
 });
 
 export const PUBLIC_API_BASE: string =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (import.meta as any).env?.PUBLIC_API_BASE ?? 'http://localhost:8787/api/v1';
+  (import.meta as unknown as { env?: { PUBLIC_API_BASE?: string } }).env?.PUBLIC_API_BASE ??
+  'http://localhost:8787/api/v1';
 
 const newCorrelationId = (): string =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -42,12 +42,12 @@ type FetchOpts = {
 export const apiFetch = async <T>(path: string, opts: FetchOpts = {}): Promise<Result<T>> => {
   const url = `${opts.baseUrl ?? PUBLIC_API_BASE}${path}`;
   const headers: Record<string, string> = {
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'X-Correlation-Id': newCorrelationId(),
   };
   if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
   if (opts.idempotencyKey) headers['Idempotency-Key'] = opts.idempotencyKey;
-  if (opts.cookieHeader) headers['Cookie'] = opts.cookieHeader;
+  if (opts.cookieHeader) headers.Cookie = opts.cookieHeader;
 
   let res: Response;
   try {

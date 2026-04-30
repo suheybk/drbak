@@ -17,9 +17,7 @@ export class KVIdempotencyStore implements IdempotencyStore {
     const k = `idem:${input.key}`;
     const existing = await this.kv.get<Entry>(k, 'json');
     if (existing) {
-      return existing.fingerprint === input.fingerprint
-        ? 'duplicate_match'
-        : 'duplicate_mismatch';
+      return existing.fingerprint === input.fingerprint ? 'duplicate_match' : 'duplicate_mismatch';
     }
     const newEntry: Entry = { fingerprint: input.fingerprint };
     await this.kv.put(k, JSON.stringify(newEntry), {

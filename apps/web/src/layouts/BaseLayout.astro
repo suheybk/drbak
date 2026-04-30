@@ -16,11 +16,9 @@
  *   - sets canonical + hreflang from `alternates`
  */
 import '~/styles/global.css';
-import { dirOf, type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
 import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
-import Header from '~/components/Header.astro';
-import Footer from '~/components/Footer.astro';
+import { type AppLocale, DEFAULT_LOCALE, dirOf } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
 interface Props {
   title: string;
@@ -44,6 +42,26 @@ const canonical = `${baseUrl}${Astro.url.pathname}`;
 const fullTitle = `${Astro.props.title} — ${t('brand.doctor')}`;
 const description = Astro.props.description ?? t('brand.tagline');
 const ogImage = Astro.props.ogImage ?? `${baseUrl}/og/default.jpg`;
+
+/**
+ * Soft-launch banner. Appears on AR/FR/ES when SOFT_LAUNCH=1 (CF Pages
+ * env var). The banner is removed by the owner after the medical translator
+ * has signed off — see LAUNCH-CHECKLIST.md group B and the scheduled
+ * reminder agent. Search engines still see the page (no noindex) but the
+ * patient sees a clear "auto-translated, review pending" notice.
+ *
+ * The TR copy is the master string; per-locale text below is one-time
+ * placeholder content vetted in TR + EN by the doctor on Phase 2 sign-off.
+ */
+const softLaunchOn = import.meta.env.SOFT_LAUNCH === '1';
+const showSoftLaunchBanner = softLaunchOn && (locale === 'ar' || locale === 'fr' || locale === 'es');
+const softLaunchCopy: Record<AppLocale, string> = {
+  tr: 'Bu sayfa otomatik çevrildi; tıbbi inceleme süreci devam ediyor.',
+  ar: 'تُرجمت هذه الصفحة آليًا؛ المراجعة الطبية جارية.',
+  en: 'This page was machine-translated; medical review is in progress.',
+  fr: 'Cette page est une traduction automatique ; la relecture médicale est en cours.',
+  es: 'Esta página es una traducción automática; la revisión médica está en curso.',
+};
 ---
 <!doctype html>
 <html lang={locale} dir={dir}>
@@ -81,6 +99,11 @@ const ogImage = Astro.props.ogImage ?? `${baseUrl}/og/default.jpg`;
   </head>
   <body class="bg-grain">
     <a class="drb-skiplink" href="#main">{t('common.skipToContent')}</a>
+    {showSoftLaunchBanner && (
+      <div class="soft-launch-banner" role="status" aria-live="polite">
+        <p>{softLaunchCopy[locale]}</p>
+      </div>
+    )}
     <div class="app-shell">
       <Header alternates={alternates} />
       <main id="main" class="app-main">
@@ -93,4 +116,13 @@ const ogImage = Astro.props.ogImage ?? `${baseUrl}/og/default.jpg`;
 <style is:global>
   /* Make sure the grain overlay sits behind page content */
   .app-shell { position: relative; z-index: 1; }
+  .soft-launch-banner {
+    background: var(--color-warning);
+    color: #fff;
+    padding: var(--space-2) var(--space-5);
+    text-align: center;
+    font-size: var(--type-meta);
+    line-height: 1.4;
+  }
+  .soft-launch-banner p { margin: 0; max-width: none; }
 </style>

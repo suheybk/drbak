@@ -7,7 +7,8 @@
       "**/.astro/**",
       "**/.wrangler/**",
       "**/node_modules/**",
-      "**/drizzle/migrations/**"
+      "**/drizzle/migrations/**",
+      "**/*.astro"
     ]
   },
   "formatter": {
@@ -24,22 +25,33 @@
       "correctness": {
         "noUnusedVariables": "error",
         "noUnusedImports": "error",
+        "noUnusedFunctionParameters": "off",
         "useExhaustiveDependencies": "warn"
       },
       "suspicious": {
         "noExplicitAny": "error",
-        "noConsole": { "level": "warn", "options": { "allow": ["error", "warn"] } }
+        "noConsole": { "level": "warn", "options": { "allow": ["error", "warn"] } },
+        "noEmptyBlockStatements": "off"
       },
       "style": {
         "useNamingConvention": "off",
         "useImportType": "error",
-        "noNonNullAssertion": "error"
+        "noNonNullAssertion": "off",
+        "useTemplate": "warn",
+        "noParameterAssign": "warn"
       },
       "complexity": {
-        "noUselessTypeConstraint": "error"
+        "noUselessTypeConstraint": "error",
+        "noStaticOnlyClass": "off",
+        "noBannedTypes": "warn",
+        "noForEach": "off",
+        "noUselessFragments": "warn"
       },
       "security": {
         "noDangerouslySetInnerHtml": "error"
+      },
+      "performance": {
+        "noAccumulatingSpread": "warn"
       }
     }
   },

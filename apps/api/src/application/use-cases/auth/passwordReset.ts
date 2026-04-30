@@ -13,6 +13,9 @@
  *     we currently revoke; user re-logs in everywhere).
  */
 
+import type { Locale } from '@dr-bak/contracts';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import { type CorrelationId, type UserId, asUserId } from '../../../domain/shared/ids.js';
 import type {
   AuditLogger,
   Clock,
@@ -24,9 +27,6 @@ import type {
   SessionStore,
   UserRepository,
 } from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import { asUserId, type CorrelationId, type UserId } from '../../../domain/shared/ids.js';
-import type { Locale } from '@dr-bak/contracts';
 
 // ─── Request ────────────────────────────────────────────────
 

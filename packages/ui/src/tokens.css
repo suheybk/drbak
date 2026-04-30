@@ -13,42 +13,42 @@
 
 :root {
   /* Brand */
-  --color-primary: #2F5D50;          /* deep clinical sage */
-  --color-primary-hover: #264C42;
-  --color-primary-pressed: #1F3F37;
-  --color-primary-on: #F4F1EA;       /* text on primary */
+  --color-primary: #2f5d50; /* deep clinical sage */
+  --color-primary-hover: #264c42;
+  --color-primary-pressed: #1f3f37;
+  --color-primary-on: #f4f1ea; /* text on primary */
 
-  --color-accent: #C46A3D;           /* warm clay — CTAs only */
-  --color-accent-hover: #B05D34;
-  --color-accent-on: #F4F1EA;
+  --color-accent: #c46a3d; /* warm clay — CTAs only */
+  --color-accent-hover: #b05d34;
+  --color-accent-on: #f4f1ea;
 
-  --color-surface: #F4F1EA;          /* warm paper */
-  --color-surface-elevated: #ECE7DB;
-  --color-surface-sunken: #DCD5C4;
+  --color-surface: #f4f1ea; /* warm paper */
+  --color-surface-elevated: #ece7db;
+  --color-surface-sunken: #dcd5c4;
 
-  --color-ink: #1A1F1C;
-  --color-ink-muted: #4D5852;
-  --color-ink-subtle: #6E7A73;
+  --color-ink: #1a1f1c;
+  --color-ink-muted: #4d5852;
+  --color-ink-subtle: #6e7a73;
 
   /* States */
-  --color-success: #2F6B4F;
-  --color-warning: #B0762A;
-  --color-danger: #8C2A1F;
-  --color-danger-on: #F4F1EA;
-  --color-info: #2A5A78;
+  --color-success: #2f6b4f;
+  --color-warning: #b0762a;
+  --color-danger: #8c2a1f;
+  --color-danger-on: #f4f1ea;
+  --color-info: #2a5a78;
 
   /* Borders */
-  --color-border: #C9C3B4;
-  --color-border-strong: #8E8775;
+  --color-border: #c9c3b4;
+  --color-border-strong: #8e8775;
 
   /* Type */
-  --font-display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
-  --font-body: 'Söhne', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-arabic: 'IBM Plex Sans Arabic', 'Söhne', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-display: "Fraunces", "Georgia", "Times New Roman", serif;
+  --font-body: "Söhne", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-arabic: "IBM Plex Sans Arabic", "Söhne", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --type-display-xl: clamp(2.5rem, 1.8rem + 3vw, 4.25rem);  /* hero */
-  --type-display-lg: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);  /* page title */
+  --type-display-xl: clamp(2.5rem, 1.8rem + 3vw, 4.25rem); /* hero */
+  --type-display-lg: clamp(2rem, 1.4rem + 2.4vw, 3.25rem); /* page title */
   --type-display-md: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem); /* section */
   --type-display-sm: 1.25rem;
   --type-body-lg: 1.125rem;
@@ -79,7 +79,7 @@
   /* Elevation */
   --shadow-sm: 0 1px 2px hsl(150 12% 8% / 0.06);
   --shadow-md: 0 4px 12px hsl(150 12% 8% / 0.08), 0 1px 3px hsl(150 12% 8% / 0.04);
-  --shadow-lg: 0 12px 32px hsl(150 12% 8% / 0.10), 0 4px 8px hsl(150 12% 8% / 0.04);
+  --shadow-lg: 0 12px 32px hsl(150 12% 8% / 0.1), 0 4px 8px hsl(150 12% 8% / 0.04);
 
   /* Focus — visible on every interactive surface */
   --focus-ring: 0 0 0 3px hsl(150 33% 28% / 0.5);
@@ -104,20 +104,20 @@
 }
 
 /* Locale-aware base font: Arabic uses IBM Plex Sans Arabic */
-html[lang='ar'] body {
+html[lang="ar"] body {
   font-family: var(--font-arabic);
 }
 
 /* Force Western digits in elements that show clinical numbers in AR.
  * Use `dir="ltr"` on the digit container to flip number rendering. */
 .digit-western {
-  font-feature-settings: 'lnum' 1;
+  font-feature-settings: "lnum" 1;
   unicode-bidi: isolate;
 }
 
 /* Subtle film-grain — 3% opacity, applied as a body overlay in apps/web */
 .bg-grain::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;

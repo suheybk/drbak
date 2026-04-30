@@ -123,9 +123,7 @@ export class DoctorDayLock {
     if (await this.state.storage.get<BookedRecord>(`${BOOKED_PREFIX}${input.startsAtMs}`)) {
       return null;
     }
-    const existing = await this.state.storage.get<HoldRecord>(
-      `${HOLD_PREFIX}${input.startsAtMs}`,
-    );
+    const existing = await this.state.storage.get<HoldRecord>(`${HOLD_PREFIX}${input.startsAtMs}`);
     if (existing && existing.expiresAtMs > input.nowMs) {
       return null;
     }
@@ -151,9 +149,7 @@ export class DoctorDayLock {
     if (await this.state.storage.get<BookedRecord>(`${BOOKED_PREFIX}${input.startsAtMs}`)) {
       return 'slot_taken';
     }
-    const hold = await this.state.storage.get<HoldRecord>(
-      `${HOLD_PREFIX}${input.startsAtMs}`,
-    );
+    const hold = await this.state.storage.get<HoldRecord>(`${HOLD_PREFIX}${input.startsAtMs}`);
     if (!hold || hold.token !== input.token) return 'hold_invalid';
     if (hold.expiresAtMs <= input.nowMs) {
       await this.state.storage.delete(`${HOLD_PREFIX}${input.startsAtMs}`);
@@ -176,9 +172,7 @@ export class DoctorDayLock {
     token: string;
     startsAtMs: number;
   }): Promise<{ ok: true }> {
-    const hold = await this.state.storage.get<HoldRecord>(
-      `${HOLD_PREFIX}${input.startsAtMs}`,
-    );
+    const hold = await this.state.storage.get<HoldRecord>(`${HOLD_PREFIX}${input.startsAtMs}`);
     if (hold && hold.token === input.token) {
       await this.state.storage.delete(`${HOLD_PREFIX}${input.startsAtMs}`);
     }

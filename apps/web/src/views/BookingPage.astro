@@ -1,10 +1,8 @@
 ---
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT, loadDict } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
+import { buildT, loadDict } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
-import BookingFlow from '~/islands/BookingFlow';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
 interface Props {
   locale: AppLocale;
@@ -25,7 +23,9 @@ if (!me.ok) {
   return Astro.redirect(`${routes.login(locale)}?next=${encodeURIComponent(routes.book(locale))}`);
 }
 
-const consentVersion = (import.meta.env as never as { CONSENT_DOCUMENT_VERSION?: string }).CONSENT_DOCUMENT_VERSION ?? 'v1.2026-04';
+const consentVersion =
+  (import.meta.env as never as { CONSENT_DOCUMENT_VERSION?: string }).CONSENT_DOCUMENT_VERSION ??
+  'v1.2026-04';
 ---
 <BaseLayout title={t('booking.title')} description={t('home.heroLead')} alternates={alternates}>
   <header class="app-section" style="margin-block-start: 0;">

@@ -3,10 +3,7 @@ import type { Instant } from '../../domain/shared/time.js';
 export interface PasswordHasher {
   hash(plaintext: string): Promise<string>;
   /** Returns true on match. Also returns whether the hash needs upgrading. */
-  verify(
-    plaintext: string,
-    storedHash: string,
-  ): Promise<{ ok: boolean; needsRehash: boolean }>;
+  verify(plaintext: string, storedHash: string): Promise<{ ok: boolean; needsRehash: boolean }>;
 }
 
 export interface JwtClaims {

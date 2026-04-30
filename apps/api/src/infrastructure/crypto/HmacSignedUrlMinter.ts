@@ -7,7 +7,7 @@
  */
 
 import type { SignedUrlMinter } from '../../application/ports/index.js';
-import { type Instant, instantFromIso, instantFromMillis } from '../../domain/shared/time.js';
+import { type Instant, instantFromIso } from '../../domain/shared/time.js';
 
 const enc = new TextEncoder();
 

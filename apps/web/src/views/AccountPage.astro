@@ -1,14 +1,13 @@
 ---
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT, loadDict } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
+import { buildT, loadDict } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
-import AppointmentActions from '~/islands/AppointmentActions';
-import DocumentUploader from '~/islands/DocumentUploader';
-import TmsScreeningForm from '~/islands/TmsScreeningForm';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
-interface Props { locale: AppLocale; request: Request }
+interface Props {
+  locale: AppLocale;
+  request: Request;
+}
 const { locale, request } = Astro.props;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.portal(l));
@@ -17,7 +16,9 @@ const dict = loadDict(locale);
 type Me = { userId: string; emailVerified: boolean; role: string };
 const me = await serverFetch<Me>(request, '/auth/me');
 if (!me.ok) {
-  return Astro.redirect(`${routes.login(locale)}?next=${encodeURIComponent(routes.portal(locale))}`);
+  return Astro.redirect(
+    `${routes.login(locale)}?next=${encodeURIComponent(routes.portal(locale))}`,
+  );
 }
 
 type Appt = {
@@ -53,7 +54,13 @@ const fmtTime = (iso: string) =>
   }).format(new Date(iso));
 
 const isFuture = (iso: string) => new Date(iso).getTime() > Date.now();
-const TERMINAL = new Set(['cancelled_by_patient', 'cancelled_by_clinic', 'no_show', 'completed', 'late_cancellation']);
+const TERMINAL = new Set([
+  'cancelled_by_patient',
+  'cancelled_by_clinic',
+  'no_show',
+  'completed',
+  'late_cancellation',
+]);
 ---
 <BaseLayout title={t('portal.title')} description={t('portal.title')} alternates={alternates}>
   <header class="app-section" style="margin-block-start: 0;">

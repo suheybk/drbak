@@ -34,9 +34,7 @@ export const routes = {
 } as const;
 
 /** Build the locale-switcher hrefs for the current page. */
-export const localeHrefsFor = (
-  builder: (l: Locale) => string,
-): Record<Locale, string> => ({
+export const localeHrefsFor = (builder: (l: Locale) => string): Record<Locale, string> => ({
   tr: builder('tr'),
   ar: builder('ar'),
   en: builder('en'),

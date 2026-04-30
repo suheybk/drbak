@@ -1,3 +1,5 @@
+import type { Locale } from '@dr-bak/i18n-keys';
+import { Banner, Button, Checkbox, Field, TextInput, useTranslator } from '@dr-bak/ui';
 /**
  * Login + register form. Single component, mode prop selects which fields.
  *
@@ -7,8 +9,6 @@
  *    is enqueued by the API)
  */
 import { useState } from 'react';
-import { Banner, Button, Checkbox, Field, TextInput, useTranslator } from '@dr-bak/ui';
-import type { Locale } from '@dr-bak/i18n-keys';
 import { apiFetch, errorMessageFor } from '~/lib/api';
 
 type Mode = 'login' | 'register';
@@ -22,7 +22,14 @@ interface Props {
   oauthBeginPath: string;
 }
 
-export default function AuthForm({ locale, dict, mode, next, consentDocumentVersion, oauthBeginPath }: Props) {
+export default function AuthForm({
+  locale,
+  dict,
+  mode,
+  next,
+  consentDocumentVersion,
+  oauthBeginPath,
+}: Props) {
   const t = useTranslator(dict, locale);
 
   const [email, setEmail] = useState('');
@@ -49,7 +56,7 @@ export default function AuthForm({ locale, dict, mode, next, consentDocumentVers
       });
       setSubmitting(false);
       if (!r.ok) return setError(errorMessageFor(r.error, t as never));
-      window.location.href = next ?? `/${locale === 'tr' ? '' : locale + '/'}account`;
+      window.location.href = next ?? `/${locale === 'tr' ? '' : `${locale}/`}account`;
       return;
     }
 

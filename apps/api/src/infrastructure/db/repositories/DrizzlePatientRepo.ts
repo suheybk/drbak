@@ -1,16 +1,11 @@
+import type { Locale } from '@dr-bak/contracts';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { PatientRepository } from '../../../application/ports/index.js';
 import { Patient } from '../../../domain/patient/Patient.js';
-import {
-  asPatientId,
-  asUserId,
-  type PatientId,
-  type UserId,
-} from '../../../domain/shared/ids.js';
+import { type PatientId, type UserId, asPatientId, asUserId } from '../../../domain/shared/ids.js';
 import { instantFromMillis } from '../../../domain/shared/time.js';
 import type { Db } from '../client.js';
 import { patients, users } from '../schema.js';
-import type { Locale } from '@dr-bak/contracts';
 
 const toPatient = (
   row: typeof patients.$inferSelect,
@@ -30,9 +25,7 @@ const toPatient = (
     countryIso2: row.countryIso2,
     emergencyContactName: row.emergencyContactName,
     emergencyContactPhoneE164: row.emergencyContactPhoneE164,
-    guardianPatientId: row.guardianPatientId
-      ? asPatientId(row.guardianPatientId)
-      : null,
+    guardianPatientId: row.guardianPatientId ? asPatientId(row.guardianPatientId) : null,
     emailVerifiedAt: user.emailVerifiedAt
       ? instantFromMillis(user.emailVerifiedAt.getTime())
       : null,

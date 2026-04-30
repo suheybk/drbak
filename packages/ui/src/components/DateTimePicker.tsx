@@ -111,6 +111,7 @@ export const DateTimePicker = ({
             <button
               key={ymd}
               type="button"
+              // biome-ignore lint/a11y/useSemanticElements: visual radio implemented as button so the picker can carry rich children (weekday/dom/month layout)
               role="radio"
               aria-checked={selected}
               className={clsx('drb-dtp__day', { 'drb-dtp__day--selected': selected })}
@@ -137,6 +138,7 @@ export const DateTimePicker = ({
               <li key={s.id}>
                 <button
                   type="button"
+                  // biome-ignore lint/a11y/useSemanticElements: visual radio implemented as button to allow disabled slots and custom keyboard handling
                   role="radio"
                   aria-checked={s.id === selectedSlotId}
                   disabled={!s.available}

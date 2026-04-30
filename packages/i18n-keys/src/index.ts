@@ -36,10 +36,7 @@ export const isRtl = (l: Locale): boolean => RTL_LOCALES.has(l);
 export const dirOf = (l: Locale): 'rtl' | 'ltr' => (isRtl(l) ? 'rtl' : 'ltr');
 
 /** Resolve a dotted key against a locale dictionary. Falls back to the key itself. */
-export const resolveKey = (
-  dict: Record<string, unknown>,
-  key: string,
-): string => {
+export const resolveKey = (dict: Record<string, unknown>, key: string): string => {
   const parts = key.split('.');
   let cur: unknown = dict;
   for (const p of parts) {
@@ -53,18 +50,11 @@ export const resolveKey = (
 };
 
 /** Tiny `{name}` interpolator — no MessageFormat dep on the edge. */
-export const interpolate = (
-  template: string,
-  vars: Record<string, string | number> = {},
-): string =>
-  template.replace(/\{(\w+)\}/g, (_, name) =>
-    name in vars ? String(vars[name]) : `{${name}}`,
-  );
+export const interpolate = (template: string, vars: Record<string, string | number> = {}): string =>
+  template.replace(/\{(\w+)\}/g, (_, name) => (name in vars ? String(vars[name]) : `{${name}}`));
 
 /** AR uses Western digits in clinical contexts (dose, date, time). Force Latin. */
 export const forceWesternDigits = (s: string): string =>
-  s.replace(/[٠-٩]/g, (d) =>
-    String.fromCharCode(d.charCodeAt(0) - 0x0660 + 0x30),
-  );
+  s.replace(/[٠-٩]/g, (d) => String.fromCharCode(d.charCodeAt(0) - 0x0660 + 0x30));
 
 export type Dictionary = typeof tr;

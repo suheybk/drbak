@@ -10,9 +10,9 @@
  */
 
 import type { MiddlewareHandler } from 'hono';
-import type { Container } from '../../../composition/container.js';
-import type { TokenIssuer, UserRepository, Clock } from '../../../application/ports/index.js';
+import type { Clock, TokenIssuer, UserRepository } from '../../../application/ports/index.js';
 import { Tx } from '../../../composition/buildContainer.js';
+import type { Container } from '../../../composition/container.js';
 import { token } from '../../../composition/container.js';
 
 export interface AuthContext {
@@ -25,7 +25,8 @@ export interface AuthContext {
 
 const COOKIE_NAME = '__Secure-drbak_at';
 
-export const requireAuth = (allowedRoles?: ReadonlyArray<AuthContext['role']>): MiddlewareHandler =>
+export const requireAuth =
+  (allowedRoles?: ReadonlyArray<AuthContext['role']>): MiddlewareHandler =>
   async (c, next) => {
     const container = c.get('container') as Container;
     const issuer = container.resolve<TokenIssuer>(token('TokenIssuer'));
@@ -33,16 +34,14 @@ export const requireAuth = (allowedRoles?: ReadonlyArray<AuthContext['role']>): 
     const clock = container.resolve<Clock>(token('Clock') as never) ?? null;
 
     const bearer = c.req.header('authorization');
-    const tokenStr =
-      bearer?.startsWith('Bearer ') ? bearer.slice(7) : c.req.header('cookie')?.match(new RegExp(`${COOKIE_NAME}=([^;]+)`))?.[1];
+    const tokenStr = bearer?.startsWith('Bearer ')
+      ? bearer.slice(7)
+      : c.req.header('cookie')?.match(new RegExp(`${COOKIE_NAME}=([^;]+)`))?.[1];
     if (!tokenStr) {
       return c.json({ error: { code: 'TOKEN_INVALID', message: 'Missing token.' } }, 401);
     }
 
-    const claims = await issuer.verifyAccess(
-      tokenStr,
-      clock ? clock.now() : (Date.now() as never),
-    );
+    const claims = await issuer.verifyAccess(tokenStr, clock ? clock.now() : (Date.now() as never));
     if (!claims) {
       return c.json({ error: { code: 'TOKEN_INVALID', message: 'Invalid token.' } }, 401);
     }

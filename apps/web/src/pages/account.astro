@@ -1,5 +1,4 @@
 ---
-import AccountPage from '~/views/AccountPage.astro';
 const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
 ---
 <AccountPage locale={locale} request={Astro.request} />

@@ -6,15 +6,15 @@ import type {
 import type { DeliveryMode } from '../../../domain/appointment/Appointment.js';
 import type { DoctorId, ServiceId } from '../../../domain/shared/ids.js';
 import {
+  type Instant,
   addMinutes,
   durationMinutes,
-  type Instant,
   instantFromMillis,
   isBefore,
 } from '../../../domain/shared/time.js';
+import type { SlotLockClient } from '../../do/SlotLockClient.js';
 import type { Db } from '../client.js';
 import { services, slotBlackouts, slotOverrides, slotTemplates } from '../schema.js';
-import type { SlotLockClient } from '../../do/SlotLockClient.js';
 
 const TZ_OFFSET_MIN = 180; // Europe/Istanbul
 
@@ -82,17 +82,16 @@ export class DrizzleAvailabilityProjector implements AvailabilityProjector {
     for (const t of tmplsForDay) {
       let cursor = localToInstant(input.dateYmd, t.startTime);
       const stop = localToInstant(input.dateYmd, t.endTime);
-      while (isBefore(addMinutes(cursor, durationMinutes(t.slotDurationMinutes)), stop) ||
-             addMinutes(cursor, durationMinutes(t.slotDurationMinutes)) === stop) {
+      while (
+        isBefore(addMinutes(cursor, durationMinutes(t.slotDurationMinutes)), stop) ||
+        addMinutes(cursor, durationMinutes(t.slotDurationMinutes)) === stop
+      ) {
         raw.push({
           startsAt: cursor,
           endsAt: addMinutes(cursor, durationMinutes(t.slotDurationMinutes)),
           available: true,
         });
-        cursor = addMinutes(
-          cursor,
-          durationMinutes(t.slotDurationMinutes + t.bufferMinutes),
-        );
+        cursor = addMinutes(cursor, durationMinutes(t.slotDurationMinutes + t.bufferMinutes));
       }
     }
 
@@ -130,8 +129,8 @@ export class DrizzleAvailabilityProjector implements AvailabilityProjector {
         ),
       );
     const inBlackout = (s: Instant): boolean =>
-      blackouts.some((b) =>
-        (s as number) >= b.startsAt.getTime() && (s as number) < b.endsAt.getTime(),
+      blackouts.some(
+        (b) => (s as number) >= b.startsAt.getTime() && (s as number) < b.endsAt.getTime(),
       );
 
     // Pull DO projection for current bookings + holds
@@ -141,10 +140,13 @@ export class DrizzleAvailabilityProjector implements AvailabilityProjector {
 
     return raw
       .map((s) => {
-        if (isBefore(s.startsAt, input.now)) return { ...s, available: false, reason: 'past' as const };
+        if (isBefore(s.startsAt, input.now))
+          return { ...s, available: false, reason: 'past' as const };
         if (inBlackout(s.startsAt)) return { ...s, available: false, reason: 'blackout' as const };
-        if (bookedSet.has(s.startsAt as number)) return { ...s, available: false, reason: 'booked' as const };
-        if (heldSet.has(s.startsAt as number)) return { ...s, available: false, reason: 'held' as const };
+        if (bookedSet.has(s.startsAt as number))
+          return { ...s, available: false, reason: 'booked' as const };
+        if (heldSet.has(s.startsAt as number))
+          return { ...s, available: false, reason: 'held' as const };
         return s;
       })
       .sort((a, b) => (a.startsAt as number) - (b.startsAt as number));

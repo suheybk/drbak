@@ -1,14 +1,8 @@
 ---
-/**
- * Services index — fetches the full service list from /api/v1/public/services
- * and renders a grid. The card label uses the localised service title returned
- * by the API (the API joins service_translations on the request locale).
- */
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
 import { serverFetch } from '~/lib/api';
+import { buildT } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
 interface Props {
   locale: AppLocale;
@@ -29,10 +23,7 @@ type ServiceRow = {
   requiresTmsScreening: boolean;
 };
 
-const r = await serverFetch<{ items: ServiceRow[] }>(
-  request,
-  `/public/services?locale=${locale}`,
-);
+const r = await serverFetch<{ items: ServiceRow[] }>(request, `/public/services?locale=${locale}`);
 const services: ServiceRow[] = r.ok ? r.value.items : [];
 ---
 <BaseLayout title={t('services.title')} description={t('services.lead')} alternates={alternates}>

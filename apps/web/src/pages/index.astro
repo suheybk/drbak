@@ -1,20 +1,7 @@
 ---
-/**
- * Home page — Turkish (default locale, unprefixed).
- *
- * The page deliberately keeps the visible content shallow:
- *  - hero with two CTAs
- *  - six brand pillars
- *  - the marquee TMS service block
- *  - testimonials (stub — populated as records arrive)
- *
- * Heavy clinical copy lives in service + condition detail pages.
- */
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
 import { buildT } from '~/lib/i18n';
-import { routes, localeHrefsFor } from '~/lib/routes';
-import { DoctorNote } from '@dr-bak/ui';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
 
 const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
 const t = buildT(locale);

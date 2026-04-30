@@ -24,9 +24,8 @@ export const Field = ({
   const inputId = htmlFor ?? `field-${reactId}`;
   const errorId = `${inputId}-error`;
   const helpId = `${inputId}-help`;
-  const describedBy = [error ? errorId : null, help ? helpId : null]
-    .filter(Boolean)
-    .join(' ') || undefined;
+  const describedBy =
+    [error ? errorId : null, help ? helpId : null].filter(Boolean).join(' ') || undefined;
 
   return (
     <div className={clsx('drb-field', { 'drb-field--invalid': !!error }, className)}>
@@ -53,7 +52,8 @@ export const Label = ({
     {children}
     {required ? (
       <span className="drb-field__req" aria-hidden="true">
-        {' '}*
+        {' '}
+        *
       </span>
     ) : null}
   </label>

@@ -19,9 +19,14 @@ DEFAULT_LOCALE = "tr"
 SUPPORTED_LOCALES = "tr,ar,en,fr,es"
 CONTACT_EMAIL = "info@uzmdroguzbak.com"
 CONTACT_PHONE_E164 = "+905300874391"
+# SOFT_LAUNCH = "1" until medical-translator review lands for AR/FR/ES.
+# When the reviewer signs off, set to "0" or unset entirely. The banner
+# only renders when this is exactly "1" AND the locale is ar/fr/es.
+SOFT_LAUNCH = "1"
 
 # ─── Preview (local dev / staging) ──────────────────
 [env.preview.vars]
 ENVIRONMENT = "preview"
 PUBLIC_API_BASE = "https://staging-api.uzmdroguzbak.com/api/v1"
 PUBLIC_BASE_URL = "https://staging.uzmdroguzbak.com"
+SOFT_LAUNCH = "1"

@@ -7,7 +7,7 @@ import type { APIRoute } from 'astro';
 import { LOCALES } from '~/lib/locales';
 import { routes } from '~/lib/routes';
 
-const TOP = (l: typeof LOCALES[number]) => [
+const TOP = (l: (typeof LOCALES)[number]) => [
   routes.home(l),
   routes.services(l),
   routes.conditions(l),

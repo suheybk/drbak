@@ -23,9 +23,7 @@ export const ContentEntryDetailSchema = ContentEntrySummarySchema.extend({
   metaDescription: z.string().nullable(),
   schemaJsonLd: z.record(z.unknown()).nullable(),
   // Reciprocal locale slugs for hreflang
-  alternateLocales: z.array(
-    z.object({ locale: LocaleSchema, slugLocalised: z.string() }),
-  ),
+  alternateLocales: z.array(z.object({ locale: LocaleSchema, slugLocalised: z.string() })),
   relatedConditionSlugs: z.array(z.string()),
   relatedServiceSlugs: z.array(z.string()),
 });

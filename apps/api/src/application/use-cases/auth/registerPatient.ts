@@ -12,6 +12,17 @@
  *   7. Audit + (return token to caller; route enqueues the verify email).
  */
 
+import type { Locale } from '@dr-bak/contracts';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import {
+  type CorrelationId,
+  type UserId,
+  asConsentRecordId,
+  asPatientId,
+  asUserId,
+} from '../../../domain/shared/ids.js';
+import type { Db } from '../../../infrastructure/db/client.js';
+import { patients } from '../../../infrastructure/db/schema.js';
 import type {
   AuditLogger,
   Clock,
@@ -22,17 +33,6 @@ import type {
   RandomTokenGenerator,
   UserRepository,
 } from '../../ports/index.js';
-import {
-  asConsentRecordId,
-  asPatientId,
-  asUserId,
-  type CorrelationId,
-  type UserId,
-} from '../../../domain/shared/ids.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import type { Locale } from '@dr-bak/contracts';
-import type { Db } from '../../../infrastructure/db/client.js';
-import { patients } from '../../../infrastructure/db/schema.js';
 
 export interface RegisterPatientDeps {
   readonly db: Db; // Patient profile insert lives here; outside the userRepo intentionally
@@ -72,9 +72,7 @@ export interface RegisterPatientOutput {
 
 export const registerPatient =
   (deps: RegisterPatientDeps) =>
-  async (
-    input: RegisterPatientInput,
-  ): Promise<Result<RegisterPatientOutput, DomainError>> => {
+  async (input: RegisterPatientInput): Promise<Result<RegisterPatientOutput, DomainError>> => {
     const now = deps.clock.now();
     const emailNorm = input.email.trim().toLowerCase();
 
@@ -116,10 +114,9 @@ export const registerPatient =
     });
 
     // Initial consents
-    const grantsToRecord: Array<'appointment_booking' | 'health_data_processing' | 'marketing_communications'> = [
-      'appointment_booking',
-      'health_data_processing',
-    ];
+    const grantsToRecord: Array<
+      'appointment_booking' | 'health_data_processing' | 'marketing_communications'
+    > = ['appointment_booking', 'health_data_processing'];
     if (input.consents.marketingCommunications === true) {
       grantsToRecord.push('marketing_communications');
     }

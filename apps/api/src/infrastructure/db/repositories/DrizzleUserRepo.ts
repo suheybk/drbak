@@ -1,26 +1,24 @@
+import type { Locale } from '@dr-bak/contracts';
 import { and, eq, isNull } from 'drizzle-orm';
+import { ulid } from 'ulid';
 import type {
   CreateUserInput,
   UserRecord,
   UserRepository,
   UserRole,
 } from '../../../application/ports/index.js';
-import type { Locale } from '@dr-bak/contracts';
-import type { Instant } from '../../../domain/shared/time.js';
-import { instantFromMillis } from '../../../domain/shared/time.js';
 import type { UserId } from '../../../domain/shared/ids.js';
 import { asUserId } from '../../../domain/shared/ids.js';
+import type { Instant } from '../../../domain/shared/time.js';
+import { instantFromMillis } from '../../../domain/shared/time.js';
 import type { Db } from '../client.js';
 import { oauthAccounts, users } from '../schema.js';
-import { ulid } from 'ulid';
 
 const toUserRecord = (row: typeof users.$inferSelect): UserRecord => ({
   id: asUserId(row.id),
   email: row.email,
   emailNormalized: row.emailNormalized,
-  emailVerifiedAt: row.emailVerifiedAt
-    ? instantFromMillis(row.emailVerifiedAt.getTime())
-    : null,
+  emailVerifiedAt: row.emailVerifiedAt ? instantFromMillis(row.emailVerifiedAt.getTime()) : null,
   passwordHash: row.passwordHash,
   role: row.role as UserRole,
   locale: row.locale as Locale,
@@ -65,9 +63,7 @@ export class DrizzleUserRepo implements UserRepository {
         passwordHash: input.passwordHash,
         role: input.role,
         locale: input.locale,
-        emailVerifiedAt: input.emailVerifiedAt
-          ? new Date(input.emailVerifiedAt as number)
-          : null,
+        emailVerifiedAt: input.emailVerifiedAt ? new Date(input.emailVerifiedAt as number) : null,
         createdAt: new Date(input.now as number),
         updatedAt: new Date(input.now as number),
       })

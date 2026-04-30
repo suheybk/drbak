@@ -2,6 +2,11 @@
  * Google OAuth use cases — begin + complete with PKCE + account-linking guard.
  */
 
+import type { Locale } from '@dr-bak/contracts';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import { type CorrelationId, type UserId, asUserId } from '../../../domain/shared/ids.js';
+import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
+import type { GoogleOauthClient } from '../../../infrastructure/oauth/GoogleOauthClient.js';
 import type {
   AuditLogger,
   Clock,
@@ -12,15 +17,6 @@ import type {
   TokenIssuer,
   UserRepository,
 } from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import {
-  asUserId,
-  type CorrelationId,
-  type UserId,
-} from '../../../domain/shared/ids.js';
-import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
-import type { Locale } from '@dr-bak/contracts';
-import type { GoogleOauthClient } from '../../../infrastructure/oauth/GoogleOauthClient.js';
 
 // ─── Begin ──────────────────────────────────────────────────
 
@@ -109,10 +105,18 @@ export interface CompleteGoogleOauthOutput {
 
 export const completeGoogleOauth =
   (deps: CompleteGoogleOauthDeps) =>
-  async (input: CompleteGoogleOauthInput): Promise<Result<CompleteGoogleOauthOutput, DomainError>> => {
+  async (
+    input: CompleteGoogleOauthInput,
+  ): Promise<Result<CompleteGoogleOauthOutput, DomainError>> => {
     const stateRaw = await deps.tokens.consume({ purpose: 'oauth_state', token: input.state });
     if (!stateRaw) {
-      return err(new DomainError({ code: 'OAUTH_STATE_INVALID', message: 'OAuth state invalid or expired.', httpStatus: 400 }));
+      return err(
+        new DomainError({
+          code: 'OAUTH_STATE_INVALID',
+          message: 'OAuth state invalid or expired.',
+          httpStatus: 400,
+        }),
+      );
     }
     const stateData = JSON.parse(stateRaw) as {
       codeVerifier: string;
@@ -121,7 +125,7 @@ export const completeGoogleOauth =
     };
 
     const redirectUri = `${deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.')}/api/v1/auth/oauth/google/callback`;
-    let claims;
+    let claims: { sub: string; email: string; email_verified?: boolean; name?: string };
     try {
       const { idToken } = await deps.google.exchangeCode({
         code: input.code,
@@ -130,7 +134,13 @@ export const completeGoogleOauth =
       });
       claims = await deps.google.verifyIdToken(idToken, deps.clock.now() as number);
     } catch {
-      return err(new DomainError({ code: 'OAUTH_STATE_INVALID', message: 'OAuth verification failed.', httpStatus: 400 }));
+      return err(
+        new DomainError({
+          code: 'OAUTH_STATE_INVALID',
+          message: 'OAuth verification failed.',
+          httpStatus: 400,
+        }),
+      );
     }
 
     const now = deps.clock.now();
@@ -148,7 +158,8 @@ export const completeGoogleOauth =
         return err(
           new DomainError({
             code: 'OAUTH_ACCOUNT_MISMATCH',
-            message: 'An account with this email already exists. Sign in with password to link Google.',
+            message:
+              'An account with this email already exists. Sign in with password to link Google.',
             httpStatus: 409,
             details: { existingUserId: byEmail.id },
           }),
@@ -182,7 +193,9 @@ export const completeGoogleOauth =
       now,
     );
     const refreshToken = deps.random.generate(32);
-    const refreshExp = instantFromMillis((now as number) + deps.env.TOKEN_REFRESH_TTL_SECONDS * 1000);
+    const refreshExp = instantFromMillis(
+      (now as number) + deps.env.TOKEN_REFRESH_TTL_SECONDS * 1000,
+    );
     await deps.sessions.issueRoot({
       token: refreshToken,
       userId: user.id,

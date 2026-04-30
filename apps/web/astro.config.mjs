@@ -1,9 +1,9 @@
-import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
 import cloudflare from '@astrojs/cloudflare';
+import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'astro/config';
 
-import { LOCALES, DEFAULT_LOCALE } from './src/lib/locales.mjs';
+import { DEFAULT_LOCALE, LOCALES } from './src/lib/locales.mjs';
 
 /**
  * Astro config — SSR on Cloudflare Workers via the Pages adapter.

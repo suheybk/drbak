@@ -4,6 +4,10 @@
  * On reuse-after-grace: revoke whole family + 401.
  */
 
+import type { Locale } from '@dr-bak/contracts';
+import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
+import type { UserId } from '../../../domain/shared/ids.js';
+import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
 import type {
   Clock,
   RandomTokenGenerator,
@@ -11,10 +15,6 @@ import type {
   TokenIssuer,
   UserRepository,
 } from '../../ports/index.js';
-import { DomainError, err, ok, type Result } from '../../../domain/shared/errors.js';
-import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
-import type { UserId } from '../../../domain/shared/ids.js';
-import type { Locale } from '@dr-bak/contracts';
 
 export interface RefreshDeps {
   readonly clock: Clock;
@@ -47,9 +47,21 @@ export const refreshSession =
 
     switch (consumed.kind) {
       case 'unknown':
-        return err(new DomainError({ code: 'TOKEN_INVALID', message: 'Refresh token unknown.', httpStatus: 401 }));
+        return err(
+          new DomainError({
+            code: 'TOKEN_INVALID',
+            message: 'Refresh token unknown.',
+            httpStatus: 401,
+          }),
+        );
       case 'expired':
-        return err(new DomainError({ code: 'TOKEN_EXPIRED', message: 'Refresh token expired.', httpStatus: 401 }));
+        return err(
+          new DomainError({
+            code: 'TOKEN_EXPIRED',
+            message: 'Refresh token expired.',
+            httpStatus: 401,
+          }),
+        );
       case 'reuse_detected':
         return err(
           new DomainError({
@@ -64,7 +76,13 @@ export const refreshSession =
     const user = await deps.users.findById(r.userId);
     if (!user || user.deletedAt) {
       await deps.sessions.revokeFamily(r.familyId);
-      return err(new DomainError({ code: 'TOKEN_INVALID', message: 'Account no longer active.', httpStatus: 401 }));
+      return err(
+        new DomainError({
+          code: 'TOKEN_INVALID',
+          message: 'Account no longer active.',
+          httpStatus: 401,
+        }),
+      );
     }
 
     const newRefresh = deps.random.generate(32);
