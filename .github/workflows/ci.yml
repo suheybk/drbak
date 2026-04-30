@@ -133,7 +133,7 @@ jobs:
           PUBLIC_API_BASE: http://127.0.0.1:8787/api/v1
       - name: Upload trace on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-trace
           path: apps/web/playwright-report/
@@ -156,7 +156,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dr-bak/web build
       - name: Upload dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-dist-${{ github.sha }}
           path: apps/web/dist/
