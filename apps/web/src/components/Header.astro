@@ -21,9 +21,19 @@ const current = Astro.url.pathname.replace(/\/$/, '');
 ---
 <header class="app-header">
   <div class="app-header__inner">
-    <a class="app-header__brand" href={routes.home(locale)}>
-      <strong>{t('brand.doctor')}</strong>
-      <small>{t('brand.clinic')}</small>
+    <a class="app-header__brand" href={routes.home(locale)} aria-label={t('brand.doctor')}>
+      <img
+        class="app-header__logo"
+        src="/images/drbak-logo.png"
+        alt=""
+        width="220"
+        height="65"
+        decoding="async"
+      />
+      <span class="app-header__brand-text">
+        <strong>{t('brand.doctor')}</strong>
+        <small>{t('brand.clinic')}</small>
+      </span>
     </a>
     <nav class="app-nav" aria-label={t('nav.home')}>
       {navLinks.map((l) => {

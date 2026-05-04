@@ -2,6 +2,7 @@
 import { DoctorNote } from '@dr-bak/ui';
 import AboutPreviewSection from '~/components/AboutPreviewSection.astro';
 import EvdeHizmetCallout from '~/components/EvdeHizmetCallout.astro';
+import HeroWithVideo from '~/components/HeroWithVideo.astro';
 import HizliRandevuSection from '~/components/HizliRandevuSection.astro';
 import NumberedServicesSection from '~/components/NumberedServicesSection.astro';
 import StatsStrip from '~/components/StatsStrip.astro';
@@ -26,18 +27,7 @@ const alternates = localeHrefsFor((l) => routes.home(l));
   description={t('home.heroLead')}
   alternates={alternates}
 >
-  <section class="hero">
-    <h1 class="hero__title">{t('home.heroTitle')}</h1>
-    <p class="hero__lead">{t('home.heroLead')}</p>
-    <div class="hero__ctas">
-      <a class="drb-btn drb-btn--primary drb-btn--lg" href={routes.book(locale)}>
-        {t('home.heroCta')}
-      </a>
-      <a class="drb-btn drb-btn--secondary drb-btn--lg" href={routes.services(locale)}>
-        {t('home.heroSecondaryCta')}
-      </a>
-    </div>
-  </section>
+  <HeroWithVideo />
 
   <AboutPreviewSection />
 

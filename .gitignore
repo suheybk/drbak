@@ -40,3 +40,9 @@ test-results/
 # generated
 apps/api/src/infrastructure/db/__generated__/
 docs/openapi.yaml
+
+# Static scrape of the existing WordPress site at uzmdroguzbak.com.
+# Used as a reference + asset source while migrating to the new build;
+# specific files are copied into apps/web/public/ as needed. The folder
+# itself is not part of the new codebase.
+uzmdroguzbak-com/

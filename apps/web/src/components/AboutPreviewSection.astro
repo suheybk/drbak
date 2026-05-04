@@ -26,8 +26,15 @@ const points = [t('home.aboutPoint1'), t('home.aboutPoint2'), t('home.aboutPoint
 ---
 <section class="about-preview" aria-labelledby="about-preview-heading">
   <div class="about-preview__media">
-    <div class="about-preview__photo" aria-hidden="true">
-      <span class="about-preview__photo-fallback">{t('brand.doctor')}</span>
+    <div class="about-preview__photo">
+      <img
+        src="/images/dr-oguz-bak-profile.png"
+        alt={t('brand.doctor')}
+        width="640"
+        height="800"
+        loading="lazy"
+        decoding="async"
+      />
     </div>
     <div class="about-preview__namecard">
       <p class="about-preview__namecard-name">{t('brand.doctor')}</p>

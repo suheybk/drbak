@@ -1,0 +1,53 @@
+---
+/**
+ * Home-page hero with side-by-side text + video.
+ *
+ * Mirrors the live-site hero pattern: copy + CTAs on the left, the
+ * doctor's hero video on the right. The video is muted-autoplay-loop
+ * (browser-permitted everywhere) with `playsinline` so it doesn't
+ * fullscreen on mobile, and a poster image for the pre-load state.
+ *
+ * The video file lives in `apps/web/public/media/hero-vid.mp4` and is
+ * sourced from the existing live site (~9 MB). For best LCP we'd
+ * eventually transcode to a smaller .webm + add a `<source>` for AV1,
+ * but the .mp4 alone works on all current browsers.
+ *
+ * Falls back gracefully — if the video can't load, the poster image
+ * (hero-vid-cover.jpg) shows through.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+---
+<section class="hero-video">
+  <div class="hero-video__copy">
+    <p class="hero-video__kicker">{t('brand.doctor')}</p>
+    <h1 class="hero-video__title">{t('home.heroTitle')}</h1>
+    <p class="hero-video__lead">{t('home.heroLead')}</p>
+    <div class="hero-video__ctas">
+      <a class="drb-btn drb-btn--accent drb-btn--lg" href={routes.book(locale)}>
+        {t('home.heroCta')}
+      </a>
+      <a class="drb-btn drb-btn--secondary drb-btn--lg" href={routes.services(locale)}>
+        {t('home.heroSecondaryCta')}
+      </a>
+    </div>
+  </div>
+  <div class="hero-video__media">
+    <video
+      class="hero-video__video"
+      poster="/images/hero-vid-cover.jpg"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    >
+      <source src="/media/hero-vid.mp4" type="video/mp4" />
+    </video>
+  </div>
+</section>
