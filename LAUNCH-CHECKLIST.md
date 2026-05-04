@@ -168,6 +168,131 @@ Post-launch plan:
 
 Per `marketing/seo-plan.md` §9 — only after the first 21 hand-written pages start ranking. Plan, don't build yet.
 
+### C7. Online payment system (iyzico) — booked at owner sign-off 2026-05-04
+
+Patient pays the full appointment fee at booking via iyzico (TR card payments,
+Apple Pay, Google Pay). Approved decisions:
+
+- **Provider:** iyzico for TRY (default). Stripe deferred — only consider if
+  EUR/USD medical-tourism telehealth volume justifies the second integration.
+- **Payment timing:** full upfront. Patient confirms slot → sees price modal →
+  pays → appointment status flips from `awaiting_payment` to `confirmed` on
+  webhook capture.
+- **Apple Pay + Google Pay:** enabled at launch (iyzico default once merchant
+  account is approved).
+- **Refund deadline:** **>48h before slot** for full refund. Within 48h, no
+  refund — the doctor's calendar is locked at that point and the slot can't
+  be reliably re-filled. NOTE: this differs from the `cancel/reschedule
+  window: 24h` locked decision in `dr-bak-locked-decisions.md`. Resolution
+  proposed (pending owner confirm): **align both at 48h** — cancellation,
+  reschedule, and refund all use the same 48h cutoff. Simpler patient mental
+  model. Update `APPOINTMENT_RESCHEDULE_WINDOW_HOURS` from 24 to 48 in
+  `apps/api/wrangler.toml`.
+
+Implementation gates (in this order):
+
+1. [ ] Owner signs up at iyzico merchant portal. Required documents per the
+       routine fired 2026-05-09 (trig_01LTpWT5rnf6KYpSGVCdqRkP):
+       - Doctor's diploma (Sağlık Bakanlığı approved)
+       - Klinik işyeri ruhsatı
+       - Vergi levhası
+       - T.C. kimlik
+       - İmza sirküleri
+       - IBAN
+       - Live https URL with KVKK + iletişim + iade-koşulları pages
+       Approval: 3–7 business days.
+2. [ ] iyzico sends `IYZICO_API_KEY` + `IYZICO_SECRET_KEY` (sandbox + production
+       keys, separate). Owner pastes into `apps/api/.dev.vars`. Sandbox first.
+3. [ ] Engineering implements:
+       - `apps/api/src/domain/payment/` — Payment aggregate, Money value-object
+         (kuruş integers, never floats), PaymentStatus state machine
+       - `apps/api/src/application/ports/PaymentGateway.ts` — interface
+       - `apps/api/src/infrastructure/payments/IyzicoGateway.ts` — adapter
+       - `apps/api/src/infrastructure/payments/webhooks/iyzico.ts` — HMAC-verify
+       - `apps/api/src/application/use-cases/booking/createAppointment.ts`
+         extended with `awaiting_payment` status
+       - `apps/api/src/application/use-cases/booking/refundCancellation.ts` —
+         48h refund policy + gateway refund call
+       - DB migration `0005_payments.sql`: `payments` + `payment_refunds`
+         tables
+       - Booking flow Step 6: iyzico hosted form in iframe (DO slot-hold TTL
+         extended 5min → 10min for 3DS bank redirect)
+       - Web `/iade-kosullari` page (Refund Policy) — required for iyzico
+         approval
+       - Patient portal: payment receipt download, refund status visibility
+       - Admin: payment list, manual refund button (goodwill cases)
+4. [ ] Verify in iyzico sandbox: 5 test cards (success / 3DS challenge / fail /
+       insufficient funds / refund). Document in `docs/runbook.md` §7.
+5. [ ] Flip to production keys via `wrangler secret put`. First live booking
+       happens with a doctor-flagged "test" appointment for end-to-end
+       validation.
+
+PCI scope: iyzico hosted form keeps card data off our infrastructure entirely.
+We're at PCI-DSS SAQ-A (the simplest tier; no audit). Logged: `gateway_payment_id`,
+last 4 digits, brand. Never logged: PAN, CVV, full card data.
+
+KVKK Article 6: payment metadata is special-category financial data; included
+in the existing DSAR export + erasure flow with the same retention as health
+records (10 years per medical-record retention requirement).
+
+### C8. Booking + appointment-checking chatbot — Phase 2 enhancement
+
+Per owner request 2026-05-04: a chat widget for booking and checking
+appointments via natural language. **Deferred to Phase 2** (post-v0.1.0)
+because:
+
+- Real demand can only be measured against an actual launch (we don't yet
+  know what % of patients prefer chat vs the 6-step web flow);
+- Adding chat introduces an LLM provider dependency, KVKK chat-transcript
+  storage with encryption + DSAR integration, and a separate cost/rate-limit
+  surface — all of which slow the launch with no reduction in patient
+  outcomes for v0.1.0;
+- The hexagonal architecture means chat can land cleanly in Phase 2 without
+  refactoring the booking domain.
+
+Phase 2 plan (~3 weeks):
+
+**Week 1 — chat scaffold**
+- [ ] Floating chat widget (bottom-right, mobile-bottom-sheet) — single React
+      island, lazy-loaded
+- [ ] `/api/v1/chat/*` endpoints: `POST /chat/sessions`, `POST /chat/sessions/:id/messages`,
+      `GET /chat/sessions/:id`
+- [ ] `chat_sessions` + `chat_messages` tables; encrypted-at-rest body
+      (column-level encryption with per-session key derived from user secret)
+- [ ] LLM adapter port (`LlmProvider`) — Claude API as the first
+      implementation (Anthropic processing under standard MSA + DPA;
+      EU residency for chat content via prompt-caching headers)
+
+**Week 2 — booking + lookup tools**
+- [ ] LLM tools the chatbot can call:
+      - `lookup_services()` (anon ok)
+      - `lookup_availability(serviceId, fromDate, toDate)` (anon ok)
+      - `book_appointment(...)` (auth-required; chat prompts sign-in flow)
+      - `lookup_my_appointments()` (auth-required)
+      - `cancel_appointment(appointmentId)` (auth-required + 48h policy
+        gating)
+      - `lookup_faq(query)` (anon)
+      - `escalate_to_human(reason)` — handoff to WhatsApp with chat
+        transcript in the message body
+- [ ] System prompt with strict guardrails: no medical diagnosis, no
+      treatment recommendations beyond what's in the FAQ, mandatory
+      "I'm an assistant, not the doctor" framing on every reply
+
+**Week 3 — KVKK + production hardening**
+- [ ] Chat-specific consent block (separate from `appointment_booking` and
+      `health_data_processing` — chat content is its own purpose)
+- [ ] Transcript export in DSAR JSON; transcript erasure in `dsarErase.ts`
+- [ ] Rate-limit: 30 messages/hour per session, 200/day per user
+- [ ] LLM cost monitoring + per-day-per-user budget cap; fallback to
+      static FAQ when budget exhausted
+- [ ] Admin chat-transcript review for safety incidents (medical
+      escalations, abuse)
+
+**Owner deliverables for chatbot:**
+- Anthropic API key (Claude) or alternative LLM provider
+- System-prompt sign-off — Dr. Bak reviews the assistant's voice + scope
+- KVKK page update mentioning chat data processing
+
 ---
 
 ## Quick verification before flipping the launch toggle

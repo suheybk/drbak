@@ -56,6 +56,13 @@ GOOGLE_OAUTH_CLIENT_SECRET=
 JITSI_APP_ID=
 JITSI_APP_SECRET=
 
+# ─── iyzico (TR card payments + Apple/Google Pay) ─────────────────────────────
+# Get from iyzico merchant portal after approval (Settings → API Keys).
+# Sandbox first, then production. Use api.iyzipay.com for prod, sandbox-api.iyzipay.com for test.
+IYZICO_API_KEY=
+IYZICO_SECRET_KEY=
+IYZICO_BASE_URL=https://sandbox-api.iyzipay.com
+
 # ─── Bootstrap ────────────────────────────────────────────────────────────────
 # Email for the first admin account (one-time, on initial deploy)
 ADMIN_BOOTSTRAP_EMAIL=
