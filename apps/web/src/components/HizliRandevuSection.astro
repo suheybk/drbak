@@ -1,0 +1,53 @@
+---
+/**
+ * Full-width "Hızlı Randevu" CTA section.
+ *
+ * Mirrors the dark "Hemen randevu al" pattern from the existing live site,
+ * adapted to the Sage Clinical palette: deep sage primary as the section
+ * background, clay accent for the primary CTA, WhatsApp brand-green for
+ * the secondary CTA, and the phone rendered as a large LTR Latin-digit
+ * span so AR users still see "+90 530..." correctly.
+ *
+ * Sits on the home page just before the testimonials strip.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+const env = (import.meta as never as { env: Record<string, string | undefined> }).env;
+const contactPhone = env.CONTACT_PHONE_E164 ?? '+905300874391';
+const phoneDigits = contactPhone.replace(/[^\d]/g, '');
+const waLink = `https://wa.me/${phoneDigits}`;
+---
+<section class="hizli-randevu" aria-labelledby="hizli-randevu-heading">
+  <div class="hizli-randevu__inner">
+    <div class="hizli-randevu__copy">
+      <p class="hizli-randevu__kicker">{t('home.hizliRandevuKicker')}</p>
+      <h2 class="hizli-randevu__title" id="hizli-randevu-heading">
+        {t('home.hizliRandevuTitle')}
+      </h2>
+      <p class="hizli-randevu__lead">{t('home.hizliRandevuLead')}</p>
+      <div class="hizli-randevu__ctas">
+        <a class="drb-btn drb-btn--accent drb-btn--lg" href={routes.book(locale)}>
+          {t('cta.book')}
+        </a>
+        <a
+          class="drb-btn drb-btn--whatsapp drb-btn--lg"
+          href={waLink}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t('cta.whatsapp')}
+        </a>
+      </div>
+      <p class="hizli-randevu__phone">
+        <span class="hizli-randevu__phone-label">{t('home.hizliRandevuOrCall')}:</span>
+        {' '}
+        <a class="digit-western" dir="ltr" href={`tel:${contactPhone}`}>{contactPhone}</a>
+      </p>
+    </div>
+  </div>
+</section>

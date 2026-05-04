@@ -1,0 +1,103 @@
+---
+/**
+ * Evde Hizmet / Home Visit — dedicated landing page.
+ *
+ * Per the PDF analysis, "Evde Hizmet" is one of the practice's
+ * clearest USPs versus competitor sites that all default to in-clinic
+ * only. This page surfaces:
+ *   - what's offered at home (4 capabilities)
+ *   - coverage area (Anadolu yakası + selected European-side districts)
+ *   - duration + scope expectations
+ *   - a booking CTA that links straight into the booking flow
+ *     (the flow's delivery-mode step defaults to "home_visit" when
+ *     the user arrives via this CTA — wired through the
+ *     `?service=home-visit` query param the BookingPage already reads)
+ */
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { buildT } from '~/lib/i18n';
+import type { AppLocale } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
+
+interface Props {
+  locale: AppLocale;
+}
+const { locale } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.homeVisit(l));
+
+const env = (import.meta as never as { env: Record<string, string | undefined> }).env;
+const contactPhone = env.CONTACT_PHONE_E164 ?? '+905300874391';
+const phoneDigits = contactPhone.replace(/[^\d]/g, '');
+const waLink = `https://wa.me/${phoneDigits}`;
+
+const offered = [
+  t('homeVisit.service1'),
+  t('homeVisit.service2'),
+  t('homeVisit.service3'),
+  t('homeVisit.service4'),
+];
+
+const homeVisitBookHref = `${routes.book(locale)}?service=home-visit`;
+---
+<BaseLayout
+  title={t('homeVisit.title')}
+  description={t('homeVisit.lead')}
+  alternates={alternates}
+>
+  <header class="page-head">
+    <p class="page-head__kicker">{t('home.evdeKicker')}</p>
+    <h1>{t('homeVisit.title')}</h1>
+    <p class="page-head__lead">{t('homeVisit.lead')}</p>
+  </header>
+
+  <section class="app-section" aria-labelledby="home-visit-services-heading">
+    <h2 id="home-visit-services-heading">{t('homeVisit.servicesTitle')}</h2>
+    <ul class="home-visit__services" role="list">
+      {offered.map((s) => (
+        <li class="home-visit__service-item">
+          <span class="home-visit__check" aria-hidden="true">✓</span>
+          <span>{s}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="app-section" aria-labelledby="home-visit-coverage-heading">
+    <h2 id="home-visit-coverage-heading">{t('homeVisit.coverageTitle')}</h2>
+    <p>{t('homeVisit.coverageBody')}</p>
+  </section>
+
+  <section class="app-section" aria-labelledby="home-visit-duration-heading">
+    <h2 id="home-visit-duration-heading">{t('homeVisit.durationTitle')}</h2>
+    <p>{t('homeVisit.durationBody')}</p>
+  </section>
+
+  <section class="hizli-randevu" aria-labelledby="home-visit-cta-heading">
+    <div class="hizli-randevu__inner">
+      <div class="hizli-randevu__copy">
+        <h2 class="hizli-randevu__title" id="home-visit-cta-heading">
+          {t('homeVisit.ctaTitle')}
+        </h2>
+        <p class="hizli-randevu__lead">{t('homeVisit.ctaLead')}</p>
+        <div class="hizli-randevu__ctas">
+          <a class="drb-btn drb-btn--accent drb-btn--lg" href={homeVisitBookHref}>
+            {t('cta.book')}
+          </a>
+          <a
+            class="drb-btn drb-btn--whatsapp drb-btn--lg"
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('cta.whatsapp')}
+          </a>
+        </div>
+        <p class="hizli-randevu__phone">
+          <span class="hizli-randevu__phone-label">{t('home.hizliRandevuOrCall')}:</span>
+          {' '}
+          <a class="digit-western" dir="ltr" href={`tel:${contactPhone}`}>{contactPhone}</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

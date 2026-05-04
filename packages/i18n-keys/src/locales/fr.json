@@ -17,7 +17,14 @@
     "portal": "Mon espace",
     "login": "Se connecter",
     "logout": "Se déconnecter",
-    "register": "S'inscrire"
+    "register": "S'inscrire",
+    "testimonials": "Témoignages",
+    "homeVisit": "Visite à domicile"
+  },
+  "cta": {
+    "book": "Rendez-vous",
+    "whatsapp": "WhatsApp",
+    "call": "Appeler"
   },
   "home": {
     "heroTitle": "Écouter la douleur, c'est la première étape du traitement.",
@@ -35,7 +42,25 @@
     "marqueeServiceLead": "Une option non-médicamenteuse, fondée sur les preuves, pour la dépression résistante, le TOC et la migraine.",
     "marqueeServiceCta": "En savoir plus sur la TMS",
     "testimonialsTitle": "Ce que disent nos patients",
-    "testimonialsConsentNote": "Ces témoignages sont publiés avec consentement écrit."
+    "testimonialsConsentNote": "Ces témoignages sont publiés avec consentement écrit.",
+    "testimonialsAllLink": "Voir tous les témoignages",
+    "statsTitle": "En chiffres",
+    "statsExperience": "Années d'expérience clinique",
+    "statsCertificates": "Certificats et formations",
+    "statsLocales": "Langues de service",
+    "statsSeminars": "Conférences académiques",
+    "hizliRandevuKicker": "Rendez-vous rapide",
+    "hizliRandevuTitle": "Prenez rendez-vous",
+    "hizliRandevuLead": "Contactez-nous via le formulaire ou WhatsApp. Nous répondons rapidement pour fixer votre rendez-vous.",
+    "hizliRandevuOrCall": "Ou appelez-nous directement",
+    "videosTitle": "Du médecin",
+    "videosLead": "Approches thérapeutiques, questions fréquentes et information patient.",
+    "videosWatchMore": "Plus sur YouTube",
+    "evdeKicker": "Visites à domicile",
+    "evdeTitle": "Nous apportons les soins chez vous",
+    "evdeLead": "Consultations neurologiques à domicile pour les patients à mobilité réduite.",
+    "evdeCta": "À propos des visites à domicile",
+    "trustTitle": "Sociétés affiliées"
   },
   "services": {
     "title": "Soins",
@@ -232,5 +257,26 @@
     "kvkk": "KVKK",
     "accessibility": "Accessibilité",
     "tagline": "Soins holistiques, ancrés dans les preuves."
+  },
+  "testimonials": {
+    "title": "Témoignages de patients",
+    "lead": "Témoignages partagés avec consentement écrit.",
+    "empty": "Les témoignages avec consentement vérifié apparaîtront ici prochainement.",
+    "consentNote": "Tous les témoignages sont publiés avec consentement écrit et traités comme des données de santé sensibles selon l'article 6 de la KVKK."
+  },
+  "homeVisit": {
+    "title": "Service de neurologie à domicile",
+    "lead": "Consultations à domicile pour les patients à mobilité réduite ou difficiles à déplacer.",
+    "coverageTitle": "Zone de couverture",
+    "coverageBody": "Tout le côté anatolien d'Istanbul et certains arrondissements du côté européen. Nous confirmons la couverture lors de la prise de rendez-vous.",
+    "servicesTitle": "Ce que nous proposons à domicile",
+    "service1": "Première consultation et suivi",
+    "service2": "Applications de thérapie neurale",
+    "service3": "Optimisation des médicaments et gestion des effets secondaires",
+    "service4": "Éducation des aidants et briefings familiaux",
+    "durationTitle": "Durée et déroulement",
+    "durationBody": "Une visite dure typiquement 60–90 minutes — anamnèse, examen physique et neurologique, revue des médicaments et examens, discussion du plan thérapeutique.",
+    "ctaTitle": "Réserver une visite à domicile",
+    "ctaLead": "Nous évaluons brièvement l'adresse, l'état du patient et les besoins de soins lors de la prise de rendez-vous."
   }
 }

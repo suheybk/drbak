@@ -1,5 +1,11 @@
 ---
 import { DoctorNote } from '@dr-bak/ui';
+import EvdeHizmetCallout from '~/components/EvdeHizmetCallout.astro';
+import HizliRandevuSection from '~/components/HizliRandevuSection.astro';
+import StatsStrip from '~/components/StatsStrip.astro';
+import TestimonialsStrip from '~/components/TestimonialsStrip.astro';
+import TrustBadges from '~/components/TrustBadges.astro';
+import YouTubeEmbedsSection from '~/components/YouTubeEmbedsSection.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { buildT } from '~/lib/i18n';
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
@@ -63,7 +69,7 @@ const physicianSchema = {
     </ul>
   </section>
 
-  <hr class="divider-anatomy" />
+  <StatsStrip />
 
   <section class="app-section" aria-labelledby="marquee-heading">
     <div class="card" style="background: var(--color-primary); color: var(--color-primary-on); border: 0; padding: var(--space-12);">
@@ -76,6 +82,14 @@ const physicianSchema = {
       </a>
     </div>
   </section>
+
+  <EvdeHizmetCallout />
+
+  <TestimonialsStrip request={Astro.request} />
+
+  <YouTubeEmbedsSection />
+
+  <HizliRandevuSection />
 
   <DoctorNote
     label={t('blog.doctorNoteLabel')}
@@ -92,11 +106,5 @@ const physicianSchema = {
     </p>
   </DoctorNote>
 
-  <section class="app-section" aria-labelledby="testimonials-heading">
-    <h2 id="testimonials-heading">{t('home.testimonialsTitle')}</h2>
-    <p style="color: var(--color-ink-subtle); font-size: var(--type-meta);">
-      {t('home.testimonialsConsentNote')}
-    </p>
-    <p style="color: var(--color-ink-muted);">— {/* populated as approved consent records arrive */}</p>
-  </section>
+  <TrustBadges />
 </BaseLayout>

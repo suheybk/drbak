@@ -17,7 +17,14 @@
     "portal": "Hesabım",
     "login": "Giriş",
     "logout": "Çıkış",
-    "register": "Kayıt Ol"
+    "register": "Kayıt Ol",
+    "testimonials": "Hasta Yorumları",
+    "homeVisit": "Evde Hizmet"
+  },
+  "cta": {
+    "book": "Randevu Al",
+    "whatsapp": "WhatsApp",
+    "call": "Ara"
   },
   "home": {
     "heroTitle": "Ağrıyı dinlemek tedavinin ilk adımıdır.",
@@ -35,7 +42,25 @@
     "marqueeServiceLead": "İlaca yanıt vermeyen depresyon, OKB ve migren için kanıta dayalı, ilaçsız tedavi seçeneği.",
     "marqueeServiceCta": "TMS Hakkında Daha Fazla",
     "testimonialsTitle": "Hastalarımız ne diyor",
-    "testimonialsConsentNote": "Bu görüşler yazılı onamla yayınlanmıştır."
+    "testimonialsConsentNote": "Bu görüşler yazılı onamla yayınlanmıştır.",
+    "testimonialsAllLink": "Tüm hasta hikâyelerini gör",
+    "statsTitle": "Rakamlarla",
+    "statsExperience": "Yıl Klinik Deneyim",
+    "statsCertificates": "Sertifika ve Eğitim",
+    "statsLocales": "Hizmet Dili",
+    "statsSeminars": "Akademik Seminer",
+    "hizliRandevuKicker": "Hızlı Randevu",
+    "hizliRandevuTitle": "Hemen randevu al",
+    "hizliRandevuLead": "İletişim sayfasındaki formu doldurun ya da WhatsApp üzerinden ulaşın. Randevu tarihinizi planlamak için hızla geri dönüyoruz.",
+    "hizliRandevuOrCall": "Veya doğrudan ara",
+    "videosTitle": "Doktorumuzdan",
+    "videosLead": "Tedavi yaklaşımları, sıkça sorulan sorular ve hasta bilgilendirme.",
+    "videosWatchMore": "YouTube'da daha fazla",
+    "evdeKicker": "Evde Hizmet",
+    "evdeTitle": "Klinik bakımı evinize getiriyoruz",
+    "evdeLead": "Mobilitesi kısıtlı hastalar ve aile-içi bakım gerektiren durumlar için evde nöroloji muayenesi.",
+    "evdeCta": "Evde Hizmet hakkında",
+    "trustTitle": "Üyesi olduğumuz dernekler"
   },
   "services": {
     "title": "Hizmetler",
@@ -232,5 +257,26 @@
     "kvkk": "KVKK",
     "accessibility": "Erişilebilirlik",
     "tagline": "Bilimsel temellere dayalı, bütüncül bakım."
+  },
+  "testimonials": {
+    "title": "Hasta Hikâyeleri",
+    "lead": "Yazılı onam ile paylaşılan hasta görüşleri.",
+    "empty": "Onam-onaylı görüşler yakında bu sayfada yer alacaktır.",
+    "consentNote": "Tüm görüşler yazılı onam ile yayınlanmıştır; KVKK Madde 6 kapsamında özel nitelikli sağlık verisi olarak değerlendirilmiştir."
+  },
+  "homeVisit": {
+    "title": "Evde Nöroloji Hizmeti",
+    "lead": "Mobilite kısıtlılığı, bakım yükü veya klinik ortamına ulaşım zorluğu yaşayan hastalar için evde nöroloji muayenesi sunuyoruz.",
+    "coverageTitle": "Hizmet Verdiğimiz Bölgeler",
+    "coverageBody": "İstanbul Anadolu yakasının tamamında ve seçilen Avrupa yakası ilçelerinde. Adresinizin kapsama dahil olup olmadığını randevu sırasında doğrularız.",
+    "servicesTitle": "Evde Sunabildiğimiz Hizmetler",
+    "service1": "Birinci muayene ve ardışık takip",
+    "service2": "Nöral terapi uygulamaları",
+    "service3": "İlaç optimizasyonu ve yan etki yönetimi",
+    "service4": "Bakım veren ailelere yönelik bilgilendirme ve eğitim",
+    "durationTitle": "Süre ve İçerik",
+    "durationBody": "Bir muayene tipik olarak 60–90 dakika sürer; öykü, fiziksel ve nörolojik muayene, mevcut ilaç ve testlerin değerlendirilmesi ile tedavi planının çerçevesinin konuşulmasını içerir.",
+    "ctaTitle": "Evde randevu için bize ulaşın",
+    "ctaLead": "Randevu sürecinde adres, hasta durumu ve bakım gereksinimleri kısaca değerlendirilir."
   }
 }

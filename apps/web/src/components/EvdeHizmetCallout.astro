@@ -1,0 +1,27 @@
+---
+/**
+ * "Evde Hizmet" home-page callout.
+ *
+ * Surface the home-visit USP — per the PDF analysis ("yok - Dr. Oğuz'a
+ * özel fırsat"), this is one of the practice's clearest differentiators
+ * versus competitor sites. Dedicated landing at /evde-hizmet handles
+ * coverage area, what's offered, duration, and a separate booking CTA
+ * that pre-selects "home_visit" as the delivery mode.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+---
+<section class="evde-callout" aria-labelledby="evde-heading">
+  <div class="evde-callout__inner">
+    <p class="evde-callout__kicker">{t('home.evdeKicker')}</p>
+    <h2 class="evde-callout__title" id="evde-heading">{t('home.evdeTitle')}</h2>
+    <p class="evde-callout__lead">{t('home.evdeLead')}</p>
+    <a class="drb-btn drb-btn--secondary" href={routes.homeVisit(locale)}>
+      {t('home.evdeCta')} →
+    </a>
+  </div>
+</section>

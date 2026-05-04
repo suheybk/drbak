@@ -1,0 +1,58 @@
+---
+/**
+ * Bottom-fixed CTA bar with Randevu / WhatsApp / Phone.
+ *
+ * Visible on every public page; intentionally hidden on routes where the
+ * patient is *already* in a conversion flow (booking, account, admin),
+ * since stacking another "Book now" button there is noise and steals
+ * focus from the primary action.
+ *
+ * Design: clay primary CTA (matches the Sage Clinical accent token),
+ * WhatsApp brand-green for the secondary CTA (universal recognition
+ * trumps brand consistency for this single button per Nielsen-Norman
+ * guidance on platform-affordance icons), tel: link as plain text on
+ * desktop. Mobile shows all three as equal-width pills along the
+ * bottom; desktop floats a stacked pill in the bottom-right corner.
+ *
+ * The phone number is rendered with `dir="ltr"` and the `digit-western`
+ * class so the AR locale keeps Latin digits — see the RTL spec.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+const env = (import.meta as never as { env: Record<string, string | undefined> }).env;
+const contactPhone = env.CONTACT_PHONE_E164 ?? '+905300874391';
+const phoneDigits = contactPhone.replace(/[^\d]/g, '');
+const waLink = `https://wa.me/${phoneDigits}`;
+
+// Routes where the bar is suppressed.
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const hideOnPrefix = ['/book', '/account', '/admin', '/login', '/register', '/reset-password', '/verify-email'];
+const localePrefix = locale === 'tr' ? '' : `/${locale}`;
+const isSuppressed = hideOnPrefix.some((p) => path === `${localePrefix}${p}` || path.startsWith(`${localePrefix}${p}/`));
+---
+{!isSuppressed && (
+  <div class="sticky-cta" role="complementary" aria-label="Hızlı iletişim">
+    <a class="sticky-cta__btn sticky-cta__btn--book" href={routes.book(locale)}>
+      <span class="sticky-cta__icon" aria-hidden="true">📅</span>
+      <span>{t('cta.book')}</span>
+    </a>
+    <a
+      class="sticky-cta__btn sticky-cta__btn--whatsapp"
+      href={waLink}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span class="sticky-cta__icon" aria-hidden="true">💬</span>
+      <span>{t('cta.whatsapp')}</span>
+    </a>
+    <a class="sticky-cta__btn sticky-cta__btn--call" href={`tel:${contactPhone}`}>
+      <span class="sticky-cta__icon" aria-hidden="true">☎</span>
+      <span class="digit-western" dir="ltr">{t('cta.call')}</span>
+    </a>
+  </div>
+)}

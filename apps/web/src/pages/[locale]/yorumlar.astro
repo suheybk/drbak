@@ -1,0 +1,6 @@
+---
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import TestimonialsPage from '~/views/TestimonialsPage.astro';
+const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
+---
+<TestimonialsPage locale={locale} request={Astro.request} />

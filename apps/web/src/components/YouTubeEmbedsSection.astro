@@ -1,0 +1,68 @@
+---
+/**
+ * Home-page YouTube embeds section.
+ *
+ * Three iframes laid out in a responsive grid. Lazy-loaded
+ * (`loading="lazy"`) so they don't block first-paint; YouTube's
+ * "nocookie" embed domain avoids dropping a tracking cookie on first
+ * impression (KVKK + GDPR friendly — no consent banner needed for the
+ * pre-click state).
+ *
+ * Real video IDs need to come from the doctor's YouTube channel. Until
+ * the owner provides them, the IDs below are placeholders that link to
+ * the channel's "videos" tab via a fallback `videosWatchMore` link.
+ *
+ * Future: move the IDs into `youtube_videos` table + admin CMS so the
+ * doctor can swap them without an engineering deploy.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+// TODO: replace with real video IDs (owner deliverable).
+// These are placeholders that show the "Embed coming soon" cards.
+type Video = { id: string | null; title: string };
+const videos: ReadonlyArray<Video> = [
+  { id: null, title: 'TMS — Transkraniyal Manyetik Stimülasyon' },
+  { id: null, title: 'Ozon Tedavisi: Multipass Yöntemi' },
+  { id: null, title: 'Migren Tedavisinde Bütüncül Yaklaşım' },
+];
+
+const channelUrl = 'https://www.youtube.com/@uzmandroguzbak';
+---
+<section class="videos-section" aria-labelledby="videos-heading">
+  <div class="videos-section__head">
+    <h2 id="videos-heading">{t('home.videosTitle')}</h2>
+    <p class="videos-section__lead">{t('home.videosLead')}</p>
+  </div>
+  <div class="videos-section__grid">
+    {videos.map((v) => (
+      <article class="videos-section__card">
+        {v.id ? (
+          <div class="videos-section__embed">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${v.id}`}
+              title={v.title}
+              loading="lazy"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        ) : (
+          <div class="videos-section__placeholder" aria-label={v.title}>
+            <span aria-hidden="true">▶</span>
+            <p>{v.title}</p>
+          </div>
+        )}
+      </article>
+    ))}
+  </div>
+  <div class="videos-section__foot">
+    <a class="drb-btn drb-btn--ghost" href={channelUrl} target="_blank" rel="noopener noreferrer">
+      {t('home.videosWatchMore')} →
+    </a>
+  </div>
+</section>

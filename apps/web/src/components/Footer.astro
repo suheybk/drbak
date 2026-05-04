@@ -12,6 +12,7 @@ const contactEmail =
 const contactPhone =
   (import.meta as never as { env: { CONTACT_PHONE_E164?: string } }).env.CONTACT_PHONE_E164 ??
   '+905300874391';
+const waLink = `https://wa.me/${contactPhone.replace(/[^\d]/g, '')}`;
 ---
 <footer class="app-footer">
   <div class="app-footer__inner">
@@ -27,6 +28,7 @@ const contactPhone =
       <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); font-size: var(--type-body-sm);">
         <li><a href={`mailto:${contactEmail}`}>{contactEmail}</a></li>
         <li><span class="digit-western" dir="ltr"><a href={`tel:${contactPhone}`}>{contactPhone}</a></span></li>
+        <li><a href={waLink} target="_blank" rel="noopener noreferrer">{t('cta.whatsapp')}</a></li>
         <li>{t('about.address')}</li>
       </ul>
     </div>

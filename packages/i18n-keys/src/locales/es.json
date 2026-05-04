@@ -17,7 +17,14 @@
     "portal": "Mi cuenta",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
-    "register": "Crear cuenta"
+    "register": "Crear cuenta",
+    "testimonials": "Testimonios",
+    "homeVisit": "Visita domiciliaria"
+  },
+  "cta": {
+    "book": "Reservar",
+    "whatsapp": "WhatsApp",
+    "call": "Llamar"
   },
   "home": {
     "heroTitle": "Escuchar el dolor es el primer paso del tratamiento.",
@@ -35,7 +42,25 @@
     "marqueeServiceLead": "Opción no farmacológica basada en la evidencia para la depresión resistente, el TOC y la migraña.",
     "marqueeServiceCta": "Más sobre TMS",
     "testimonialsTitle": "Lo que dicen nuestros pacientes",
-    "testimonialsConsentNote": "Estos testimonios se publican con consentimiento por escrito."
+    "testimonialsConsentNote": "Estos testimonios se publican con consentimiento por escrito.",
+    "testimonialsAllLink": "Ver todos los testimonios",
+    "statsTitle": "En cifras",
+    "statsExperience": "Años de experiencia clínica",
+    "statsCertificates": "Certificados y formaciones",
+    "statsLocales": "Idiomas de servicio",
+    "statsSeminars": "Conferencias académicas",
+    "hizliRandevuKicker": "Cita rápida",
+    "hizliRandevuTitle": "Reserva ahora",
+    "hizliRandevuLead": "Contacta a través del formulario o WhatsApp. Respondemos rápidamente para programar tu cita.",
+    "hizliRandevuOrCall": "O llámanos directamente",
+    "videosTitle": "Del médico",
+    "videosLead": "Enfoques terapéuticos, preguntas frecuentes y educación al paciente.",
+    "videosWatchMore": "Más en YouTube",
+    "evdeKicker": "Visitas domiciliarias",
+    "evdeTitle": "Llevamos la atención clínica a tu hogar",
+    "evdeLead": "Consultas neurológicas a domicilio para pacientes con movilidad limitada.",
+    "evdeCta": "Sobre las visitas domiciliarias",
+    "trustTitle": "Sociedades afiliadas"
   },
   "services": {
     "title": "Servicios",
@@ -232,5 +257,26 @@
     "kvkk": "KVKK",
     "accessibility": "Accesibilidad",
     "tagline": "Atención holística, anclada en la evidencia."
+  },
+  "testimonials": {
+    "title": "Testimonios de pacientes",
+    "lead": "Experiencias compartidas con consentimiento escrito.",
+    "empty": "Los testimonios verificados aparecerán aquí pronto.",
+    "consentNote": "Todos los testimonios se publican bajo consentimiento escrito y se tratan como datos de salud de categoría especial según el artículo 6 de la KVKK."
+  },
+  "homeVisit": {
+    "title": "Servicio de neurología a domicilio",
+    "lead": "Consultas a domicilio para pacientes con movilidad limitada o carga de cuidado familiar.",
+    "coverageTitle": "Zona de cobertura",
+    "coverageBody": "Toda la parte anatolia de Estambul y distritos seleccionados de la parte europea. Confirmamos la cobertura al programar la cita.",
+    "servicesTitle": "Lo que ofrecemos en domicilio",
+    "service1": "Primera consulta y seguimiento",
+    "service2": "Aplicaciones de terapia neural",
+    "service3": "Optimización de medicación y manejo de efectos secundarios",
+    "service4": "Educación a cuidadores y orientación familiar",
+    "durationTitle": "Duración y contenido",
+    "durationBody": "Una visita típica dura 60–90 minutos: anamnesis, examen físico y neurológico, revisión de medicación y pruebas, y discusión del plan terapéutico.",
+    "ctaTitle": "Programe una visita domiciliaria",
+    "ctaLead": "Revisamos brevemente la dirección, el estado del paciente y las necesidades de cuidado al programar."
   }
 }

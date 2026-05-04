@@ -31,6 +31,8 @@ export const routes = {
   register: (l: Locale) => `${PREFIX(l)}/register`,
   resetPassword: (l: Locale) => `${PREFIX(l)}/reset-password`,
   verifyEmail: (l: Locale) => `${PREFIX(l)}/verify-email`,
+  testimonials: (l: Locale) => `${PREFIX(l)}/yorumlar`,
+  homeVisit: (l: Locale) => `${PREFIX(l)}/evde-hizmet`,
 } as const;
 
 /** Build the locale-switcher hrefs for the current page. */

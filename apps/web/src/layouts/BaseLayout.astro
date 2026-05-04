@@ -18,6 +18,7 @@
 import '~/styles/global.css';
 import Footer from '~/components/Footer.astro';
 import Header from '~/components/Header.astro';
+import StickyCtaBar from '~/components/StickyCtaBar.astro';
 import { buildT } from '~/lib/i18n';
 import { type AppLocale, DEFAULT_LOCALE, dirOf } from '~/lib/locales';
 import { localeHrefsFor, routes } from '~/lib/routes';
@@ -113,6 +114,7 @@ const softLaunchCopy: Record<AppLocale, string> = {
       </main>
       <Footer />
     </div>
+    <StickyCtaBar />
   </body>
 </html>
 <style is:global>

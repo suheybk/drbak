@@ -1,0 +1,83 @@
+---
+/**
+ * Hasta Hikâyeleri / Patient Stories — full listing page.
+ *
+ * Pulls all admin-approved + consent-verified testimonials from the
+ * public API endpoint. Each testimonial row is gated on a
+ * `testimonial_publication` consent record per
+ * `apps/api/src/application/use-cases/admin/reviewTestimonial.ts`,
+ * so anything visible here was published with explicit written consent.
+ *
+ * Empty state: until the consent backlog is processed (real
+ * testimonials from doktoroguzbak.com are migrated through the admin
+ * review flow with new consent records, or new patients submit through
+ * the portal), the page shows a calm message + a CTA to share an
+ * experience.
+ */
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { serverFetch } from '~/lib/api';
+import { buildT } from '~/lib/i18n';
+import type { AppLocale } from '~/lib/locales';
+import { localeHrefsFor, routes } from '~/lib/routes';
+
+interface Props {
+  locale: AppLocale;
+  request: Request;
+}
+const { locale, request } = Astro.props;
+const t = buildT(locale);
+const alternates = localeHrefsFor((l) => routes.testimonials(l));
+
+type Testimonial = {
+  id: string;
+  patientFirstName: string | null;
+  authorInitials: string;
+  conditionLabel: string | null;
+  bodyMarkdown: string;
+  approvedAt: string;
+};
+
+const r = await serverFetch<{ items: Testimonial[] }>(
+  request,
+  `/public/testimonials?locale=${locale}`,
+);
+const items = r.ok ? r.value.items : [];
+---
+<BaseLayout
+  title={t('testimonials.title')}
+  description={t('testimonials.lead')}
+  alternates={alternates}
+>
+  <header class="page-head">
+    <p class="page-head__kicker">{t('home.evdeKicker')}</p>
+    <h1>{t('testimonials.title')}</h1>
+    <p class="page-head__lead">{t('testimonials.lead')}</p>
+  </header>
+
+  {items.length === 0 ? (
+    <section class="testimonials-page__empty">
+      <p>{t('testimonials.empty')}</p>
+      <p class="testimonials-page__consent">{t('testimonials.consentNote')}</p>
+    </section>
+  ) : (
+    <section>
+      <ul class="testimonials-page__grid" role="list">
+        {items.map((item) => (
+          <li class="testimonials-page__card">
+            <p class="testimonials-page__quote">“{item.bodyMarkdown}”</p>
+            <footer class="testimonials-page__attrib">
+              <strong>{item.patientFirstName ?? item.authorInitials}</strong>
+              {item.conditionLabel && (
+                <>
+                  {' · '}
+                  <span class="testimonials-page__cond">{item.conditionLabel}</span>
+                </>
+              )}
+            </footer>
+          </li>
+        ))}
+      </ul>
+      <p class="testimonials-page__consent">{t('testimonials.consentNote')}</p>
+    </section>
+  )}
+</BaseLayout>

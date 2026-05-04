@@ -17,7 +17,14 @@
     "portal": "My Account",
     "login": "Sign in",
     "logout": "Sign out",
-    "register": "Sign up"
+    "register": "Sign up",
+    "testimonials": "Patient Stories",
+    "homeVisit": "Home Visit"
+  },
+  "cta": {
+    "book": "Book",
+    "whatsapp": "WhatsApp",
+    "call": "Call"
   },
   "home": {
     "heroTitle": "Listening to pain is the first step of treatment.",
@@ -35,7 +42,25 @@
     "marqueeServiceLead": "An evidence-based, drug-free option for treatment-resistant depression, OCD and migraine.",
     "marqueeServiceCta": "Learn more about TMS",
     "testimonialsTitle": "What our patients say",
-    "testimonialsConsentNote": "These testimonials are published with written consent."
+    "testimonialsConsentNote": "These testimonials are published with written consent.",
+    "testimonialsAllLink": "Read all patient stories",
+    "statsTitle": "By the numbers",
+    "statsExperience": "Years of clinical experience",
+    "statsCertificates": "Certificates and trainings",
+    "statsLocales": "Service languages",
+    "statsSeminars": "Academic talks",
+    "hizliRandevuKicker": "Quick Appointment",
+    "hizliRandevuTitle": "Book now",
+    "hizliRandevuLead": "Reach us via the contact form or WhatsApp. We respond promptly to schedule your visit.",
+    "hizliRandevuOrCall": "Or call us directly",
+    "videosTitle": "From the doctor",
+    "videosLead": "Treatment approaches, frequently asked questions, and patient education.",
+    "videosWatchMore": "More on YouTube",
+    "evdeKicker": "Home Visits",
+    "evdeTitle": "We bring clinical care to your home",
+    "evdeLead": "Home neurology consultations for patients with limited mobility or family caregiving needs.",
+    "evdeCta": "About home visits",
+    "trustTitle": "Affiliated societies"
   },
   "services": {
     "title": "Services",
@@ -232,5 +257,26 @@
     "kvkk": "KVKK",
     "accessibility": "Accessibility",
     "tagline": "Holistic care, anchored in evidence."
+  },
+  "testimonials": {
+    "title": "Patient Stories",
+    "lead": "Patient experiences shared with written consent.",
+    "empty": "Consent-verified stories will appear here soon.",
+    "consentNote": "All stories are published under written consent and treated as special-category health data under KVKK Article 6."
+  },
+  "homeVisit": {
+    "title": "Home Neurology Service",
+    "lead": "Home consultations for patients with mobility limitations, caregiving burden, or difficulty traveling to the clinic.",
+    "coverageTitle": "Coverage Area",
+    "coverageBody": "Throughout Istanbul's Anatolian side and selected districts on the European side. We confirm coverage during scheduling.",
+    "servicesTitle": "What we can offer at home",
+    "service1": "First-time consultation and follow-up",
+    "service2": "Neural therapy applications",
+    "service3": "Medication optimization and side-effect management",
+    "service4": "Caregiver education and family briefings",
+    "durationTitle": "Duration and scope",
+    "durationBody": "A visit typically takes 60–90 minutes — history, physical and neurological examination, review of medications and tests, and a discussion of the treatment plan.",
+    "ctaTitle": "Schedule a home visit",
+    "ctaLead": "We briefly review address, patient condition, and care requirements during scheduling."
   }
 }

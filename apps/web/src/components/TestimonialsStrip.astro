@@ -1,0 +1,80 @@
+---
+/**
+ * Home-page testimonials strip.
+ *
+ * Pulls the 3 most-recent admin-approved testimonials from the API.
+ * Each row in the `testimonials` table is gated on a verified
+ * `testimonial_publication` consent record per
+ * `apps/api/src/application/use-cases/admin/reviewTestimonial.ts`,
+ * so anything we surface here has KVKK-compliant publication consent.
+ *
+ * Until consents arrive (real testimonial backlog from doktoroguzbak.com
+ * + new submissions through the patient portal), the empty state
+ * renders a calm "stories will appear here soon" line plus the consent
+ * note. We deliberately do NOT seed placeholder testimonials — fake or
+ * reused-without-consent testimonials would be both a KVKK violation
+ * and a Sağlık Bakanlığı tanıtım issue.
+ *
+ * The full /yorumlar page is the canonical place for the long list;
+ * this strip is the home-page summary with a "see all" link.
+ */
+import { buildT } from '~/lib/i18n';
+import { serverFetch } from '~/lib/api';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
+
+interface Props {
+  request: Request;
+}
+const { request } = Astro.props;
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+type Testimonial = {
+  id: string;
+  patientFirstName: string | null;
+  authorInitials: string;
+  conditionLabel: string | null;
+  bodyMarkdown: string;
+  approvedAt: string;
+};
+
+const r = await serverFetch<{ items: Testimonial[] }>(
+  request,
+  `/public/testimonials?locale=${locale}&limit=3`,
+);
+const items = r.ok ? r.value.items : [];
+---
+<section class="testimonials-strip" aria-labelledby="testimonials-heading">
+  <div class="testimonials-strip__head">
+    <h2 id="testimonials-heading">{t('home.testimonialsTitle')}</h2>
+    <a class="testimonials-strip__all" href={routes.testimonials(locale)}>
+      {t('home.testimonialsAllLink')} →
+    </a>
+  </div>
+  {items.length === 0 ? (
+    <div class="testimonials-strip__empty">
+      <p>{t('testimonials.empty')}</p>
+      <p class="testimonials-strip__consent">{t('home.testimonialsConsentNote')}</p>
+    </div>
+  ) : (
+    <ul class="testimonials-strip__grid" role="list">
+      {items.map((item) => (
+        <li class="testimonials-strip__card">
+          <p class="testimonials-strip__quote">
+            “{item.bodyMarkdown.length > 240 ? `${item.bodyMarkdown.slice(0, 240).trim()}…` : item.bodyMarkdown}”
+          </p>
+          <p class="testimonials-strip__attrib">
+            <strong>{item.patientFirstName ?? item.authorInitials}</strong>
+            {item.conditionLabel && (
+              <>
+                {' · '}
+                <span class="testimonials-strip__cond">{item.conditionLabel}</span>
+              </>
+            )}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>

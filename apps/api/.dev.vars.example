@@ -1,0 +1,61 @@
+# Local secrets template — copy to `.dev.vars` (gitignored) and fill in.
+#
+# `wrangler dev` reads `.dev.vars` automatically as if every key were a
+# `wrangler secret put` value. We re-use the same file for the migration
+# runner script (`pnpm --filter @dr-bak/api db:migrate`) and the
+# CF-provisioning helper.
+#
+# DO NOT commit `.dev.vars` — it contains real credentials. The `.example`
+# file is the documentation of what keys exist; values are placeholders.
+
+# ─── Cloudflare ───────────────────────────────────────────────────────────────
+# Generate at: https://dash.cloudflare.com/profile/api-tokens
+# Token needs: Workers Edit, KV Edit, R2 Edit, Hyperdrive Edit, Pages Edit,
+#              Queues Edit, Account Settings Read, DNS Edit (zone), Zone Read.
+CLOUDFLARE_API_TOKEN=
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_ZONE_ID=
+
+# ─── Neon Postgres EU (Frankfurt) ─────────────────────────────────────────────
+# Get the pooled connection string from: console.neon.tech → Connect.
+# Format: postgres://USER:PASSWORD@HOST-pooler.eu-central-1.aws.neon.tech/DB?sslmode=require
+DATABASE_URL_PRODUCTION=
+DATABASE_URL_STAGING=
+
+# ─── JWT signing (generated, not provisioned) ─────────────────────────────────
+# Engineering will generate via `pnpm --filter @dr-bak/api keys:generate`
+# and `wrangler secret put` per env. Local dev uses the values below for the
+# Miniflare runner only — they are NOT the production keys.
+JWT_SIGNING_PRIVATE_KEY=
+JWT_SIGNING_PUBLIC_KEY=
+JWT_SIGNING_KID=dev-key-1
+
+# ─── Resend (email) ───────────────────────────────────────────────────────────
+RESEND_API_KEY=
+
+# ─── NetGSM (TR SMS) ──────────────────────────────────────────────────────────
+NETGSM_USERNAME=
+NETGSM_PASSWORD=
+NETGSM_SENDER_ID=  # must be İYS-registered
+
+# ─── Twilio (non-TR SMS fallback, optional at launch) ─────────────────────────
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM_NUMBER=
+
+# ─── Meta WhatsApp Cloud API ──────────────────────────────────────────────────
+META_WA_ACCESS_TOKEN=
+META_WA_PHONE_NUMBER_ID=
+META_WA_VERIFY_TOKEN=
+
+# ─── Google OAuth ─────────────────────────────────────────────────────────────
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+
+# ─── Jitsi-as-a-Service (telehealth) ──────────────────────────────────────────
+JITSI_APP_ID=
+JITSI_APP_SECRET=
+
+# ─── Bootstrap ────────────────────────────────────────────────────────────────
+# Email for the first admin account (one-time, on initial deploy)
+ADMIN_BOOTSTRAP_EMAIL=

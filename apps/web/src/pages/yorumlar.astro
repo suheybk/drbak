@@ -1,0 +1,5 @@
+---
+import TestimonialsPage from '~/views/TestimonialsPage.astro';
+const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+---
+<TestimonialsPage locale={locale} request={Astro.request} />

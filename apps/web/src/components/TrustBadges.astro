@@ -1,0 +1,38 @@
+---
+/**
+ * Trust badges — placeholder slots for medical-society memberships.
+ *
+ * Until real logo assets arrive (owner deliverable; same delivery
+ * channel as the 22 certificates per LAUNCH-CHECKLIST §C2), we render
+ * type-set placeholders that establish the visual rhythm without
+ * making unverified claims.
+ *
+ * The four society slots match `docs/discovery.md` §1 "scientific
+ * authority" pillar — these are the bodies whose membership is most
+ * relevant to a Turkish neurology + algoloji practice. Owner should
+ * confirm membership before the logos go live.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+const societies = [
+  { short: 'TND', full: 'Türk Nöroloji Derneği' },
+  { short: 'TAD', full: 'Türk Algoloji Derneği' },
+  { short: 'EAN', full: 'European Academy of Neurology' },
+  { short: 'IASP', full: 'International Association for the Study of Pain' },
+];
+---
+<section class="trust-badges" aria-labelledby="trust-heading">
+  <h2 class="trust-badges__title" id="trust-heading">{t('home.trustTitle')}</h2>
+  <ul class="trust-badges__grid" role="list">
+    {societies.map((s) => (
+      <li class="trust-badges__cell">
+        <span class="trust-badges__short">{s.short}</span>
+        <span class="trust-badges__full">{s.full}</span>
+      </li>
+    ))}
+  </ul>
+</section>

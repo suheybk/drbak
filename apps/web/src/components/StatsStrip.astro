@@ -1,0 +1,45 @@
+---
+/**
+ * Stats strip — 4-column verifiable-numbers row.
+ *
+ * Replaces the live-site's "12Bin+ Memnun Hastalar / 100% Memnuniyet
+ * Oranları / 58+ Seminer" pattern. We deliberately drop the "100%
+ * memnuniyet" claim — it brushes against the banned "%100 başarı"
+ * superlative in `dr-bak-locked-decisions.md` and TR Sağlık Bakanlığı
+ * tanıtım rules. Numbers below are facts that can be defended on a CV
+ * page:
+ *
+ *   - 28 yıl: from December 1998 (board-certified neurology start)
+ *   - 22 sertifika: see C2 in LAUNCH-CHECKLIST.md
+ *   - 5 lisan: TR + AR + EN + FR + ES — our locale offering
+ *   - 58 seminer: academic talks, sourced from CV
+ *
+ * Patient-count numbers (e.g. "12000+ patients seen") would also be
+ * defensible per practice records, but they require the doctor's
+ * sign-off on the exact count + the period — leaving that out for now
+ * and surfacing it once we have a verified source.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+const stats = [
+  { value: '28', label: t('home.statsExperience') },
+  { value: '22', label: t('home.statsCertificates') },
+  { value: '5', label: t('home.statsLocales') },
+  { value: '58', label: t('home.statsSeminars') },
+];
+---
+<section class="stats-strip" aria-labelledby="stats-heading">
+  <h2 class="visually-hidden" id="stats-heading">{t('home.statsTitle')}</h2>
+  <div class="stats-strip__grid">
+    {stats.map((s) => (
+      <div class="stats-strip__cell">
+        <p class="stats-strip__value digit-western" dir="ltr">{s.value}</p>
+        <p class="stats-strip__label">{s.label}</p>
+      </div>
+    ))}
+  </div>
+</section>

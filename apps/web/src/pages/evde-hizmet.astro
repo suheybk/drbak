@@ -1,0 +1,5 @@
+---
+import HomeVisitPage from '~/views/HomeVisitPage.astro';
+const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+---
+<HomeVisitPage locale={locale} />
