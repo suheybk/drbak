@@ -235,63 +235,174 @@ KVKK Article 6: payment metadata is special-category financial data; included
 in the existing DSAR export + erasure flow with the same retention as health
 records (10 years per medical-record retention requirement).
 
-### C8. Booking + appointment-checking chatbot — Phase 2 enhancement
+### C8. WhatsApp + web AI agent — Phase 2 (Tier 2, ~3 days post-launch)
 
-Per owner request 2026-05-04: a chat widget for booking and checking
-appointments via natural language. **Deferred to Phase 2** (post-v0.1.0)
-because:
+Per owner discussion 2026-05-04 informed by `whatsapp-ai-agent-rehberi_1.pdf`:
 
-- Real demand can only be measured against an actual launch (we don't yet
-  know what % of patients prefer chat vs the 6-step web flow);
-- Adding chat introduces an LLM provider dependency, KVKK chat-transcript
-  storage with encryption + DSAR integration, and a separate cost/rate-limit
-  surface — all of which slow the launch with no reduction in patient
-  outcomes for v0.1.0;
-- The hexagonal architecture means chat can land cleanly in Phase 2 without
-  refactoring the booking domain.
+The chatbot lives on **two surfaces** with the same backend:
 
-Phase 2 plan (~3 weeks):
+1. **WhatsApp** (primary) — patients message the clinic's WhatsApp
+   Business number; Meta webhook hits our Worker; Worker calls Claude;
+   reply goes back through the WA API. Identity is the patient's phone
+   number (E.164) → `patients.phone_e164`. Same channel they already
+   use for confirmations + reminders.
 
-**Week 1 — chat scaffold**
-- [ ] Floating chat widget (bottom-right, mobile-bottom-sheet) — single React
-      island, lazy-loaded
-- [ ] `/api/v1/chat/*` endpoints: `POST /chat/sessions`, `POST /chat/sessions/:id/messages`,
-      `GET /chat/sessions/:id`
-- [ ] `chat_sessions` + `chat_messages` tables; encrypted-at-rest body
-      (column-level encryption with per-session key derived from user secret)
-- [ ] LLM adapter port (`LlmProvider`) — Claude API as the first
-      implementation (Anthropic processing under standard MSA + DPA;
-      EU residency for chat content via prompt-caching headers)
+2. **Web widget** (secondary) — bottom-right floating widget on every
+   public page; lazy-loaded React island. Same backend. Identity via
+   the existing JWT session (auth-required for personalised tools;
+   anon allowed for FAQ + availability lookup).
 
-**Week 2 — booking + lookup tools**
-- [ ] LLM tools the chatbot can call:
-      - `lookup_services()` (anon ok)
-      - `lookup_availability(serviceId, fromDate, toDate)` (anon ok)
-      - `book_appointment(...)` (auth-required; chat prompts sign-in flow)
-      - `lookup_my_appointments()` (auth-required)
-      - `cancel_appointment(appointmentId)` (auth-required + 48h policy
-        gating)
-      - `lookup_faq(query)` (anon)
-      - `escalate_to_human(reason)` — handoff to WhatsApp with chat
-        transcript in the message body
-- [ ] System prompt with strict guardrails: no medical diagnosis, no
-      treatment recommendations beyond what's in the FAQ, mandatory
-      "I'm an assistant, not the doctor" framing on every reply
+**Tier 2 — read-only conversational.** AI can answer FAQs, explain
+services/conditions, and look up the patient's existing appointments
+(when authenticated). It **cannot** book, cancel, or modify anything;
+those state changes always route through the secure web booking flow
+with iyzico payment + KVKK consent. Most patient questions don't
+require state change; the ones that do get a deep-link to the web flow.
 
-**Week 3 — KVKK + production hardening**
-- [ ] Chat-specific consent block (separate from `appointment_booking` and
-      `health_data_processing` — chat content is its own purpose)
-- [ ] Transcript export in DSAR JSON; transcript erasure in `dsarErase.ts`
-- [ ] Rate-limit: 30 messages/hour per session, 200/day per user
-- [ ] LLM cost monitoring + per-day-per-user budget cap; fallback to
-      static FAQ when budget exhausted
-- [ ] Admin chat-transcript review for safety incidents (medical
-      escalations, abuse)
+**Languages:** all 5 locales (TR, AR, EN, FR, ES). System prompt is
+parameterised by detected user-language, with TR as the canonical
+prompt and the other 4 as direct translations of the same scope +
+guardrails. AR system prompt notes Western digits for clinical
+strings (consistent with the rest of the site).
 
-**Owner deliverables for chatbot:**
-- Anthropic API key (Claude) or alternative LLM provider
-- System-prompt sign-off — Dr. Bak reviews the assistant's voice + scope
-- KVKK page update mentioning chat data processing
+**Hard constraint baked into the system prompt** (TR Sağlık Bakanlığı
+tanıtım rules + KVKK):
+
+> "Sen Uzm. Dr. Oğuz Bak'ın klinik asistanısın, doktor değilsin.
+> Yapabileceklerin: SSS yanıtlamak, hizmet/hastalık bilgisi vermek,
+> randevu durumunu sorgulamak, TMS ön taraması için sorular sormak.
+> Yapamayacakların: tanı koymak, tedavi önermek, doktor muayenesinin
+> yerini almak, sonuç vaat etmek. Hasta semptom paylaştığında: kabul
+> et, randevu öner, ilgili SSS girdisini sun. Her cevabı şu cümleyle
+> kapat: 'Bu bir tıbbi tavsiye değildir; tam değerlendirme için lütfen
+> Dr. Bak ile randevu alın.'"
+
+The same prompt is mirrored in 4 other locales.
+
+#### Phase 2 implementation plan (~3 working days post-v0.1.0)
+
+**Day 1 — Backend scaffold (shared by both surfaces)**
+
+- [ ] `apps/api/src/application/ports/LlmProvider.ts` — interface
+- [ ] `apps/api/src/infrastructure/llm/AnthropicClaudeProvider.ts` —
+      adapter using Sonnet 4.5/4.6 with prompt caching enabled
+- [ ] `apps/api/src/infrastructure/llm/systemPrompts/` — 5 locale-
+      specific system prompts derived from a shared TR base
+- [ ] `apps/api/src/application/use-cases/chat/handleMessage.ts` —
+      orchestration: identify patient → run Claude with tools →
+      return response
+- [ ] DB migration `0005_chat_transcripts.sql`:
+      ```sql
+      CREATE TABLE chat_sessions (
+        id text PRIMARY KEY,
+        surface text NOT NULL,        -- 'whatsapp' | 'web'
+        patient_id text REFERENCES patients(id),
+        anon_session_id text,         -- for unauthenticated web sessions
+        wa_phone_e164 text,           -- denormalised for WhatsApp lookup
+        locale char(2) NOT NULL,
+        consent_version text NOT NULL,
+        consent_granted_at timestamptz NOT NULL,
+        last_message_at timestamptz NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE TABLE chat_messages (
+        id text PRIMARY KEY,
+        session_id text NOT NULL REFERENCES chat_sessions(id),
+        role text NOT NULL,           -- 'user' | 'assistant' | 'tool'
+        body_encrypted bytea NOT NULL,  -- AES-GCM with per-session key
+        body_iv bytea NOT NULL,
+        tool_name text,
+        tool_args_encrypted bytea,
+        tokens_in integer,
+        tokens_out integer,
+        created_at timestamptz NOT NULL DEFAULT now()
+      );
+      ```
+
+**Day 2 — WhatsApp + web wiring**
+
+- [ ] `POST /api/v1/webhooks/whatsapp/incoming` — Meta-signed webhook
+      handler; verifies HMAC; identifies patient by phone_e164;
+      checks/prompts chat consent (template message on first contact);
+      passes message into `handleMessage`; sends Claude response back
+      via Meta WA API
+- [ ] Web widget component: `apps/web/src/islands/ChatWidget.tsx`,
+      lazy-loaded floating button (bottom-right, RTL-aware), opens to
+      a chat panel with the same backend at
+      `POST /api/v1/chat/sessions/:id/messages`
+- [ ] LLM tools (read-only):
+      - `lookup_services()` — anon ok
+      - `lookup_availability(serviceSlug, fromDate, toDate)` — anon ok
+      - `lookup_my_appointments()` — auth required (phone match for
+        WhatsApp; JWT for web)
+      - `lookup_faq(query)` — anon ok
+      - `lookup_service_detail(slug)` — anon ok
+      - `lookup_condition_detail(slug)` — anon ok
+      - `book_link()` — returns the deep-link URL to the web booking
+        flow with optional `?service=<slug>` preselect
+      - `cancel_or_reschedule_link(appointmentId)` — returns the
+        signed `/r/iptal/<token>` or `/r/yeniden-planla/<token>` URL
+        from `HmacSignedUrlMinter` (same one we use in
+        confirmation emails)
+      - `escalate_to_human(reason)` — writes to clinic Slack
+        with truncated transcript + sets a `human_takeover_until`
+        flag on the session for the next 4 hours
+
+**Day 3 — KVKK + production hardening**
+
+- [ ] Chat-consent: separate `chat_processing` purpose in
+      `consent_records`; first WhatsApp message triggers a template-
+      message consent prompt; web widget shows the consent block
+      before the first message
+- [ ] Transcript encryption: AES-GCM with per-session key derived
+      from `(userId | anon_session_id, KMS_KEY)`; KMS key is a
+      Workers binding rotated quarterly
+- [ ] DSAR integration: `dsarExport.ts` includes decrypted transcripts
+      in the JSON dump; `dsarErase.ts` purges chat_messages.body_*
+      fields for the user
+- [ ] Rate-limit: 30 messages/hour per session, 200/day per patient;
+      enforced in KV
+- [ ] LLM cost cap: 50 ₺/day per patient, 500 ₺/day total; when hit,
+      fallback to static FAQ search ("Bütçe doldu, doktor sizinle
+      WhatsApp üzerinden iletişime geçecek.")
+- [ ] Admin transcript review: `/admin/chat` lists sessions filterable
+      by escalation flag, with full decrypted transcript for the
+      named DPO + admin role only
+- [ ] Meta WhatsApp 24h-window handling: after 24h of patient
+      inactivity, AI cannot send free-form messages — only the
+      4 approved templates (booking_confirm, reminder_t24h,
+      reminder_t1h_telehealth, plus a new `chat_followup` template
+      requiring Meta review before launch +14)
+
+#### Owner deliverables for the chatbot
+
+- [ ] **Anthropic API key** (Claude). Sign up at
+      https://console.anthropic.com → API Keys → Create. Add to
+      `apps/api/.dev.vars` as `ANTHROPIC_API_KEY=`. Reminder fires
+      2026-05-30 (trig_01VcqgdUkJHLD8sBGLjwHFCX).
+- [ ] **System-prompt sign-off** — Dr. Bak reviews the TR system
+      prompt (the source-of-truth) before deploy. Engineering
+      drafts; doctor approves voice + scope.
+- [ ] **KVKK page update** — add a paragraph to
+      `apps/web/src/views/KvkkPage.astro` covering chat data
+      processing: what's collected, why, retention (10y same as
+      health records), Meta + Anthropic as processors, EU residency
+      for both. Legal review same as the rest of the KVKK page (A6).
+- [ ] **Meta WhatsApp template approval** — submit `chat_followup`
+      template for TR + EN before Tier-2 launch. 24-48h review per
+      template.
+
+#### Cost projection (validated against the PDF reference)
+
+- ~500 conversations/month at Tier 2 (read-only, short turns)
+- Sonnet 4.5/4.6 with prompt caching: ~50% cheaper than the PDF
+  reference (which used uncached Sonnet 4)
+- Estimated ~250-500 TL/month total (Anthropic + Meta WA + KV
+  storage). Stays under 1,000 TL even at 2,000 conversations/month.
+- Compared to the PDF's 770-1,640 TL/month estimate, we save by:
+  - No Railway hosting (Workers already in our stack)
+  - Prompt caching halves the Claude bill
+  - Service conversations on Meta WA are free for the first 1k/month
 
 ---
 
