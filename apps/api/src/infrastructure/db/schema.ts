@@ -21,6 +21,7 @@ import { sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,
   boolean,
+  customType,
   date,
   index,
   integer,
@@ -726,6 +727,85 @@ export const webhookEvents = pgTable(
     ),
   }),
 );
+
+// ─── Chat (Tier-2 AI assistant) ──────────────────────────────────────────────
+
+export const chatSurfaceEnum = pgEnum('chat_surface', ['whatsapp', 'web']);
+export const chatRoleEnum = pgEnum('chat_role', ['user', 'assistant', 'tool']);
+
+export const chatSessions = pgTable('chat_sessions', {
+  id: text('id').primaryKey(),
+  surface: chatSurfaceEnum('surface').notNull(),
+  patientId: text('patient_id').references(() => patients.id, {
+    onDelete: 'set null',
+  }),
+  anonSessionId: text('anon_session_id'),
+  waPhoneE164: text('wa_phone_e164'),
+  locale: localeEnum('locale').notNull(),
+  consentVersion: text('consent_version').notNull(),
+  consentGrantedAt: timestamp('consent_granted_at', { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  humanTakeoverUntil: timestamp('human_takeover_until', { withTimezone: true }),
+  tokensInTotal: integer('tokens_in_total').notNull().default(0),
+  tokensOutTotal: integer('tokens_out_total').notNull().default(0),
+  costKurusTotal: integer('cost_kurus_total').notNull().default(0),
+  lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().default(sql`now()`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const chatMessages = pgTable('chat_messages', {
+  id: text('id').primaryKey(),
+  sessionId: text('session_id')
+    .notNull()
+    .references(() => chatSessions.id, { onDelete: 'cascade' }),
+  role: chatRoleEnum('role').notNull(),
+  bodyCiphertext: customType<{ data: Uint8Array; driverData: Buffer }>({
+    dataType: () => 'bytea',
+    fromDriver: (v) => new Uint8Array(v as Buffer),
+    toDriver: (v) => Buffer.from(v),
+  })('body_ciphertext').notNull(),
+  bodyIv: customType<{ data: Uint8Array; driverData: Buffer }>({
+    dataType: () => 'bytea',
+    fromDriver: (v) => new Uint8Array(v as Buffer),
+    toDriver: (v) => Buffer.from(v),
+  })('body_iv').notNull(),
+  bodyTag: customType<{ data: Uint8Array; driverData: Buffer }>({
+    dataType: () => 'bytea',
+    fromDriver: (v) => new Uint8Array(v as Buffer),
+    toDriver: (v) => Buffer.from(v),
+  })('body_tag').notNull(),
+  toolName: text('tool_name'),
+  toolArgsCiphertext: customType<{ data: Uint8Array; driverData: Buffer }>({
+    dataType: () => 'bytea',
+    fromDriver: (v) => new Uint8Array(v as Buffer),
+    toDriver: (v) => Buffer.from(v),
+  })('tool_args_ciphertext'),
+  toolArgsIv: customType<{ data: Uint8Array; driverData: Buffer }>({
+    dataType: () => 'bytea',
+    fromDriver: (v) => new Uint8Array(v as Buffer),
+    toDriver: (v) => Buffer.from(v),
+  })('tool_args_iv'),
+  toolArgsTag: customType<{ data: Uint8Array; driverData: Buffer }>({
+    dataType: () => 'bytea',
+    fromDriver: (v) => new Uint8Array(v as Buffer),
+    toDriver: (v) => Buffer.from(v),
+  })('tool_args_tag'),
+  tokensIn: integer('tokens_in'),
+  tokensOut: integer('tokens_out'),
+  model: text('model'),
+  stopReason: text('stop_reason'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const chatDailySpend = pgTable('chat_daily_spend', {
+  patientId: text('patient_id')
+    .notNull()
+    .references(() => patients.id, { onDelete: 'cascade' }),
+  ymd: date('ymd').notNull(),
+  messages: integer('messages').notNull().default(0),
+  costKurus: integer('cost_kurus').notNull().default(0),
+});
 
 // ─── Type exports for use in domain/infrastructure ─────────────────────────────
 

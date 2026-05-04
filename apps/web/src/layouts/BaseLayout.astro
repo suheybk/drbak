@@ -19,6 +19,7 @@ import '~/styles/global.css';
 import Footer from '~/components/Footer.astro';
 import Header from '~/components/Header.astro';
 import StickyCtaBar from '~/components/StickyCtaBar.astro';
+import ChatWidget from '~/islands/ChatWidget';
 import { buildT } from '~/lib/i18n';
 import { type AppLocale, DEFAULT_LOCALE, dirOf } from '~/lib/locales';
 import { localeHrefsFor, routes } from '~/lib/routes';
@@ -115,6 +116,12 @@ const softLaunchCopy: Record<AppLocale, string> = {
       <Footer />
     </div>
     <StickyCtaBar />
+    <ChatWidget
+      client:idle
+      locale={locale}
+      apiBase={import.meta.env.PUBLIC_API_BASE ?? 'https://api.uzmdroguzbak.com/api/v1'}
+      consentVersion={import.meta.env.CONSENT_DOCUMENT_VERSION ?? 'v1.2026-04'}
+    />
   </body>
 </html>
 <style is:global>

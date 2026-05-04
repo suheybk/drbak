@@ -41,16 +41,16 @@ APP_BASE_URL = "http://localhost:4321"
 # Bindings: KV
 [[env.dev.kv_namespaces]]
 binding = "KV_SESSIONS"
-id = "REPLACE_WITH_DEV_KV_ID"
+id = "e6e7349e10b8411ba2246584632bee0b"
 [[env.dev.kv_namespaces]]
 binding = "KV_RATELIMIT"
-id = "REPLACE_WITH_DEV_KV_ID"
+id = "0ab87d1999f642efb3324981cffc9a93"
 [[env.dev.kv_namespaces]]
 binding = "KV_IDEMPOTENCY"
-id = "REPLACE_WITH_DEV_KV_ID"
+id = "7c6592a945304323bc9ef3d205166670"
 [[env.dev.kv_namespaces]]
 binding = "KV_CACHE"
-id = "REPLACE_WITH_DEV_KV_ID"
+id = "7a6a568016db4040868ea6f48f857b73"
 
 # Bindings: R2
 [[env.dev.r2_buckets]]
@@ -92,7 +92,7 @@ dead_letter_queue = "drbak-webhooks-dlq-dev"
 # Bindings: Hyperdrive
 [[env.dev.hyperdrive]]
 binding = "HYPERDRIVE_DB"
-id = "REPLACE_WITH_DEV_HYPERDRIVE_ID"
+id = "ed23da9987524f88910c36b754ffc22e"
 
 # Cron triggers
 [env.dev.triggers]
@@ -109,7 +109,10 @@ new_sqlite_classes = ["DoctorDayLock"]
 
 # ---------- STAGING environment ----------
 [env.staging]
-routes = [{ pattern = "staging-api.uzmdroguzbak.com/*", zone_name = "uzmdroguzbak.com" }]
+workers_dev = true
+# Routes attach once DNS is cut over to CF (LAUNCH-CHECKLIST §A4). Until then
+# staging is at dr-bak-api-staging.<account>.workers.dev.
+# routes = [{ pattern = "staging-api.uzmdroguzbak.com/*", zone_name = "uzmdroguzbak.com" }]
 [env.staging.vars]
 ENVIRONMENT = "staging"
 LOG_LEVEL = "info"
@@ -118,16 +121,16 @@ APP_BASE_URL = "https://staging.uzmdroguzbak.com"
 
 [[env.staging.kv_namespaces]]
 binding = "KV_SESSIONS"
-id = "REPLACE_WITH_STAGING_KV_ID"
+id = "5c55ff12e7ae4e30aac2cd0ff148b185"
 [[env.staging.kv_namespaces]]
 binding = "KV_RATELIMIT"
-id = "REPLACE_WITH_STAGING_KV_ID"
+id = "d40186a1a1c34088b92686d673b29971"
 [[env.staging.kv_namespaces]]
 binding = "KV_IDEMPOTENCY"
-id = "REPLACE_WITH_STAGING_KV_ID"
+id = "519edf4d13b141ab97e23d3e8741726f"
 [[env.staging.kv_namespaces]]
 binding = "KV_CACHE"
-id = "REPLACE_WITH_STAGING_KV_ID"
+id = "639db512301a4aeaa4815d704ebce983"
 
 [[env.staging.r2_buckets]]
 binding = "R2_DOCUMENTS"
@@ -162,7 +165,7 @@ dead_letter_queue = "drbak-webhooks-dlq-staging"
 
 [[env.staging.hyperdrive]]
 binding = "HYPERDRIVE_DB"
-id = "REPLACE_WITH_STAGING_HYPERDRIVE_ID"
+id = "ed23da9987524f88910c36b754ffc22e"
 
 [env.staging.triggers]
 crons = ["*/5 * * * *", "0 3 * * *", "*/10 * * * *"]
@@ -176,16 +179,16 @@ LOG_LEVEL = "info"
 
 [[env.production.kv_namespaces]]
 binding = "KV_SESSIONS"
-id = "REPLACE_WITH_PROD_KV_ID"
+id = "29655459014b4f04acad62defd0cf4d2"
 [[env.production.kv_namespaces]]
 binding = "KV_RATELIMIT"
-id = "REPLACE_WITH_PROD_KV_ID"
+id = "4bf0d63164494b1aafa872940cf75f78"
 [[env.production.kv_namespaces]]
 binding = "KV_IDEMPOTENCY"
-id = "REPLACE_WITH_PROD_KV_ID"
+id = "0f70f4a899fc4114b3957a7d6d5ee8a9"
 [[env.production.kv_namespaces]]
 binding = "KV_CACHE"
-id = "REPLACE_WITH_PROD_KV_ID"
+id = "14c24f16c5ff4070ba18a9651a5f96a0"
 
 [[env.production.r2_buckets]]
 binding = "R2_DOCUMENTS"
@@ -220,7 +223,7 @@ dead_letter_queue = "drbak-webhooks-dlq"
 
 [[env.production.hyperdrive]]
 binding = "HYPERDRIVE_DB"
-id = "REPLACE_WITH_PROD_HYPERDRIVE_ID"
+id = "08c7b113f81b495cbec2e32fcaad0bb4"
 
 [env.production.triggers]
 crons = ["*/5 * * * *", "0 3 * * *", "*/10 * * * *"]

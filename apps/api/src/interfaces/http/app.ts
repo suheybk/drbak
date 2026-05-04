@@ -22,6 +22,7 @@ import { mapErrorToResponse } from './middleware/errorMapper.js';
 import { securityHeadersMiddleware } from './middleware/securityHeaders.js';
 import { adminRouter } from './routes/admin.js';
 import { authRouter } from './routes/auth.js';
+import { chatRouter } from './routes/chat.js';
 import { patientRouter } from './routes/patient.js';
 import { publicRouter } from './routes/public.js';
 import { signedLinksRouter } from './routes/signedLinks.js';
@@ -119,6 +120,7 @@ export const buildApp = (env: Env, ctx: ExecutionContext) => {
   app.route('/api/v1/public', publicRouter);
   app.route('/api/v1/auth', authRouter);
   app.route('/api/v1/patient', patientRouter);
+  app.route('/api/v1/chat', chatRouter);
   app.route('/api/v1/webhooks', webhookRouter);
   app.route('/api/v1/admin', adminRouter);
   app.route('/r', signedLinksRouter);

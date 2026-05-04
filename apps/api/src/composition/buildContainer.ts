@@ -41,6 +41,7 @@ import { KVIdempotencyStore } from '../infrastructure/kv/KVIdempotencyStore.js';
 import { KVOneTimeTokenStore } from '../infrastructure/kv/KVOneTimeTokenStore.js';
 import { KVRateLimiter } from '../infrastructure/kv/KVRateLimiter.js';
 import { KVSessionStore } from '../infrastructure/kv/KVSessionStore.js';
+import { AnthropicClaudeProvider } from '../infrastructure/llm/AnthropicClaudeProvider.js';
 import { JitsiTelehealthFactory } from '../infrastructure/notifiers/JitsiTelehealthFactory.js';
 import {
   QueueEmailNotifier,
@@ -67,9 +68,14 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
   c.bindValue(T.Env, env);
   c.bindValue(T.WorkerCtx, ctx);
 
-  // DB (per-request — Drizzle client is request-scoped)
+  // DB (per-request — Drizzle client is request-scoped).
+  // We use the @neondatabase/serverless HTTP driver, which speaks HTTPS
+  // straight to Neon — no TCP, no connection pool needed. Hyperdrive is
+  // for TCP-based drivers (pg / postgres-js); pairing it with the HTTP
+  // driver gives an empty connection string. The Hyperdrive binding
+  // stays in wrangler.toml for the future migration to a TCP driver.
   c.bindSingleton(token<ReturnType<typeof buildDb>>('Db'), () =>
-    buildDb({ connectionString: env.HYPERDRIVE_DB.connectionString }),
+    buildDb({ connectionString: env.DATABASE_URL }),
   );
 
   // Stateless infra
@@ -115,6 +121,21 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
     T.DoctorCatalogue,
     (cc) => new DrizzleDoctorCatalogue(cc.resolve(token('Db') as never) as never),
   );
+
+  // LLM provider (Tier-2 chat assistant). Falls back to a stub provider
+  // when ANTHROPIC_API_KEY is missing — chat endpoints return 503 in
+  // that case, but the rest of the API is unaffected.
+  c.bindSingleton(T.LlmProvider, () => {
+    const apiKey = env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return {
+        async complete() {
+          throw new Error('ANTHROPIC_API_KEY not configured');
+        },
+      };
+    }
+    return new AnthropicClaudeProvider(apiKey);
+  });
 
   // Auth-extra
   c.bindSingleton(

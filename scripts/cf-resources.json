@@ -1,0 +1,91 @@
+{
+  "kv": {
+    "dev.KV_SESSIONS": "e6e7349e10b8411ba2246584632bee0b",
+    "dev.KV_RATELIMIT": "0ab87d1999f642efb3324981cffc9a93",
+    "dev.KV_IDEMPOTENCY": "7c6592a945304323bc9ef3d205166670",
+    "dev.KV_CACHE": "7a6a568016db4040868ea6f48f857b73",
+    "staging.KV_SESSIONS": "5c55ff12e7ae4e30aac2cd0ff148b185",
+    "staging.KV_RATELIMIT": "d40186a1a1c34088b92686d673b29971",
+    "staging.KV_IDEMPOTENCY": "519edf4d13b141ab97e23d3e8741726f",
+    "staging.KV_CACHE": "639db512301a4aeaa4815d704ebce983",
+    "production.KV_SESSIONS": "29655459014b4f04acad62defd0cf4d2",
+    "production.KV_RATELIMIT": "4bf0d63164494b1aafa872940cf75f78",
+    "production.KV_IDEMPOTENCY": "0f70f4a899fc4114b3957a7d6d5ee8a9",
+    "production.KV_CACHE": "14c24f16c5ff4070ba18a9651a5f96a0"
+  },
+  "r2": {
+    "dev.R2_DOCUMENTS": "drbak-documents-dev",
+    "dev.R2_MEDIA": "drbak-media-dev",
+    "staging.R2_DOCUMENTS": "drbak-documents-staging",
+    "staging.R2_MEDIA": "drbak-media-staging",
+    "production.R2_DOCUMENTS": "drbak-documents",
+    "production.R2_MEDIA": "drbak-media"
+  },
+  "queues": {
+    "dev.notifications": {
+      "id": "438f974549a340389c271415bcc7b624",
+      "name": "drbak-notifications-dev"
+    },
+    "dev.notifications-dlq": {
+      "id": "b4665d50ab194354b8c60f2881c7ceeb",
+      "name": "drbak-notifications-dlq-dev"
+    },
+    "dev.webhooks": {
+      "id": "dff40728c43040a8a4f4c7300b4c5e10",
+      "name": "drbak-webhooks-dev"
+    },
+    "dev.webhooks-dlq": {
+      "id": "09b4f3b8155047ee92a1edb5f93ea177",
+      "name": "drbak-webhooks-dlq-dev"
+    },
+    "staging.notifications": {
+      "id": "57a48be01ae6405dadecdfeccea50cba",
+      "name": "drbak-notifications-staging"
+    },
+    "staging.notifications-dlq": {
+      "id": "eff282edfc334f2ba5721906218bea8e",
+      "name": "drbak-notifications-dlq-staging"
+    },
+    "staging.webhooks": {
+      "id": "0119c9fd310040298be9267d13d0c37d",
+      "name": "drbak-webhooks-staging"
+    },
+    "staging.webhooks-dlq": {
+      "id": "c1ac999ff7f3402680a61b1e50b107fc",
+      "name": "drbak-webhooks-dlq-staging"
+    },
+    "production.notifications": {
+      "id": "93a3133203cf445c981e480bcd8c1df5",
+      "name": "drbak-notifications"
+    },
+    "production.notifications-dlq": {
+      "id": "ba7991b11aeb4f319e7f6e22147aca26",
+      "name": "drbak-notifications-dlq"
+    },
+    "production.webhooks": {
+      "id": "d0fd6cd1af984fddbacafa5200c5aafc",
+      "name": "drbak-webhooks"
+    },
+    "production.webhooks-dlq": {
+      "id": "abf7c382e7cf4c8ca85fa0456a5a3121",
+      "name": "drbak-webhooks-dlq"
+    }
+  },
+  "hyperdrive": {
+    "staging": "ed23da9987524f88910c36b754ffc22e",
+    "production": "08c7b113f81b495cbec2e32fcaad0bb4",
+    "dev": "ed23da9987524f88910c36b754ffc22e"
+  },
+  "pages": {
+    "staging": {
+      "name": "dr-bak-web-staging",
+      "subdomain": "dr-bak-web-staging.pages.dev",
+      "id": "edbdb983-cfd9-41f8-88f5-b4a6c130ab48"
+    },
+    "production": {
+      "name": "dr-bak-web",
+      "subdomain": "dr-bak-web.pages.dev",
+      "id": "52be288a-0aa7-4497-a359-e5c86665c672"
+    }
+  }
+}

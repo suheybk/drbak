@@ -72,6 +72,9 @@ export interface Env {
   JITSI_APP_ID: string;
   JITSI_APP_SECRET: string;
   ADMIN_BOOTSTRAP_EMAIL?: string;
+
+  // Tier-2 chat assistant
+  ANTHROPIC_API_KEY?: string;
 }
 
 export type WorkerCtx = ExecutionContext;

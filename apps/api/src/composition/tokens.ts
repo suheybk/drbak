@@ -1,3 +1,4 @@
+import type { LlmProvider } from '../application/ports/LlmProvider.js';
 import type {
   AppointmentRepository,
   AuditLogger,
@@ -49,4 +50,7 @@ export const T = {
   SignedUrlMinter: token<SignedUrlMinter>('SignedUrlMinter'),
   UploadTokenMinter: token<UploadTokenMinter>('UploadTokenMinter'),
   DoctorCatalogue: token<DoctorCatalogue>('DoctorCatalogue'),
+
+  // LLM (Tier-2 chat assistant)
+  LlmProvider: token<LlmProvider>('LlmProvider'),
 } as const;
