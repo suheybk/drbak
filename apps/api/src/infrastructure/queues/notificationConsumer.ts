@@ -30,7 +30,7 @@ export const handleNotificationBatch = async (
   batch: MessageBatch<NotificationJob>,
   env: Env,
 ): Promise<void> => {
-  const db = buildDb({ connectionString: env.HYPERDRIVE_DB.connectionString });
+  const db = buildDb({ connectionString: env.DATABASE_URL });
   const resend = new ResendEmailClient(env.RESEND_API_KEY);
   const netgsm = new NetGsmSmsClient(
     env.NETGSM_USERNAME,

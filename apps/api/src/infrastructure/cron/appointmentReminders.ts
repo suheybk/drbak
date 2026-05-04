@@ -20,7 +20,7 @@ import type { NotificationJob } from '../notifiers/QueueNotifierEnqueuers.js';
 const WINDOW_MS = 5 * 60 * 1000;
 
 export const handleAppointmentRemindersCron = async (env: Env): Promise<void> => {
-  const db = buildDb({ connectionString: env.HYPERDRIVE_DB.connectionString });
+  const db = buildDb({ connectionString: env.DATABASE_URL });
   const now = Date.now();
 
   await enqueueRemindersForOffset(db, env, now, 24 * 60, 'appointment_reminder_24h');

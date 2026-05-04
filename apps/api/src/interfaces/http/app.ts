@@ -92,7 +92,7 @@ export const buildApp = (env: Env, ctx: ExecutionContext) => {
       (async () => {
         const { buildDb } = await import('../../infrastructure/db/client.js');
         const { sql } = await import('drizzle-orm');
-        const db = buildDb({ connectionString: env.HYPERDRIVE_DB.connectionString });
+        const db = buildDb({ connectionString: env.DATABASE_URL });
         await db.execute(sql`select 1`);
         return 'ok';
       })(),
