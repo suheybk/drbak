@@ -1,8 +1,11 @@
 ---
 import { DoctorNote } from '@dr-bak/ui';
+import AboutPreviewSection from '~/components/AboutPreviewSection.astro';
 import EvdeHizmetCallout from '~/components/EvdeHizmetCallout.astro';
 import HizliRandevuSection from '~/components/HizliRandevuSection.astro';
+import NumberedServicesSection from '~/components/NumberedServicesSection.astro';
 import StatsStrip from '~/components/StatsStrip.astro';
+import TeamSection from '~/components/TeamSection.astro';
 import TestimonialsStrip from '~/components/TestimonialsStrip.astro';
 import TrustBadges from '~/components/TrustBadges.astro';
 import YouTubeEmbedsSection from '~/components/YouTubeEmbedsSection.astro';
@@ -17,15 +20,6 @@ export const getStaticPaths = () =>
 const locale = (Astro.params.locale ?? DEFAULT_LOCALE) as AppLocale;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.home(l));
-
-const pillars = [
-  t('home.pillarBoardCertified'),
-  t('home.pillarHolistic'),
-  t('home.pillarHumility'),
-  t('home.pillarContinuity'),
-  t('home.pillarAccessibility'),
-  t('home.pillarMindBody'),
-];
 ---
 <BaseLayout
   title={t('home.heroTitle')}
@@ -45,36 +39,19 @@ const pillars = [
     </div>
   </section>
 
-  <section class="app-section">
-    <h2>{t('home.pillarsTitle')}</h2>
-    <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-5); list-style: none; padding: 0; margin: var(--space-6) 0;">
-      {pillars.map((p) => (
-        <li class="card">
-          <p style="font-family: var(--font-display); font-size: var(--type-display-sm); margin: 0;">{p}</p>
-        </li>
-      ))}
-    </ul>
-  </section>
+  <AboutPreviewSection />
 
   <StatsStrip />
 
-  <section class="app-section">
-    <div class="card" style="background: var(--color-primary); color: var(--color-primary-on); border: 0; padding: var(--space-12);">
-      <h2 style="color: inherit;">{t('home.marqueeServiceTitle')}</h2>
-      <p style="color: rgba(244,241,234,0.85); font-size: var(--type-body-lg); max-width: 56ch;">
-        {t('home.marqueeServiceLead')}
-      </p>
-      <a class="drb-btn drb-btn--accent" href={routes.serviceDetail(locale, 'tms')}>
-        {t('home.marqueeServiceCta')}
-      </a>
-    </div>
-  </section>
+  <NumberedServicesSection />
 
   <EvdeHizmetCallout />
 
   <TestimonialsStrip request={Astro.request} />
 
   <YouTubeEmbedsSection />
+
+  <TeamSection />
 
   <HizliRandevuSection />
 

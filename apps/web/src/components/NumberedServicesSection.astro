@@ -1,0 +1,90 @@
+---
+/**
+ * Numbered service cards for the home page.
+ *
+ * Mirrors the "Sağladığımız Hizmetler" pattern from the live site: each
+ * service is a card with a large numbered green circle, a title, a short
+ * lead, and a "Devamını oku" link to the canonical service detail page.
+ *
+ * Source-of-truth: the 5 services are seeded in 0002_seed.sql; for the
+ * home preview we hard-code the i18n-key labels + slugs to avoid an API
+ * round-trip on the most-visited page (services rarely change, so this
+ * coupling is acceptable). The full /services hub still does the live
+ * fetch and shows the canonical descriptions.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+interface ServiceEntry {
+  slug: string;
+  title: string;
+  lead: string;
+}
+
+const services: ReadonlyArray<ServiceEntry> = locale === 'tr'
+  ? [
+      { slug: 'tms', title: 'TMS — Manyetik Beyin Uyarımı', lead: 'İlaca dirençli depresyon, OKB ve migrende kanıta dayalı, ilaçsız bir tedavi seçeneği.' },
+      { slug: 'neurology-consultation', title: 'Nöroloji Muayenesi', lead: 'Migren, epilepsi, baş dönmesi ve genel nörolojik durumlar için detaylı klinik değerlendirme.' },
+      { slug: 'home-visit', title: 'Evde Nöroloji Hizmeti', lead: 'Mobilitesi kısıtlı hastalar için adresinizde uygulanan klinik muayene.' },
+      { slug: 'telehealth', title: 'Online Görüşme', lead: 'Şifreli video görüşme ile takip muayeneleri ve uzaktan danışmanlık.' },
+      { slug: 'iv-therapy', title: 'IV Tedaviler', lead: 'Glutatyon, ozon ve kişiye özel kombinasyon protokolleri ile destekleyici tedavi.' },
+    ]
+  : locale === 'ar'
+    ? [
+        { slug: 'tms', title: 'TMS — التحفيز المغناطيسي للدماغ', lead: 'خيار قائم على الأدلة بلا أدوية للاكتئاب المقاوم والوسواس القهري والصداع النصفي.' },
+        { slug: 'neurology-consultation', title: 'استشارة الأعصاب', lead: 'تقييم سريري مفصل للصداع النصفي والصرع والدوار والحالات العصبية العامة.' },
+        { slug: 'home-visit', title: 'زيارة منزلية', lead: 'فحص سريري في منزلك للمرضى ذوي القدرة المحدودة على التنقل.' },
+        { slug: 'telehealth', title: 'استشارة عن بُعد', lead: 'متابعات واستشارات عبر مكالمة فيديو مشفرة.' },
+        { slug: 'iv-therapy', title: 'علاجات وريدية', lead: 'علاج داعم ببروتوكولات غلوتاثيون وأوزون وتركيبات شخصية.' },
+      ]
+    : locale === 'fr'
+      ? [
+          { slug: 'tms', title: 'TMS — Stimulation magnétique transcrânienne', lead: 'Option non médicamenteuse fondée sur les preuves pour la dépression résistante, le TOC et la migraine.' },
+          { slug: 'neurology-consultation', title: 'Consultation de neurologie', lead: 'Évaluation clinique détaillée pour migraine, épilepsie, vertige et autres troubles.' },
+          { slug: 'home-visit', title: 'Visite à domicile', lead: 'Examen clinique à votre adresse pour patients à mobilité réduite.' },
+          { slug: 'telehealth', title: 'Téléconsultation', lead: 'Consultations de suivi par vidéo chiffrée.' },
+          { slug: 'iv-therapy', title: 'Thérapies IV', lead: 'Soutien thérapeutique avec protocoles glutathion, ozone et combinaisons individualisées.' },
+        ]
+      : locale === 'es'
+        ? [
+            { slug: 'tms', title: 'TMS — Estimulación Magnética Transcraneal', lead: 'Opción no farmacológica basada en evidencia para depresión resistente, TOC y migraña.' },
+            { slug: 'neurology-consultation', title: 'Consulta de neurología', lead: 'Evaluación clínica detallada para migraña, epilepsia, vértigo y otros trastornos.' },
+            { slug: 'home-visit', title: 'Visita domiciliaria', lead: 'Examen clínico en su domicilio para pacientes con movilidad limitada.' },
+            { slug: 'telehealth', title: 'Telemedicina', lead: 'Consultas de seguimiento por videollamada cifrada.' },
+            { slug: 'iv-therapy', title: 'Terapias IV', lead: 'Apoyo terapéutico con protocolos de glutatión, ozono y combinaciones individualizadas.' },
+          ]
+        : [
+            { slug: 'tms', title: 'TMS — Transcranial Magnetic Stimulation', lead: 'A drug-free, evidence-based option for treatment-resistant depression, OCD, and migraine.' },
+            { slug: 'neurology-consultation', title: 'Neurology Consultation', lead: 'Detailed clinical assessment for migraine, epilepsy, vertigo, and general neurological conditions.' },
+            { slug: 'home-visit', title: 'Home Neurology Service', lead: 'In-home clinical examination for patients with limited mobility.' },
+            { slug: 'telehealth', title: 'Telehealth', lead: 'Encrypted video consultations for follow-up and remote advice.' },
+            { slug: 'iv-therapy', title: 'IV Therapies', lead: 'Supportive treatment with glutathione, ozone, and individualised combination protocols.' },
+          ];
+---
+<section class="numbered-services" aria-labelledby="numbered-services-heading">
+  <div class="numbered-services__head">
+    <p class="numbered-services__kicker">{t('home.servicesNumberedKicker')}</p>
+    <h2 id="numbered-services-heading">{t('home.servicesNumberedTitle')}</h2>
+    <p class="numbered-services__lead">{t('home.servicesNumberedLead')}</p>
+  </div>
+  <ul class="numbered-services__grid" role="list">
+    {services.map((s, i) => (
+      <li class="numbered-services__card">
+        <div class="numbered-services__copy">
+          <h3 class="numbered-services__title">{s.title}</h3>
+          <p class="numbered-services__service-lead">{s.lead}</p>
+          <a class="numbered-services__link" href={routes.serviceDetail(locale, s.slug)}>
+            {t('home.servicesReadMore')} »
+          </a>
+        </div>
+        <div class="numbered-services__num" aria-hidden="true">
+          <span class="digit-western" dir="ltr">{String(i + 1).padStart(2, '0')}</span>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>

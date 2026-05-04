@@ -1,0 +1,59 @@
+---
+/**
+ * "Uzman Ekibimiz" team section.
+ *
+ * Three placeholder cards until the owner provides real team-member
+ * photos + bios. Cards use initials in a sage circle as the
+ * photo-fallback, matching the Sage Clinical aesthetic.
+ *
+ * Future: pull team data from a `team_members` table + admin CMS.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+interface TeamMember {
+  initials: string;
+  name: string;
+  role: string;
+}
+
+// Placeholder until real team-member content arrives.
+const team: ReadonlyArray<TeamMember> = [
+  {
+    initials: 'OB',
+    name: t('brand.doctor'),
+    role: t('brand.doctorTitle'),
+  },
+  {
+    initials: '—',
+    name: t('home.teamPlaceholder'),
+    role: locale === 'tr' ? 'Hemşire' : locale === 'ar' ? 'ممرضة' : locale === 'fr' ? 'Infirmière' : locale === 'es' ? 'Enfermería' : 'Clinical Nurse',
+  },
+  {
+    initials: '—',
+    name: t('home.teamPlaceholder'),
+    role: locale === 'tr' ? 'Hasta İlişkileri' : locale === 'ar' ? 'علاقات المرضى' : locale === 'fr' ? 'Relations patients' : locale === 'es' ? 'Relación con pacientes' : 'Patient Coordinator',
+  },
+];
+---
+<section class="team-section" aria-labelledby="team-heading">
+  <div class="team-section__head">
+    <p class="team-section__kicker">{t('home.teamKicker')}</p>
+    <h2 id="team-heading">{t('home.teamTitle')}</h2>
+    <p class="team-section__lead">{t('home.teamLead')}</p>
+  </div>
+  <ul class="team-section__grid" role="list">
+    {team.map((m) => (
+      <li class="team-section__card">
+        <div class="team-section__avatar" aria-hidden="true">
+          <span>{m.initials}</span>
+        </div>
+        <p class="team-section__name">{m.name}</p>
+        <p class="team-section__role">{m.role}</p>
+      </li>
+    ))}
+  </ul>
+</section>

@@ -1,68 +1,91 @@
 # Local secrets template — copy to `.dev.vars` (gitignored) and fill in.
 #
-# `wrangler dev` reads `.dev.vars` automatically as if every key were a
-# `wrangler secret put` value. We re-use the same file for the migration
-# runner script (`pnpm --filter @dr-bak/api db:migrate`) and the
-# CF-provisioning helper.
+# IMPORTANT: comments only on their own line. Do NOT put `# foo` after a value
+# on the same line — `wrangler dev` and `dotenv` keep the `# foo` as part of
+# the variable's value, which has bitten us. Each `KEY=value` line must be
+# value-only.
 #
-# DO NOT commit `.dev.vars` — it contains real credentials. The `.example`
-# file is the documentation of what keys exist; values are placeholders.
+# DO NOT commit `.dev.vars` — it contains real credentials.
+
 
 # ─── Cloudflare ───────────────────────────────────────────────────────────────
 # Generate at: https://dash.cloudflare.com/profile/api-tokens
 # Token needs: Workers Edit, KV Edit, R2 Edit, Hyperdrive Edit, Pages Edit,
 #              Queues Edit, Account Settings Read, DNS Edit (zone), Zone Read.
+# CLOUDFLARE_ACCOUNT_ID is a 32-char hex string visible on every CF dashboard
+# page in the right sidebar.
+# CLOUDFLARE_ZONE_ID is a 32-char hex string visible on the
+# uzmdroguzbak.com zone overview page (right sidebar). NOT the domain name.
 CLOUDFLARE_API_TOKEN=
 CLOUDFLARE_ACCOUNT_ID=
 CLOUDFLARE_ZONE_ID=
 
+
 # ─── Neon Postgres EU (Frankfurt) ─────────────────────────────────────────────
-# Get the pooled connection string from: console.neon.tech → Connect.
-# Format: postgres://USER:PASSWORD@HOST-pooler.eu-central-1.aws.neon.tech/DB?sslmode=require
+# Get pooled connection string from: console.neon.tech → Connect.
+# Expected shape: postgresql://USER:PASSWORD@HOST-pooler.eu-central-1.aws.neon.tech/DB?sslmode=require&channel_binding=require
+# Both branches must exist before filling: production (default) + staging
+# (created via Neon dashboard → Branches → Create branch → from production).
 DATABASE_URL_PRODUCTION=
 DATABASE_URL_STAGING=
 
-# ─── JWT signing (generated, not provisioned) ─────────────────────────────────
-# Engineering will generate via `pnpm --filter @dr-bak/api keys:generate`
-# and `wrangler secret put` per env. Local dev uses the values below for the
-# Miniflare runner only — they are NOT the production keys.
+
+# ─── JWT signing keys ─────────────────────────────────────────────────────────
+# Engineering generates with `pnpm --filter @dr-bak/api keys:generate` and
+# `wrangler secret put` per env. Local dev uses these for the Miniflare
+# runner; they are NOT the production keys.
 JWT_SIGNING_PRIVATE_KEY=
 JWT_SIGNING_PUBLIC_KEY=
 JWT_SIGNING_KID=dev-key-1
 
+
 # ─── Resend (email) ───────────────────────────────────────────────────────────
 RESEND_API_KEY=
 
+
 # ─── NetGSM (TR SMS) ──────────────────────────────────────────────────────────
+# NETGSM_SENDER_ID must be İYS-registered before any TR commercial SMS goes
+# out. The value is the registered sender header text (max 11 chars), like
+# DRBAK or AGRI-KLINIK — NOT a phone number.
 NETGSM_USERNAME=
 NETGSM_PASSWORD=
-NETGSM_SENDER_ID=  # must be İYS-registered
+NETGSM_SENDER_ID=
+
 
 # ─── Twilio (non-TR SMS fallback, optional at launch) ─────────────────────────
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_FROM_NUMBER=
 
+
 # ─── Meta WhatsApp Cloud API ──────────────────────────────────────────────────
+# Templates booking_confirm, reminder_t24h, reminder_t1h_telehealth must be
+# approved for TR + EN before launch (Meta review 24-48h per template).
 META_WA_ACCESS_TOKEN=
 META_WA_PHONE_NUMBER_ID=
 META_WA_VERIFY_TOKEN=
 
+
 # ─── Google OAuth ─────────────────────────────────────────────────────────────
+# Authorised redirect URI:
+# https://api.uzmdroguzbak.com/api/v1/auth/oauth/google/callback
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=
+
 
 # ─── Jitsi-as-a-Service (telehealth) ──────────────────────────────────────────
 JITSI_APP_ID=
 JITSI_APP_SECRET=
 
+
 # ─── iyzico (TR card payments + Apple/Google Pay) ─────────────────────────────
-# Get from iyzico merchant portal after approval (Settings → API Keys).
-# Sandbox first, then production. Use api.iyzipay.com for prod, sandbox-api.iyzipay.com for test.
+# Sandbox first, then production. Use api.iyzipay.com for prod,
+# sandbox-api.iyzipay.com for test.
 IYZICO_API_KEY=
 IYZICO_SECRET_KEY=
 IYZICO_BASE_URL=https://sandbox-api.iyzipay.com
 
+
 # ─── Bootstrap ────────────────────────────────────────────────────────────────
-# Email for the first admin account (one-time, on initial deploy)
+# Email for the first admin account (one-time, on initial deploy).
 ADMIN_BOOTSTRAP_EMAIL=

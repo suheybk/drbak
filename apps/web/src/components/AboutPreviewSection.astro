@@ -1,0 +1,64 @@
+---
+/**
+ * "Hakkımızda" preview block on the home page.
+ *
+ * Mirrors the live-site About section: doctor photo on the left, content
+ * + 3-bullet list on the right, support-line + CTA at the bottom. Photo
+ * is a placeholder (`/og/dr-oguz-bak.jpg`) until the owner uploads the
+ * licensed clinical headshots — the path is consistent with the OG image
+ * fallback so we can swap one file and update both surfaces.
+ *
+ * Voice: positions the practice as scientific + individualised + holistic
+ * without superlative claims.
+ */
+import { buildT } from '~/lib/i18n';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const t = buildT(locale);
+
+const env = (import.meta as never as { env: Record<string, string | undefined> }).env;
+const contactEmail = env.CONTACT_EMAIL ?? 'info@uzmdroguzbak.com';
+const contactPhone = env.CONTACT_PHONE_E164 ?? '+905300874391';
+
+const points = [t('home.aboutPoint1'), t('home.aboutPoint2'), t('home.aboutPoint3')];
+---
+<section class="about-preview" aria-labelledby="about-preview-heading">
+  <div class="about-preview__media">
+    <div class="about-preview__photo" aria-hidden="true">
+      <span class="about-preview__photo-fallback">{t('brand.doctor')}</span>
+    </div>
+    <div class="about-preview__namecard">
+      <p class="about-preview__namecard-name">{t('brand.doctor')}</p>
+      <p class="about-preview__namecard-role">{t('brand.doctorTitle')}</p>
+      <a class="about-preview__namecard-phone digit-western" dir="ltr" href={`tel:${contactPhone}`}>
+        ☎ {contactPhone}
+      </a>
+    </div>
+  </div>
+  <div class="about-preview__copy">
+    <p class="about-preview__kicker">{t('home.aboutKicker')}</p>
+    <h2 class="about-preview__title" id="about-preview-heading">{t('home.aboutTitle')}</h2>
+    <p class="about-preview__lead">{t('home.aboutLead')}</p>
+    <ul class="about-preview__points" role="list">
+      {points.map((p) => (
+        <li class="about-preview__point">
+          <span class="about-preview__check" aria-hidden="true">✓</span>
+          <span>{p}</span>
+        </li>
+      ))}
+    </ul>
+    <div class="about-preview__foot">
+      <div class="about-preview__support">
+        <p class="about-preview__support-label">{t('home.aboutSupport')}</p>
+        <a class="about-preview__support-email" href={`mailto:${contactEmail}`}>
+          {contactEmail}
+        </a>
+      </div>
+      <a class="drb-btn drb-btn--primary" href={routes.about(locale)}>
+        {t('home.aboutCta')}
+      </a>
+    </div>
+  </div>
+</section>
