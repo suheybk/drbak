@@ -94,7 +94,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name dr-bak-web-staging --branch=staging --commit-hash=${{ env.DEPLOY_SHA }}
+          workingDirectory: apps/web
+          command: pages deploy dist --project-name dr-bak-web-staging --branch=staging --commit-hash=${{ env.DEPLOY_SHA }}
           packageManager: pnpm
 
   smoke-staging:

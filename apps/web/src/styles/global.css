@@ -150,51 +150,31 @@ html[dir="rtl"] body {
 .app-header__inner {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-6);
   padding: var(--space-4) var(--space-5);
   max-width: var(--shell-max);
   margin: 0 auto;
 }
 .app-header__brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
   text-decoration: none;
   color: inherit;
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 auto;
 }
 .app-header__logo {
-  block-size: 40px;
+  block-size: 48px;
   inline-size: auto;
   flex-shrink: 0;
-}
-.app-header__brand-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.app-header__brand strong,
-.app-header__brand-text strong {
-  font-family: var(--font-display);
-  font-size: var(--type-body-lg);
-  line-height: 1.1;
-}
-.app-header__brand small,
-.app-header__brand-text small {
-  color: var(--color-ink-subtle);
-  font-size: var(--type-meta);
-}
-@media (max-width: 600px) {
-  .app-header__brand-text {
-    display: none;
-  }
 }
 .app-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--space-4);
   align-items: center;
+  flex: 0 1 auto;
+  justify-content: flex-end;
 }
 .app-nav a {
   color: var(--color-ink-muted);
@@ -846,34 +826,27 @@ html[dir="rtl"] body {
   object-position: center top;
   display: block;
 }
-.about-preview__namecard {
-  position: absolute;
-  inset-inline-end: var(--space-4);
-  inset-block-end: var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-4) var(--space-5);
-  box-shadow: var(--shadow-md);
-  max-width: 240px;
+.about-preview__media {
+  margin: 0;
 }
-.about-preview__namecard-name {
-  margin: 0 0 var(--space-1);
+.about-preview__caption {
+  margin-block-start: var(--space-4);
+  display: grid;
+  gap: 2px;
+}
+.about-preview__caption-name {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
   color: var(--color-ink);
+  font-size: var(--type-body-lg);
 }
-.about-preview__namecard-role {
-  margin: 0 0 var(--space-2);
+.about-preview__caption-role {
+  margin: 0;
   font-size: var(--type-meta);
   color: var(--color-ink-muted);
-}
-.about-preview__namecard-phone {
-  display: inline-block;
-  font-size: var(--type-body-sm);
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 .about-preview__copy {
   display: grid;

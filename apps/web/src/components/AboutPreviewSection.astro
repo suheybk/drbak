@@ -25,7 +25,7 @@ const contactPhone = env.CONTACT_PHONE_E164 ?? '+905300874391';
 const points = [t('home.aboutPoint1'), t('home.aboutPoint2'), t('home.aboutPoint3')];
 ---
 <section class="about-preview" aria-labelledby="about-preview-heading">
-  <div class="about-preview__media">
+  <figure class="about-preview__media">
     <div class="about-preview__photo">
       <img
         src="/images/dr-oguz-bak-profile.png"
@@ -36,14 +36,11 @@ const points = [t('home.aboutPoint1'), t('home.aboutPoint2'), t('home.aboutPoint
         decoding="async"
       />
     </div>
-    <div class="about-preview__namecard">
-      <p class="about-preview__namecard-name">{t('brand.doctor')}</p>
-      <p class="about-preview__namecard-role">{t('brand.doctorTitle')}</p>
-      <a class="about-preview__namecard-phone digit-western" dir="ltr" href={`tel:${contactPhone}`}>
-        ☎ {contactPhone}
-      </a>
-    </div>
-  </div>
+    <figcaption class="about-preview__caption">
+      <p class="about-preview__caption-name">{t('brand.doctor')}</p>
+      <p class="about-preview__caption-role">{t('brand.doctorTitle')}</p>
+    </figcaption>
+  </figure>
   <div class="about-preview__copy">
     <p class="about-preview__kicker">{t('home.aboutKicker')}</p>
     <h2 class="about-preview__title" id="about-preview-heading">{t('home.aboutTitle')}</h2>
