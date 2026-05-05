@@ -61,11 +61,31 @@ For each, run `wrangler secret put <NAME> --env staging` then `--env production`
 - [ ] Enable Bot Fight Mode + Cloudflare Managed Ruleset + OWASP CRS at paranoia 2
 - [ ] Enable HSTS (1-year) — wait 30 days before adding `preload` per the file's note
 
-### A6. KVKK + privacy
+### A6. KVKK + GDPR + privacy
 
+Full obligations are documented in `docs/compliance/CHECKLIST-DOCTOR.md` (English) / `docs/compliance/CHECKLIST-DOCTOR-TR.md` (Turkish, printable as `dr-bak-uyum-listesi.pdf`) for the doctor, and `docs/compliance/CHECKLIST-DEVELOPER.md` for the engineering controls. The gate items below are the launch-blockers.
+
+**Doctor-side (per CHECKLIST-DOCTOR-TR.md):**
+- [ ] **B1.1** VERBİS registration filed (within 30 days of first patient record)
+- [ ] **B1.2** İrtibat kişisi designated and registered with VERBİS
+- [ ] **B1.3** Uzaktan Sağlık Faaliyet İzin Belgesi obtained from İl Sağlık Müdürlüğü
+- [ ] **B1.4** Veri İşleyen Sözleşmesi signed with every third-party that touches patient data (incl. Standart Sözleşme + KVKK 5-business-day filing for each EU vendor)
+- [ ] **B1.5** Aydınlatma Metni published in 5 languages + waiting-room poster
+- [ ] **B1.6** Five required written policies adopted and date-signed
+- [ ] **B9.1** GDPR Art.27 EU representative appointed (if EU patient bookings expected)
+- [ ] **B9.6** DPIA reviewed and signed by doctor
+
+**Engineering-side (per CHECKLIST-DEVELOPER.md):**
+- [ ] **A2.2** AES-256-GCM at-rest encryption live for özel-nitelikli columns (currently plaintext placeholder in `chat_messages.body_ciphertext` — see TODO in `handleChatMessage.ts`)
+- [ ] **A4.1** Granular separated consents (`consents` table with C1–C5 purposes) wired to onboarding flow
+- [ ] **A7.1** Incident response runbook at `runbooks/INCIDENT_RESPONSE.md` with TR/AR/EN/FR/ES patient-notification templates
+- [ ] **A8.5** Telehealth pre-visit non-skippable modal with verbatim Yönetmelik md.7 disclosures
+- [ ] **A10.2** Data portability endpoint (Art.20) — JSON export of patient's own data
+- [ ] **A10.3** Restriction flag (Art.18) honored by downstream queries
+- [ ] **A10.5** Cookie consent banner (only triggered if marketing adds GA on patient routes)
 - [ ] Have legal counsel review `apps/web/src/views/KvkkPage.astro` content before publish
-- [ ] Designate a clinic data protection officer (the named person who files KVKK breach notifications within 72h per `docs/runbook.md` §6)
-- [ ] Add `dpo@uzmdroguzbak.com` (or equivalent) as a forwarder; add to footer
+- [ ] Designate the named person who files KVKK + EU DPA breach notifications within 72 h per `docs/runbook.md` §6
+- [ ] Add `kvkk@drbak.com` as the patient-rights intake address; add to footer
 - [ ] Confirm Resend stores PII under EU residency (it does for paid plans on `eu-west-1`)
 
 ---
