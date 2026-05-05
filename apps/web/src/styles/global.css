@@ -155,6 +155,7 @@ html[dir="rtl"] body {
   padding: var(--space-4) var(--space-5);
   max-width: var(--shell-max);
   margin: 0 auto;
+  position: relative;
 }
 .app-header__brand {
   display: inline-flex;
@@ -168,6 +169,36 @@ html[dir="rtl"] body {
   inline-size: auto;
   flex-shrink: 0;
 }
+
+/* CSS-only mobile drawer — checkbox is hidden, label is the visual hamburger */
+.app-header__toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.app-header__hamburger {
+  display: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-inline-start: auto;
+  z-index: 2;
+}
+.app-header__hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--color-ink);
+  margin: 5px 0;
+  transition: transform var(--motion-base) var(--ease-out), opacity var(--motion-base) var(--ease-out);
+  border-radius: 2px;
+}
+
 .app-nav {
   display: flex;
   flex-wrap: wrap;
@@ -184,6 +215,70 @@ html[dir="rtl"] body {
 .app-nav a:hover,
 .app-nav a[aria-current="page"] {
   color: var(--color-primary);
+}
+.app-nav__locales {
+  flex-basis: 100%;
+}
+
+/* Locale switcher — compact on desktop (right of nav), full-width inside the drawer on mobile. */
+.app-nav__locales .drb-localesw ul {
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.app-nav__locales .drb-localesw__link {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* ── Mobile drawer (≤900px) ── */
+@media (max-width: 900px) {
+  .app-header__hamburger {
+    display: block;
+  }
+  .app-nav {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline: 0;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    background: var(--color-surface);
+    border-block-end: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-4) var(--space-5);
+    gap: var(--space-3);
+    max-block-size: 0;
+    overflow: hidden;
+    transition: max-block-size var(--motion-base) var(--ease-out),
+      padding var(--motion-base) var(--ease-out);
+    padding-block: 0;
+  }
+  .app-nav a {
+    padding: var(--space-2) 0;
+    font-size: var(--type-body);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .app-nav a:last-of-type {
+    border-block-end: 0;
+  }
+  .app-nav .drb-btn {
+    align-self: stretch;
+    text-align: center;
+  }
+  .app-header__toggle:checked ~ .app-nav {
+    max-block-size: 90vh;
+    padding-block: var(--space-4);
+    overflow-y: auto;
+  }
+  .app-header__toggle:checked ~ .app-header__hamburger span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .app-header__toggle:checked ~ .app-header__hamburger span:nth-child(2) {
+    opacity: 0;
+  }
+  .app-header__toggle:checked ~ .app-header__hamburger span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
 }
 
 .app-footer {

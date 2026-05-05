@@ -10,15 +10,235 @@ interface Props {
 const { locale } = Astro.props;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.accessibility(l));
+
+/**
+ * Accessibility statement — drafted to align with the WAI ATAG / EN 301 549
+ * structure. Kept in inline 5-locale literals (matches AboutPage / Footer
+ * pattern) until the medical translator review (LAUNCH-CHECKLIST §B1)
+ * lifts it into i18n keys.
+ *
+ * The conformance level reflects what this build actually delivers (not
+ * what we aspire to). When something measurably ships above WCAG 2.1 AA
+ * — e.g. captioned video, sign-language interpretation — bump the claim.
+ */
+type LocaleStrings = Record<AppLocale, string>;
+const pick = (s: LocaleStrings): string => s[locale] ?? s.en;
+
+const policyLead: LocaleStrings = {
+  tr: 'Bu site herkesin kullanabilmesi için tasarlanmıştır. Görme, işitme, motor veya bilişsel farklılıkları olan ziyaretçilerin de aynı bilgilere ulaşabilmesi bizim için bir kalite ölçütüdür.',
+  en: 'This site is designed to be usable by everyone. Equal access for visitors with vision, hearing, motor, or cognitive differences is a quality standard for us.',
+  ar: 'صُمّم هذا الموقع ليكون قابلًا للاستخدام من قِبل الجميع. ويُعدّ تكافؤ الوصول للزوار من ذوي الاحتياجات البصرية أو السمعية أو الحركية أو المعرفية معيارًا للجودة لدينا.',
+  fr: "Ce site est conçu pour être utilisable par tous. L'accès équitable des visiteurs présentant des différences visuelles, auditives, motrices ou cognitives est pour nous un critère de qualité.",
+  es: 'Este sitio está diseñado para ser utilizable por todas las personas. El acceso equitativo para visitantes con diferencias visuales, auditivas, motoras o cognitivas es para nosotros un criterio de calidad.',
+};
+
+const standardTitle: LocaleStrings = {
+  tr: 'Uyum Standardı',
+  en: 'Conformance Standard',
+  ar: 'معيار التوافق',
+  fr: 'Norme de conformité',
+  es: 'Estándar de conformidad',
+};
+
+const standardBody: LocaleStrings = {
+  tr: 'Hedeflediğimiz seviye: WCAG 2.1 (Web İçeriği Erişilebilirlik Yönergeleri) AA. Bu site, EN 301 549 ve AB Erişilebilirlik Direktifi ile uyumlu olacak şekilde geliştirilmektedir. Mayıs 2026 itibarıyla bilinen önemli sapmalar aşağıda listelenmiştir.',
+  en: 'Target conformance: WCAG 2.1 (Web Content Accessibility Guidelines) Level AA. The site is developed to align with EN 301 549 and the EU Accessibility Directive. Known material gaps as of May 2026 are listed below.',
+  ar: 'مستوى التوافق المستهدف: WCAG 2.1 (إرشادات الوصول إلى محتوى الويب) المستوى AA. يُطوَّر الموقع بما يتماشى مع EN 301 549 وتوجيه الاتحاد الأوروبي للوصول. القائمة أدناه تتضمّن الفجوات الجوهرية المعلومة حتى مايو 2026.',
+  fr: "Niveau de conformité visé : WCAG 2.1 (Règles pour l'accessibilité des contenus Web) niveau AA. Le site est développé pour être conforme à EN 301 549 et à la directive européenne sur l'accessibilité. Les écarts notables connus au mois de mai 2026 sont listés ci-dessous.",
+  es: 'Nivel de conformidad objetivo: WCAG 2.1 (Pautas de Accesibilidad para el Contenido Web) Nivel AA. El sitio se desarrolla para alinearse con EN 301 549 y la Directiva Europea de Accesibilidad. A continuación se enumeran las desviaciones materiales conocidas a mayo de 2026.',
+};
+
+const featuresTitle: LocaleStrings = {
+  tr: 'Şu anda destekledikleri',
+  en: 'What is supported today',
+  ar: 'ما هو مدعوم حاليًا',
+  fr: 'Ce qui est pris en charge aujourd’hui',
+  es: 'Lo que es compatible actualmente',
+};
+
+const features: ReadonlyArray<LocaleStrings> = [
+  {
+    tr: 'Klavye ile tam navigasyon — fare olmadan tüm sayfaların kullanılabilmesi',
+    en: 'Full keyboard navigation — every page is operable without a mouse',
+    ar: 'تنقّل كامل بلوحة المفاتيح — يمكن استخدام كل الصفحات دون فأرة',
+    fr: 'Navigation complète au clavier — toutes les pages sont utilisables sans souris',
+    es: 'Navegación completa con teclado — todas las páginas son operables sin ratón',
+  },
+  {
+    tr: 'Ekran okuyucu uyumu (NVDA, JAWS, VoiceOver, TalkBack) — anlamsal HTML, ARIA etiketleri',
+    en: 'Screen-reader compatibility (NVDA, JAWS, VoiceOver, TalkBack) — semantic HTML and ARIA labels',
+    ar: 'توافق مع قارئات الشاشة (NVDA، JAWS، VoiceOver، TalkBack) — HTML دلالي وعلامات ARIA',
+    fr: "Compatibilité lecteurs d'écran (NVDA, JAWS, VoiceOver, TalkBack) — HTML sémantique et étiquettes ARIA",
+    es: 'Compatibilidad con lectores de pantalla (NVDA, JAWS, VoiceOver, TalkBack) — HTML semántico y etiquetas ARIA',
+  },
+  {
+    tr: 'Renk kontrastı WCAG AA seviyesinde (gövde metni 4,5:1, büyük metin 3:1)',
+    en: 'Colour contrast at WCAG AA (4.5:1 for body text, 3:1 for large text)',
+    ar: 'تباين الألوان وفق WCAG AA (4.5:1 للنص العادي، 3:1 للنص الكبير)',
+    fr: 'Contraste des couleurs au niveau WCAG AA (4,5:1 pour le texte courant, 3:1 pour le texte large)',
+    es: 'Contraste de color a nivel WCAG AA (4,5:1 para texto normal, 3:1 para texto grande)',
+  },
+  {
+    tr: 'İçerik metin olarak yeniden boyutlandırılabilir (200% zoom kapsamında düzen bozulmaz)',
+    en: 'Content reflows at 200% zoom without loss of information or function',
+    ar: 'يتدفّق المحتوى عند تكبير 200% دون فقدان المعلومات أو الوظائف',
+    fr: 'Le contenu se réorganise à 200 % de zoom sans perte d’informations ni de fonctionnalités',
+    es: 'El contenido se reajusta al 200 % de zoom sin pérdida de información ni de funcionalidad',
+  },
+  {
+    tr: 'Çoklu dil desteği (TR/AR/EN/FR/ES); Arapça için sağdan sola (RTL) yerleşim',
+    en: 'Multilingual support (TR/AR/EN/FR/ES); right-to-left layout for Arabic',
+    ar: 'دعم متعدّد اللغات (TR/AR/EN/FR/ES)؛ تخطيط من اليمين إلى اليسار للعربية',
+    fr: 'Support multilingue (TR/AR/EN/FR/ES) ; mise en page de droite à gauche pour l’arabe',
+    es: 'Soporte multilingüe (TR/AR/EN/FR/ES); diseño de derecha a izquierda para árabe',
+  },
+  {
+    tr: 'Form alanlarında etiket–giriş eşleştirmesi ve hata mesajlarının `aria-describedby` ile bağlanması',
+    en: 'Form labels paired with inputs; error messages bound via aria-describedby',
+    ar: 'اقتران تسميات الحقول بالمدخلات؛ ربط رسائل الخطأ عبر aria-describedby',
+    fr: "Étiquettes de formulaire associées aux champs ; messages d'erreur reliés via aria-describedby",
+    es: 'Etiquetas de formulario emparejadas con los campos; mensajes de error vinculados con aria-describedby',
+  },
+  {
+    tr: 'Tarayıcı seviyesinde indirgenmiş hareket tercihine (`prefers-reduced-motion`) uyum',
+    en: 'Honours the browser-level reduced-motion preference (prefers-reduced-motion)',
+    ar: 'يحترم تفضيل تقليل الحركة على مستوى المتصفّح (prefers-reduced-motion)',
+    fr: 'Respect du paramètre `prefers-reduced-motion` du navigateur',
+    es: 'Respeta la preferencia del navegador prefers-reduced-motion',
+  },
+];
+
+const gapsTitle: LocaleStrings = {
+  tr: 'Bilinen sınırlamalar',
+  en: 'Known limitations',
+  ar: 'القيود المعروفة',
+  fr: 'Limitations connues',
+  es: 'Limitaciones conocidas',
+};
+
+const gaps: ReadonlyArray<LocaleStrings> = [
+  {
+    tr: 'Ana sayfadaki video şu an alt yazı içermiyor; kapalı alt yazı (CC) Phase-2 sonunda eklenecek.',
+    en: 'The home-page video has no captions yet; closed captions are planned for end of Phase 2.',
+    ar: 'لا تحتوي فيديو الصفحة الرئيسية على ترجمة مصاحبة حتى الآن؛ ستُضاف الترجمة التوضيحية في نهاية المرحلة 2.',
+    fr: "La vidéo de la page d'accueil n'a pas encore de sous-titres ; ils sont prévus pour la fin de la phase 2.",
+    es: 'El vídeo de la página de inicio aún no tiene subtítulos; se añadirán al final de la Fase 2.',
+  },
+  {
+    tr: 'Üçüncü taraf ödeme ve telesağlık iframe’lerinin erişilebilirliği sağlayıcılar (iyzico, Jitsi) tarafından belirlenir; ihlaller ilgili sağlayıcıya iletilir.',
+    en: 'Third-party payment and telehealth iframes inherit accessibility from their providers (iyzico, Jitsi); we relay any issues upstream.',
+    ar: 'تَرِث إطارات الدفع والصحة عن بُعد من الجهات الخارجية (iyzico وJitsi) إعدادات الوصول الخاصة بمزوّديها؛ تُحال أي ملاحظات إلى المزوّد.',
+    fr: 'Les iframes de paiement et de téléconsultation tiers (iyzico, Jitsi) reposent sur l’accessibilité de leurs fournisseurs ; tout problème est transmis en amont.',
+    es: 'Los iframes de pago y telesalud de terceros heredan la accesibilidad de sus proveedores (iyzico, Jitsi); cualquier incidencia se traslada al proveedor.',
+  },
+  {
+    tr: 'AR/FR/ES sayfalarındaki bazı içerikler tıbbi çevirmen tarafından gözden geçirilene kadar otomatik çeviridir (yumuşak başlatma uyarısı sayfa üstünde gösterilir).',
+    en: 'Some content in AR/FR/ES is machine-translated until medical-translator review completes; the soft-launch banner flags this above the fold.',
+    ar: 'بعض المحتوى في AR/FR/ES مترجم آليًا حتى اكتمال مراجعة المترجم الطبي؛ ويظهر شريط التنبيه أعلى الصفحة.',
+    fr: "Une partie du contenu en AR/FR/ES est traduite automatiquement en attendant la relecture du traducteur médical ; un bandeau de pré-lancement le signale en haut de page.",
+    es: 'Parte del contenido en AR/FR/ES está traducido automáticamente hasta que se complete la revisión del traductor médico; el banner de soft-launch lo señala en la parte superior.',
+  },
+];
+
+const contactTitle: LocaleStrings = {
+  tr: 'Erişilebilirlik bildirimi',
+  en: 'Reporting an accessibility issue',
+  ar: 'الإبلاغ عن مشكلة في الوصول',
+  fr: 'Signaler un problème d’accessibilité',
+  es: 'Informar de un problema de accesibilidad',
+};
+
+const contactBody: LocaleStrings = {
+  tr: 'Bu sitede bir engelle karşılaşırsanız, lütfen bize ulaşın. 5 iş günü içinde yanıt veriyoruz.',
+  en: 'If you encounter a barrier on this site, please contact us. We respond within 5 working days.',
+  ar: 'إذا واجهتَ عائقًا في هذا الموقع، يرجى التواصل معنا. نردّ خلال 5 أيام عمل.',
+  fr: 'Si vous rencontrez un obstacle sur ce site, contactez-nous. Nous répondons sous 5 jours ouvrés.',
+  es: 'Si encuentra una barrera en este sitio, póngase en contacto con nosotros. Respondemos en un plazo de 5 días hábiles.',
+};
+
+const lastReviewed: LocaleStrings = {
+  tr: 'Son inceleme: 5 Mayıs 2026',
+  en: 'Last reviewed: 5 May 2026',
+  ar: 'آخر مراجعة: 5 مايو 2026',
+  fr: 'Dernière relecture : 5 mai 2026',
+  es: 'Última revisión: 5 de mayo de 2026',
+};
 ---
 <BaseLayout title={t('accessibility.title')} description={t('accessibility.lead')} alternates={alternates}>
   <article class="app-prose">
     <h1>{t('accessibility.title')}</h1>
-    <p class="hero__lead">{t('accessibility.lead')}</p>
-    <p>{t('accessibility.wcagStatement')}</p>
-    <p>{t('accessibility.contactNote')}</p>
-    <p style="margin-block-start: var(--space-6);">
-      <a class="drb-btn drb-btn--secondary" href={routes.contact(locale)}>{t('contact.title')}</a>
+    <p class="hero__lead">{pick(policyLead)}</p>
+
+    <section class="app-section">
+      <h2>{pick(standardTitle)}</h2>
+      <p>{pick(standardBody)}</p>
+    </section>
+
+    <section class="app-section">
+      <h2>{pick(featuresTitle)}</h2>
+      <ul class="a11y-list">
+        {features.map((f) => (
+          <li class="a11y-list__item">
+            <span class="a11y-list__check" aria-hidden="true">✓</span>
+            <span>{pick(f)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="app-section">
+      <h2>{pick(gapsTitle)}</h2>
+      <ul class="a11y-list a11y-list--gaps">
+        {gaps.map((g) => (
+          <li class="a11y-list__item">
+            <span class="a11y-list__check" aria-hidden="true">!</span>
+            <span>{pick(g)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="app-section">
+      <h2>{pick(contactTitle)}</h2>
+      <p>{pick(contactBody)}</p>
+      <p style="margin-block-start: var(--space-4);">
+        <a class="drb-btn drb-btn--secondary" href={routes.contact(locale)}>{t('contact.title')}</a>
+      </p>
+    </section>
+
+    <p style="margin-block-start: var(--space-8); color: var(--color-ink-subtle); font-size: var(--type-meta);">
+      <span class="digit-western" dir="ltr">{pick(lastReviewed)}</span>
     </p>
   </article>
 </BaseLayout>
+
+<style>
+  .a11y-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .a11y-list__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  .a11y-list__check {
+    color: var(--color-primary);
+    font-weight: 700;
+    flex-shrink: 0;
+    inline-size: 22px;
+    block-size: 22px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-primary) 12%, var(--color-surface));
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+  }
+  .a11y-list--gaps .a11y-list__check {
+    color: var(--color-accent);
+    background: color-mix(in oklab, var(--color-accent) 14%, var(--color-surface));
+  }
+</style>
