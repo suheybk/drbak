@@ -103,18 +103,22 @@ jobs:
     needs: [deploy-api-staging, deploy-web-staging]
     runs-on: ubuntu-latest
     steps:
-      - name: Hit /healthz on staging
+      # We hit the workers.dev / pages.dev URLs directly because the custom
+      # domain (staging-api.uzmdroguzbak.com) DNS cut-over is pending — see
+      # LAUNCH-CHECKLIST §A4. Once DNS is live, swap these for the custom
+      # domain so we exercise the full edge path.
+      - name: Hit /healthz on staging API
         run: |
           set -euo pipefail
           for i in 1 2 3 4 5; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" https://staging-api.uzmdroguzbak.com/healthz || true)
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://dr-bak-api-staging.suheybk.workers.dev/healthz || true)
             if [ "$code" = "200" ]; then echo "healthz ok"; exit 0; fi
             echo "attempt $i: $code, retrying..."; sleep 6
           done
-          echo "::error::staging healthz did not reach 200 after 5 attempts"
+          echo "::error::staging /healthz did not reach 200 after 5 attempts"
           exit 1
-      - name: Hit staging home page
+      - name: Hit staging web home page
         run: |
           set -euo pipefail
-          code=$(curl -s -o /dev/null -w "%{http_code}" https://staging.uzmdroguzbak.com/)
-          test "$code" = "200" || (echo "::error::staging home returned $code" && exit 1)
+          code=$(curl -s -o /dev/null -w "%{http_code}" -L https://dr-bak-web-staging.pages.dev/)
+          test "$code" = "200" || (echo "::error::staging web home returned $code" && exit 1)
