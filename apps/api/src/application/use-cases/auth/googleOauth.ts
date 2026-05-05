@@ -60,8 +60,7 @@ export const beginGoogleOauth =
     });
 
     const apiBase =
-      deps.env.API_BASE_URL ??
-      deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.');
+      deps.env.API_BASE_URL ?? deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.');
     const redirectUri = `${apiBase.replace(/\/$/, '')}/api/v1/auth/oauth/google/callback`;
     const authUrl = deps.google.buildAuthUrl({
       state,
@@ -134,8 +133,7 @@ export const completeGoogleOauth =
     };
 
     const apiBase =
-      deps.env.API_BASE_URL ??
-      deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.');
+      deps.env.API_BASE_URL ?? deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.');
     const redirectUri = `${apiBase.replace(/\/$/, '')}/api/v1/auth/oauth/google/callback`;
     let claims: { sub: string; email: string; email_verified?: boolean; name?: string };
     try {

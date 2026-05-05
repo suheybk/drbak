@@ -195,7 +195,8 @@ html[dir="rtl"] body {
   height: 2px;
   background: var(--color-ink);
   margin: 5px 0;
-  transition: transform var(--motion-base) var(--ease-out), opacity var(--motion-base) var(--ease-out);
+  transition: transform var(--motion-base) var(--ease-out), opacity var(--motion-base)
+    var(--ease-out);
   border-radius: 2px;
 }
 
@@ -249,8 +250,8 @@ html[dir="rtl"] body {
     gap: var(--space-3);
     max-block-size: 0;
     overflow: hidden;
-    transition: max-block-size var(--motion-base) var(--ease-out),
-      padding var(--motion-base) var(--ease-out);
+    transition: max-block-size var(--motion-base) var(--ease-out), padding var(--motion-base)
+      var(--ease-out);
     padding-block: 0;
   }
   .app-nav a {
