@@ -1,9 +1,14 @@
 name: Deploy to staging
 
-# Auto-deploys to staging on every push to `main` after CI is green.
-# Uses Wrangler v3. Two parallel jobs: web (CF Pages) and api (CF Workers).
+# Auto-deploys to staging AFTER the CI workflow completes successfully
+# on `main`. Uses `workflow_run` so the deploy fires sequentially after
+# CI — no race against parallel check-poll, no manual re-runs needed.
+#
+# Two parallel deploy jobs: web (CF Pages) and api (CF Workers).
+#
 # Secrets:
-#   CLOUDFLARE_API_TOKEN  — token scoped: Pages:Edit, Workers:Edit, KV:Edit, R2:Edit, DNS:Read for the zone
+#   CLOUDFLARE_API_TOKEN  — token scoped: Pages:Edit · Workers:Edit · KV:Edit · R2:Edit · Queues:Edit · DO:Edit · DNS:Read on the `uzmdroguzbak.com` zone
+# Variables (NOT secrets — account IDs are public):
 #   CLOUDFLARE_ACCOUNT_ID
 #
 # Worker secrets (DATABASE_URL, JWT_SIGNING_PRIVATE_KEY, etc.) are NOT set here;
@@ -11,7 +16,9 @@ name: Deploy to staging
 # rotated per `docs/runbook.md`.
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -22,39 +29,27 @@ concurrency:
 permissions:
   contents: read
   deployments: write
+  actions: read
 
 env:
   NODE_VERSION: '20.11.0'
   PNPM_VERSION: '9.12.0'
+  # The exact commit to deploy. For workflow_run, that's the SHA the upstream
+  # CI ran on. For manual workflow_dispatch, fall back to the current ref.
+  DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
 jobs:
-  wait-for-ci:
-    name: Wait for CI to be green on this commit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Wait for CI checks
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.sha }}
-          check-name: 'Lint (Biome)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 15
-      - name: Wait for typecheck
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.sha }}
-          check-name: 'Typecheck (all packages)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 15
-
   deploy-api-staging:
     name: API → staging
-    needs: wait-for-ci
+    # For workflow_run: only proceed if upstream CI was successful. For
+    # workflow_dispatch: there is no upstream conclusion, so skip the gate.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: staging
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
       - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
@@ -74,11 +69,13 @@ jobs:
 
   deploy-web-staging:
     name: Web → staging (CF Pages)
-    needs: wait-for-ci
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: staging
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
       - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
@@ -97,7 +94,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name dr-bak-web-staging --branch=staging --commit-hash=${{ github.sha }}
+          command: pages deploy apps/web/dist --project-name dr-bak-web-staging --branch=staging --commit-hash=${{ env.DEPLOY_SHA }}
           packageManager: pnpm
 
   smoke-staging:
