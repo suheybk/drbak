@@ -12,11 +12,78 @@ const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.about(l));
 
 /**
- * Per memory/dr-bak-locked-decisions.md §12.16, the 22 certificate titles
- * arrive later. Until then we render a placeholder strip so the visual
- * scaffold is in place but the page doesn't claim credentials we can't list.
+ * Pulled directly from the live uzmdroguzbak.com home page (the WordPress
+ * source has no separate /about-us body, so the canonical text is the home
+ * "Hakkımızda — Profesyonel Tıbbi Bakım" block + the "Resmi Sağlık Turizmi
+ * Kuruluşu" credentials section).
+ *
+ * Inline 5-locale literals follow the same pattern as the bio paragraph
+ * below — keeps the page deployable without round-tripping content through
+ * the i18n JSON bundle, which is gated on medical translator review (per
+ * LAUNCH-CHECKLIST §B1). When the translator signs off, lift these into
+ * i18n keys.
  */
-const certificatesPlaceholder = Array.from({ length: 6 }, (_, i) => `Certificate ${i + 1}`);
+type LocaleStrings = Record<AppLocale, string>;
+const pick = (s: LocaleStrings): string => s[locale] ?? s.en;
+
+const philosophyLead: LocaleStrings = {
+  tr: 'Sinir sistemi hastalıklarının tanı ve tedavisinde bilimsel, güncel ve kişiye özel yaklaşımlar sunuyoruz. Migren, epilepsi, nöropatik ağrı, baş dönmesi, ozon ve glutatyon terapisi gibi alanlarda modern yöntemlerle hastalarımıza destek veriyoruz. Her hastayı bütüncül olarak değerlendiriyor, yaşam kalitesini artırmayı hedefliyoruz.',
+  en: 'In the diagnosis and treatment of nervous-system disorders we apply scientific, up-to-date, and individualised approaches. We support our patients with modern methods in fields such as migraine, epilepsy, neuropathic pain, vertigo, ozone and glutathione therapy. We assess every patient holistically, with quality of life as the goal.',
+  ar: 'نقدّم في تشخيص وعلاج أمراض الجهاز العصبي مقاربة علمية محدّثة ومخصّصة لكل مريض. ندعم مرضانا بأساليب حديثة في مجالات الصداع النصفي والصرع والألم العصبي والدوار والعلاج بالأوزون والغلوتاثيون. نقيّم كل مريض بنظرة شاملة، وهدفنا تحسين جودة الحياة.',
+  fr: "Pour le diagnostic et le traitement des maladies du système nerveux, nous adoptons une approche scientifique, actualisée et personnalisée. Nous accompagnons nos patients par des méthodes modernes dans les domaines de la migraine, de l'épilepsie, des douleurs neuropathiques, des vertiges, et des thérapies à l'ozone et au glutathion. Chaque patient est évalué de manière holistique, avec la qualité de vie pour objectif.",
+  es: 'En el diagnóstico y tratamiento de las enfermedades del sistema nervioso aplicamos enfoques científicos, actualizados y personalizados. Acompañamos a nuestros pacientes con métodos modernos en campos como migraña, epilepsia, dolor neuropático, vértigo, y terapias con ozono y glutatión. Evaluamos a cada paciente de forma holística, con la calidad de vida como objetivo.',
+};
+
+const valueBullets: ReadonlyArray<LocaleStrings> = [
+  {
+    tr: 'Bilimsel ve kanıta dayalı tedavi yaklaşımları',
+    en: 'Scientific and evidence-based treatment approaches',
+    ar: 'مناهج علاجية علمية وقائمة على الأدلة',
+    fr: 'Approches thérapeutiques scientifiques et fondées sur les preuves',
+    es: 'Enfoques terapéuticos científicos y basados en la evidencia',
+  },
+  {
+    tr: 'Kişiye özel tanı ve takip planları',
+    en: 'Individualised diagnosis and follow-up plans',
+    ar: 'خطط تشخيص ومتابعة مخصّصة',
+    fr: 'Diagnostics et plans de suivi personnalisés',
+    es: 'Diagnósticos y planes de seguimiento personalizados',
+  },
+  {
+    tr: 'Modern teknoloji ve bütüncül tedavi desteği',
+    en: 'Modern technology with holistic treatment support',
+    ar: 'تقنيات حديثة ودعم علاجي شامل',
+    fr: 'Technologie moderne et accompagnement thérapeutique global',
+    es: 'Tecnología moderna y soporte terapéutico holístico',
+  },
+];
+
+const hoursLines: ReadonlyArray<readonly [LocaleStrings, string]> = [
+  [
+    { tr: 'Pazartesi – Cuma', en: 'Monday – Friday', ar: 'الإثنين – الجمعة', fr: 'Lundi – Vendredi', es: 'Lunes – Viernes' },
+    '09:00 – 17:00',
+  ],
+  [
+    { tr: 'Cumartesi – Pazar', en: 'Saturday – Sunday', ar: 'السبت – الأحد', fr: 'Samedi – Dimanche', es: 'Sábado – Domingo' },
+    '—',
+  ],
+];
+
+const tourismTitle: LocaleStrings = {
+  tr: 'Resmi Sağlık Turizmi Kuruluşu',
+  en: 'Officially Registered Health Tourism Provider',
+  ar: 'مؤسسة معتمدة رسميًا للسياحة الصحية',
+  fr: 'Établissement officiellement enregistré pour le tourisme médical',
+  es: 'Centro oficialmente registrado para el turismo de salud',
+};
+
+const tourismLead: LocaleStrings = {
+  tr: 'Uluslararası Sağlık Turizmi Yetki Belgesi, sağlık kuruluşlarının uluslararası hasta kabul edebilme, belirli kalite ve hizmet standartlarını sağlama, hasta güvenliği ve memnuniyet kriterlerini karşılama gibi şartları yerine getirmesiyle verilen resmi bir belgedir. Uzm. Dr. Oğuz Bak, bu standartlara uygun olarak faaliyet göstermekte ve uluslararası hastalara güvenle hizmet sunmaktadır.',
+  en: 'The International Health Tourism Authorisation is an official certificate awarded when a clinic meets the conditions for receiving international patients, including specific quality and service standards, patient safety, and satisfaction criteria. Uzm. Dr. Oğuz Bak operates in line with these standards and serves international patients with confidence.',
+  ar: 'شهادة السياحة الصحية الدولية هي وثيقة رسمية تُمنح عند استيفاء شروط استقبال المرضى الدوليين، ومعايير الجودة والخدمة، وسلامة المرضى ورضاهم. يعمل د. أوغوز باك وفق هذه المعايير ويقدّم خدماته للمرضى الدوليين بثقة.',
+  fr: "L'Autorisation internationale de tourisme de santé est un certificat officiel délivré aux établissements remplissant les conditions d'accueil de patients internationaux : standards de qualité et de service, sécurité et satisfaction des patients. Le Dr Oğuz Bak exerce conformément à ces standards et accueille les patients internationaux en toute confiance.",
+  es: 'La Autorización Internacional de Turismo de Salud es un certificado oficial otorgado cuando un centro cumple las condiciones para recibir pacientes internacionales: estándares de calidad y servicio, seguridad y satisfacción del paciente. El Dr. Oğuz Bak opera de acuerdo con estos estándares y atiende a pacientes internacionales con confianza.',
+};
 ---
 <BaseLayout title={t('about.title')} description={t('brand.tagline')} alternates={alternates}>
   <article class="app-prose">
@@ -42,23 +109,80 @@ const certificatesPlaceholder = Array.from({ length: 6 }, (_, i) => `Certificate
 
     <section class="app-section">
       <h2>{t('about.philosophyTitle')}</h2>
-      <p>{t('brand.tagline')}</p>
+      <p>{pick(philosophyLead)}</p>
+      <ul class="about-values">
+        {valueBullets.map((v) => (
+          <li class="about-values__item">
+            <span class="about-values__check" aria-hidden="true">✓</span>
+            <span>{pick(v)}</span>
+          </li>
+        ))}
+      </ul>
     </section>
 
     <section class="app-section">
-      <h2>{t('about.certificatesTitle')}</h2>
-      <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3); list-style: none; padding: 0;">
-        {certificatesPlaceholder.map((c) => (
-          <li class="card" style="font-size: var(--type-body-sm); color: var(--color-ink-subtle);">{c}</li>
-        ))}
-      </ul>
+      <h2>{pick(tourismTitle)}</h2>
+      <p>{pick(tourismLead)}</p>
     </section>
 
     <section class="app-section">
       <h2>{t('about.locationTitle')}</h2>
       <p>{t('about.address')}</p>
       <h3 style="margin-block-start: var(--space-6);">{t('about.hoursTitle')}</h3>
-      <p style="color: var(--color-ink-subtle);">{t('about.hoursPlaceholder')}</p>
+      <dl class="about-hours digit-western" dir="ltr">
+        {hoursLines.map(([labelStrings, value]) => (
+          <div class="about-hours__row">
+            <dt>{pick(labelStrings)}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   </article>
 </BaseLayout>
+
+<style>
+  .about-values {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .about-values__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  .about-values__check {
+    color: var(--color-primary);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .about-hours {
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    max-width: 360px;
+  }
+  .about-hours__row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
+    border-block-end: 1px solid var(--color-border);
+  }
+  .about-hours__row:last-child {
+    border-block-end: 0;
+  }
+  .about-hours dt {
+    color: var(--color-ink-muted);
+    font-weight: 500;
+  }
+  .about-hours dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+</style>

@@ -13,6 +13,79 @@ const contactPhone =
   (import.meta as never as { env: { CONTACT_PHONE_E164?: string } }).env.CONTACT_PHONE_E164 ??
   '+905300874391';
 const waLink = `https://wa.me/${contactPhone.replace(/[^\d]/g, '')}`;
+
+/**
+ * Mirrors the live uzmdroguzbak.com footer block — same disclaimers (AI-
+ * generated content + general-information notice + per-patient variability)
+ * verbatim. Inline 5-locale literals follow the AboutPage pattern; lift
+ * into i18n keys once the medical translator review (LAUNCH-CHECKLIST §B1)
+ * lands. Until then the soft-launch banner in BaseLayout flags AR/FR/ES
+ * as machine-translated for users.
+ *
+ * Working hours match the live site (Pzt-Cum 09:00-17:00, Cmt-Paz Kapalı).
+ */
+type LocaleStrings = Record<AppLocale, string>;
+const pick = (s: LocaleStrings): string => s[locale] ?? s.en;
+
+const hoursTitle: LocaleStrings = {
+  tr: 'Çalışma Saatlerimiz',
+  en: 'Working Hours',
+  ar: 'ساعات العمل',
+  fr: 'Horaires',
+  es: 'Horario',
+};
+const hoursMonFri: LocaleStrings = {
+  tr: 'Pzt – Cum',
+  en: 'Mon – Fri',
+  ar: 'الإثنين – الجمعة',
+  fr: 'Lun – Ven',
+  es: 'Lun – Vie',
+};
+const hoursSatSun: LocaleStrings = {
+  tr: 'Cmt – Paz',
+  en: 'Sat – Sun',
+  ar: 'السبت – الأحد',
+  fr: 'Sam – Dim',
+  es: 'Sáb – Dom',
+};
+const closedLabel: LocaleStrings = {
+  tr: 'Kapalı',
+  en: 'Closed',
+  ar: 'مغلق',
+  fr: 'Fermé',
+  es: 'Cerrado',
+};
+
+const disclaimerLines: ReadonlyArray<LocaleStrings> = [
+  {
+    tr: 'Web sitemizdeki içerikler genel sağlık bilgilendirmesi amacı taşımaktadır; tanı ve tedavi yerine geçmez.',
+    en: 'Content on this site is for general health information only; it does not replace diagnosis or treatment.',
+    ar: 'محتوى الموقع لأغراض المعلومات الصحية العامة فقط؛ ولا يحل محل التشخيص أو العلاج.',
+    fr: "Le contenu de ce site est destiné à l'information générale en matière de santé ; il ne remplace ni un diagnostic ni un traitement.",
+    es: 'El contenido de este sitio es solo para información general de salud; no sustituye al diagnóstico ni al tratamiento.',
+  },
+  {
+    tr: 'Her hastanın değerlendirmesi ve tedavi süreci kişiye özeldir; sonuçlar kişiden kişiye değişiklik gösterebilir.',
+    en: 'Every patient evaluation and treatment plan is individualised; outcomes vary from one person to another.',
+    ar: 'تقييم كل مريض وخطة العلاج فردية؛ وقد تختلف النتائج من شخص لآخر.',
+    fr: "Chaque évaluation et plan de traitement est individualisé ; les résultats peuvent varier d'un patient à l'autre.",
+    es: 'Cada evaluación y plan de tratamiento es individualizado; los resultados pueden variar de una persona a otra.',
+  },
+  {
+    tr: 'Tanı ve tedavi için doktor muayenesi gereklidir. Acil durumlarda 112 arayın.',
+    en: 'Diagnosis and treatment require an in-person visit. In emergencies, call 112.',
+    ar: 'التشخيص والعلاج يستلزمان فحصًا حضوريًا. في حالات الطوارئ، اتصل بـ 112.',
+    fr: 'Le diagnostic et le traitement nécessitent une consultation en personne. En cas d\'urgence, appelez le 112.',
+    es: 'El diagnóstico y el tratamiento requieren una consulta presencial. En caso de emergencia, llame al 112.',
+  },
+  {
+    tr: 'Sitede yapay zekâ destekli görsel ve seslendirme teknolojileri kullanılmıştır.',
+    en: 'Some images and voice-overs on this site were produced with AI-assisted tools.',
+    ar: 'تم إنتاج بعض الصور والتعليقات الصوتية على الموقع باستخدام أدوات مدعومة بالذكاء الاصطناعي.',
+    fr: 'Certaines images et voix de ce site ont été produites avec des outils assistés par IA.',
+    es: 'Algunas imágenes y locuciones de este sitio se han producido con herramientas asistidas por IA.',
+  },
+];
 ---
 <footer class="app-footer">
   <div class="app-footer__inner">
@@ -33,6 +106,19 @@ const waLink = `https://wa.me/${contactPhone.replace(/[^\d]/g, '')}`;
       </ul>
     </div>
     <div>
+      <p style="font-weight: 600; margin: 0 0 var(--space-2);">{pick(hoursTitle)}</p>
+      <dl class="app-footer__hours digit-western" dir="ltr">
+        <div class="app-footer__hours-row">
+          <dt>{pick(hoursMonFri)}</dt>
+          <dd>09:00 – 17:00</dd>
+        </div>
+        <div class="app-footer__hours-row">
+          <dt>{pick(hoursSatSun)}</dt>
+          <dd>{pick(closedLabel)}</dd>
+        </div>
+      </dl>
+    </div>
+    <div>
       <p style="font-weight: 600; margin: 0 0 var(--space-2);">{t('nav.home')}</p>
       <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); font-size: var(--type-body-sm);">
         <li><a href={routes.services(locale)}>{t('nav.services')}</a></li>
@@ -40,17 +126,73 @@ const waLink = `https://wa.me/${contactPhone.replace(/[^\d]/g, '')}`;
         <li><a href={routes.about(locale)}>{t('nav.about')}</a></li>
         <li><a href={routes.blog(locale)}>{t('nav.blog')}</a></li>
         <li><a href={routes.faq(locale)}>{t('nav.faq')}</a></li>
-      </ul>
-    </div>
-    <div>
-      <p style="font-weight: 600; margin: 0 0 var(--space-2);">Legal</p>
-      <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); font-size: var(--type-body-sm);">
         <li><a href={routes.kvkk(locale)}>{t('footer.kvkk')}</a></li>
         <li><a href={routes.accessibility(locale)}>{t('footer.accessibility')}</a></li>
       </ul>
     </div>
   </div>
-  <p style="text-align: center; margin: var(--space-8) 0 0; color: rgba(244,241,234,0.6); font-size: var(--type-meta);">
+
+  <div class="app-footer__disclaimer">
+    <ul>
+      {disclaimerLines.map((d) => (
+        <li>{pick(d)}</li>
+      ))}
+    </ul>
+  </div>
+
+  <p style="text-align: center; margin: var(--space-6) 0 0; color: rgba(244,241,234,0.6); font-size: var(--type-meta);">
     <span class="digit-western" dir="ltr">{t('footer.copyright', { year, clinic: t('brand.clinic') })}</span>
   </p>
 </footer>
+
+<style>
+  .app-footer__hours {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    font-size: var(--type-body-sm);
+  }
+  .app-footer__hours-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    color: rgba(244, 241, 234, 0.85);
+  }
+  .app-footer__hours dt {
+    color: rgba(244, 241, 234, 0.7);
+  }
+  .app-footer__hours dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .app-footer__disclaimer {
+    max-width: var(--shell-max);
+    margin: var(--space-8) auto 0;
+    padding-block-start: var(--space-6);
+    border-block-start: 1px solid rgba(244, 241, 234, 0.15);
+  }
+  .app-footer__disclaimer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .app-footer__disclaimer li {
+    color: rgba(244, 241, 234, 0.65);
+    font-size: var(--type-meta);
+    line-height: 1.5;
+    padding-inline-start: var(--space-4);
+    position: relative;
+  }
+  .app-footer__disclaimer li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.6em;
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 999px;
+    background: rgba(244, 241, 234, 0.4);
+  }
+</style>
