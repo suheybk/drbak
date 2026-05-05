@@ -1,8 +1,17 @@
 ---
+import { requireAuth } from '~/lib/auth-guard';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
 import BookingPage from '~/views/BookingPage.astro';
-const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const guard = await requireAuth(Astro.request, locale, routes.book(locale));
+if ('redirectTo' in guard) {
+  return Astro.redirect(guard.redirectTo);
+}
+
 const presetServiceSlug = (Astro.url.searchParams.get('service') ?? undefined) as
   | string
   | undefined;
 ---
-<BookingPage locale={locale} request={Astro.request} presetServiceSlug={presetServiceSlug} />
+<BookingPage locale={locale} me={guard.me} presetServiceSlug={presetServiceSlug} />

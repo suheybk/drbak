@@ -1,5 +1,13 @@
 ---
+import { requireAuth } from '~/lib/auth-guard';
+import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
+import { routes } from '~/lib/routes';
 import AccountPage from '~/views/AccountPage.astro';
-const locale = (Astro.currentLocale ?? 'tr') as 'tr' | 'ar' | 'en' | 'fr' | 'es';
+
+const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
+const guard = await requireAuth(Astro.request, locale, routes.portal(locale));
+if ('redirectTo' in guard) {
+  return Astro.redirect(guard.redirectTo);
+}
 ---
-<AccountPage locale={locale} request={Astro.request} />
+<AccountPage locale={locale} request={Astro.request} me={guard.me} />

@@ -1,29 +1,22 @@
 ---
 import BookingFlow from '~/islands/BookingFlow';
 import BaseLayout from '~/layouts/BaseLayout.astro';
-import { serverFetch } from '~/lib/api';
+import type { Me } from '~/lib/auth-guard';
 import { buildT, loadDict } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
 import { localeHrefsFor, routes } from '~/lib/routes';
 
 interface Props {
   locale: AppLocale;
-  request: Request;
+  /** Authenticated user — page entry must auth-guard before rendering this view. */
+  me: Me;
   presetServiceSlug?: string | undefined;
 }
 
-const { locale, request, presetServiceSlug } = Astro.props;
+const { locale, me, presetServiceSlug } = Astro.props;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.book(l));
 const dict = loadDict(locale);
-
-// Auth guard — never trust the client. The API will return 401 anyway, but
-// we redirect to login server-side so the user lands on a usable page.
-type Me = { userId: string; emailVerified: boolean };
-const me = await serverFetch<Me>(request, '/auth/me');
-if (!me.ok) {
-  return Astro.redirect(`${routes.login(locale)}?next=${encodeURIComponent(routes.book(locale))}`);
-}
 
 const consentVersion =
   (import.meta.env as never as { CONSENT_DOCUMENT_VERSION?: string }).CONSENT_DOCUMENT_VERSION ??
@@ -33,7 +26,7 @@ const consentVersion =
   <header class="app-section" style="margin-block-start: 0;">
     <h1>{t('booking.title')}</h1>
   </header>
-  {!me.value.emailVerified ? (
+  {!me.emailVerified ? (
     <div class="drb-banner drb-banner--warning" style="margin-block-end: var(--space-6);">
       <p style="margin: 0;">{t('errors.EMAIL_NOT_VERIFIED')}</p>
     </div>

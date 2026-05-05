@@ -4,6 +4,7 @@ import DocumentUploader from '~/islands/DocumentUploader';
 import TmsScreeningForm from '~/islands/TmsScreeningForm';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { serverFetch } from '~/lib/api';
+import type { Me } from '~/lib/auth-guard';
 import { buildT, loadDict } from '~/lib/i18n';
 import type { AppLocale } from '~/lib/locales';
 import { localeHrefsFor, routes } from '~/lib/routes';
@@ -11,19 +12,13 @@ import { localeHrefsFor, routes } from '~/lib/routes';
 interface Props {
   locale: AppLocale;
   request: Request;
+  /** Authenticated user — page entry must auth-guard before rendering this view. */
+  me: Me;
 }
-const { locale, request } = Astro.props;
+const { locale, request, me } = Astro.props;
 const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.portal(l));
 const dict = loadDict(locale);
-
-type Me = { userId: string; emailVerified: boolean; role: string };
-const me = await serverFetch<Me>(request, '/auth/me');
-if (!me.ok) {
-  return Astro.redirect(
-    `${routes.login(locale)}?next=${encodeURIComponent(routes.portal(locale))}`,
-  );
-}
 
 type Appt = {
   id: string;
@@ -71,7 +66,7 @@ const TERMINAL = new Set([
     <h1>{t('portal.title')}</h1>
   </header>
 
-  {!me.value.emailVerified ? (
+  {!me.emailVerified ? (
     <div class="drb-banner drb-banner--warning"><p style="margin: 0;">{t('errors.EMAIL_NOT_VERIFIED')}</p></div>
   ) : null}
 
