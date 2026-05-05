@@ -39,7 +39,7 @@ jobs:
       name: production
       url: https://api.uzmdroguzbak.com
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
       - uses: pnpm/action-setup@v4
@@ -69,7 +69,7 @@ jobs:
       name: production
       url: https://uzmdroguzbak.com
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
       - uses: pnpm/action-setup@v4
