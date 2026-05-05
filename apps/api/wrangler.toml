@@ -116,8 +116,12 @@ workers_dev = true
 [env.staging.vars]
 ENVIRONMENT = "staging"
 LOG_LEVEL = "info"
-PUBLIC_BASE_URL = "https://staging.uzmdroguzbak.com"
-APP_BASE_URL = "https://staging.uzmdroguzbak.com"
+PUBLIC_BASE_URL = "https://dr-bak-web-staging.pages.dev"
+APP_BASE_URL = "https://dr-bak-web-staging.pages.dev"
+# API origin used for OAuth redirect URIs (must match what's registered with
+# Google Cloud Console). Replace with https://api.uzmdroguzbak.com once DNS
+# cut-over (LAUNCH-CHECKLIST §A4) lands and update Google credentials too.
+API_BASE_URL = "https://dr-bak-api-staging.suheybk.workers.dev"
 
 [[env.staging.kv_namespaces]]
 binding = "KV_SESSIONS"

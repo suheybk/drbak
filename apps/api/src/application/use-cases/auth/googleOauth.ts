@@ -24,7 +24,11 @@ export interface BeginGoogleOauthDeps {
   readonly google: GoogleOauthClient;
   readonly tokens: OneTimeTokenStore;
   readonly clock: Clock;
-  readonly env: { PUBLIC_BASE_URL: string };
+  readonly env: {
+    PUBLIC_BASE_URL: string;
+    /** Optional override for the API origin used in OAuth redirect URIs. */
+    API_BASE_URL?: string | undefined;
+  };
 }
 
 export interface BeginGoogleOauthInput {
@@ -55,7 +59,10 @@ export const beginGoogleOauth =
       now,
     });
 
-    const redirectUri = `${deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.')}/api/v1/auth/oauth/google/callback`;
+    const apiBase =
+      deps.env.API_BASE_URL ??
+      deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.');
+    const redirectUri = `${apiBase.replace(/\/$/, '')}/api/v1/auth/oauth/google/callback`;
     const authUrl = deps.google.buildAuthUrl({
       state,
       codeChallenge,
@@ -79,6 +86,8 @@ export interface CompleteGoogleOauthDeps {
   readonly audit: AuditLogger;
   readonly env: {
     PUBLIC_BASE_URL: string;
+    /** Optional override for the API origin used in OAuth redirect URIs. */
+    API_BASE_URL?: string | undefined;
     TOKEN_ACCESS_TTL_SECONDS: number;
     TOKEN_REFRESH_TTL_SECONDS: number;
   };
@@ -124,7 +133,10 @@ export const completeGoogleOauth =
       locale: Locale;
     };
 
-    const redirectUri = `${deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.')}/api/v1/auth/oauth/google/callback`;
+    const apiBase =
+      deps.env.API_BASE_URL ??
+      deps.env.PUBLIC_BASE_URL.replace(/^https?:\/\//, 'https://api.');
+    const redirectUri = `${apiBase.replace(/\/$/, '')}/api/v1/auth/oauth/google/callback`;
     let claims: { sub: string; email: string; email_verified?: boolean; name?: string };
     try {
       const { idToken } = await deps.google.exchangeCode({

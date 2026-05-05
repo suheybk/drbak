@@ -318,7 +318,7 @@ authRouter.get(
       google: container.resolve(token('GoogleOauthClient') as never) as never,
       tokens: container.resolve(Tx.OneTimeTokenStore),
       clock: container.resolve(T.Clock),
-      env: { PUBLIC_BASE_URL: env.PUBLIC_BASE_URL },
+      env: { PUBLIC_BASE_URL: env.PUBLIC_BASE_URL, API_BASE_URL: env.API_BASE_URL },
     });
     const { authUrl } = await useCase({
       redirectAfter: q.redirectAfter ?? `${env.PUBLIC_BASE_URL}/${q.locale ?? 'tr'}`,
@@ -347,6 +347,7 @@ authRouter.get(
       audit: container.resolve(T.AuditLogger),
       env: {
         PUBLIC_BASE_URL: env.PUBLIC_BASE_URL,
+        API_BASE_URL: env.API_BASE_URL,
         TOKEN_ACCESS_TTL_SECONDS: Number(env.TOKEN_ACCESS_TTL_SECONDS),
         TOKEN_REFRESH_TTL_SECONDS: Number(env.TOKEN_REFRESH_TTL_SECONDS),
       },

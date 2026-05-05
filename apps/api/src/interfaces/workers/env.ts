@@ -19,6 +19,16 @@ export interface Env {
   SUPPORTED_LOCALES: string;
   PUBLIC_BASE_URL: string;
   APP_BASE_URL: string;
+  /**
+   * Absolute base URL of the API itself (no trailing slash, no /api/v1 suffix).
+   * If set, used verbatim for OAuth redirect URIs and any other place we need
+   * the API's externally-reachable origin. If unset, code derives it from
+   * PUBLIC_BASE_URL by prefixing the host with `api.` — that derivation only
+   * holds when the production DNS scheme (api.uzmdroguzbak.com) is live, so
+   * staging deploys MUST set this explicitly to the workers.dev URL until
+   * DNS cut-over (LAUNCH-CHECKLIST §A4).
+   */
+  API_BASE_URL?: string;
   SLOT_HOLD_TTL_SECONDS: string;
   TOKEN_ACCESS_TTL_SECONDS: string;
   TOKEN_REFRESH_TTL_SECONDS: string;
