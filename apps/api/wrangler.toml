@@ -9,13 +9,24 @@ compatibility_date = "2026-04-30"
 compatibility_flags = ["nodejs_compat"]
 account_id = ""  # filled per-environment via CI
 
-# ---------- shared variables ----------
-[vars]
-LOG_LEVEL = "info"
+# NOTE: Wrangler does NOT inherit top-level [vars] into [env.X.vars] when
+# you deploy with `--env staging` / `--env production`. Every var the
+# worker reads at runtime must be declared inside the matching env block.
+# A previous "shared [vars]" approach silently produced an undefined-vars
+# runtime (only the env-block override values were visible), which
+# surfaced as INTERNAL errors at OAuth + login. Keep this file flat —
+# repeat the values per env.
+
+# ---------- DEV environment ----------
+[env.dev]
+workers_dev = true
+[env.dev.vars]
+ENVIRONMENT = "dev"
+LOG_LEVEL = "debug"
 DEFAULT_LOCALE = "tr"
 SUPPORTED_LOCALES = "tr,ar,en,fr,es"
-PUBLIC_BASE_URL = "https://uzmdroguzbak.com"
-APP_BASE_URL = "https://uzmdroguzbak.com"
+PUBLIC_BASE_URL = "http://localhost:4321"
+APP_BASE_URL = "http://localhost:4321"
 SLOT_HOLD_TTL_SECONDS = "300"
 TOKEN_ACCESS_TTL_SECONDS = "900"
 TOKEN_REFRESH_TTL_SECONDS = "1209600"  # 14 days
@@ -28,15 +39,6 @@ DEFAULT_SLOT_DURATION_MINUTES = "40"
 TMS_SCREENING_VALIDITY_DAYS = "365"
 APPOINTMENT_RESCHEDULE_WINDOW_HOURS = "24"
 APPOINTMENT_CANCEL_WINDOW_HOURS = "24"
-
-# ---------- DEV environment ----------
-[env.dev]
-workers_dev = true
-[env.dev.vars]
-ENVIRONMENT = "dev"
-LOG_LEVEL = "debug"
-PUBLIC_BASE_URL = "http://localhost:4321"
-APP_BASE_URL = "http://localhost:4321"
 
 # Bindings: KV
 [[env.dev.kv_namespaces]]
@@ -116,8 +118,22 @@ workers_dev = true
 [env.staging.vars]
 ENVIRONMENT = "staging"
 LOG_LEVEL = "info"
+DEFAULT_LOCALE = "tr"
+SUPPORTED_LOCALES = "tr,ar,en,fr,es"
 PUBLIC_BASE_URL = "https://dr-bak-web-staging.pages.dev"
 APP_BASE_URL = "https://dr-bak-web-staging.pages.dev"
+SLOT_HOLD_TTL_SECONDS = "300"
+TOKEN_ACCESS_TTL_SECONDS = "900"
+TOKEN_REFRESH_TTL_SECONDS = "1209600"
+RATE_LIMIT_ANON_RPM = "60"
+RATE_LIMIT_AUTH_RPM = "600"
+RATE_LIMIT_LOGIN_PER_15M = "5"
+CONSENT_DOCUMENT_VERSION = "v1.2026-04"
+CLINIC_TIMEZONE = "Europe/Istanbul"
+DEFAULT_SLOT_DURATION_MINUTES = "40"
+TMS_SCREENING_VALIDITY_DAYS = "365"
+APPOINTMENT_RESCHEDULE_WINDOW_HOURS = "24"
+APPOINTMENT_CANCEL_WINDOW_HOURS = "24"
 # OAuth redirect URI is built from `${API_BASE_URL}/api/v1/auth/oauth/google/callback`.
 # Pointing this at the WEB origin (not the workers.dev API host) routes the
 # callback through the same-origin reverse proxy in `apps/web/src/pages/api/[...path].ts`,
@@ -185,6 +201,22 @@ routes = [{ pattern = "api.uzmdroguzbak.com/*", zone_name = "uzmdroguzbak.com" }
 [env.production.vars]
 ENVIRONMENT = "production"
 LOG_LEVEL = "info"
+DEFAULT_LOCALE = "tr"
+SUPPORTED_LOCALES = "tr,ar,en,fr,es"
+PUBLIC_BASE_URL = "https://uzmdroguzbak.com"
+APP_BASE_URL = "https://uzmdroguzbak.com"
+SLOT_HOLD_TTL_SECONDS = "300"
+TOKEN_ACCESS_TTL_SECONDS = "900"
+TOKEN_REFRESH_TTL_SECONDS = "1209600"
+RATE_LIMIT_ANON_RPM = "60"
+RATE_LIMIT_AUTH_RPM = "600"
+RATE_LIMIT_LOGIN_PER_15M = "5"
+CONSENT_DOCUMENT_VERSION = "v1.2026-04"
+CLINIC_TIMEZONE = "Europe/Istanbul"
+DEFAULT_SLOT_DURATION_MINUTES = "40"
+TMS_SCREENING_VALIDITY_DAYS = "365"
+APPOINTMENT_RESCHEDULE_WINDOW_HOURS = "24"
+APPOINTMENT_CANCEL_WINDOW_HOURS = "24"
 
 [[env.production.kv_namespaces]]
 binding = "KV_SESSIONS"

@@ -56,7 +56,23 @@ export const mapErrorToResponse = (e: unknown, c: Context): Response => {
     );
   }
   console.error('unhandled error', e);
-  return new Response(JSON.stringify(envelope('INTERNAL', 'Unexpected error.', c)), {
+  // In non-production environments, surface the underlying message + stack
+  // in `details` so OAuth/login failures can be diagnosed without
+  // `wrangler tail` (which is unreachable from networks that block
+  // Cloudflare websocket endpoints — see memory/dr-bak-tr-isp-dns-block.md).
+  // Production keeps the bare envelope so stack traces never leak.
+  const env = (c.env as { ENVIRONMENT?: string } | undefined) ?? {};
+  const debugExtra =
+    env.ENVIRONMENT && env.ENVIRONMENT !== 'production'
+      ? {
+          details: {
+            debugMessage: e instanceof Error ? e.message : String(e),
+            debugName: e instanceof Error ? e.name : 'unknown',
+            debugStack: e instanceof Error ? (e.stack ?? '').split('\n').slice(0, 8) : [],
+          },
+        }
+      : {};
+  return new Response(JSON.stringify(envelope('INTERNAL', 'Unexpected error.', c, debugExtra)), {
     status: 500,
     headers: { 'content-type': 'application/json' },
   });
