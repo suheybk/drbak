@@ -14,7 +14,13 @@ const t = buildT(locale);
 const alternates = localeHrefsFor((l) => routes.login(l));
 const dict = loadDict(locale);
 const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'https://api.uzmdroguzbak.com/api/v1';
-const oauthBegin = `${apiBase}/auth/oauth/google/begin?locale=${locale}${next ? `&redirectAfter=${encodeURIComponent(next)}` : ''}`;
+// The API validates `redirectAfter` as a full URL and only honours values
+// that start with PUBLIC_BASE_URL. `next` arrives here as a relative path
+// (e.g. `/book` from the auth guard), so resolve it against the site origin
+// before forwarding.
+const siteBase = import.meta.env.PUBLIC_BASE_URL ?? 'https://uzmdroguzbak.com';
+const nextAbsolute = next ? new URL(next, siteBase).toString() : undefined;
+const oauthBegin = `${apiBase}/auth/oauth/google/begin?locale=${locale}${nextAbsolute ? `&redirectAfter=${encodeURIComponent(nextAbsolute)}` : ''}`;
 const consentVersion =
   (import.meta.env as never as { CONSENT_DOCUMENT_VERSION?: string }).CONSENT_DOCUMENT_VERSION ??
   'v1.2026-04';
