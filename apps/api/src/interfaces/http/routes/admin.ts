@@ -38,8 +38,8 @@ import {
 import { dsarErase } from '../../../application/use-cases/admin/dsarErase.js';
 import { exportAppointmentsCsv } from '../../../application/use-cases/admin/exportAppointmentsCsv.js';
 import { reviewTestimonial } from '../../../application/use-cases/admin/reviewTestimonial.js';
-import type { Container } from '../../../composition/container.js';
 import { Tx } from '../../../composition/buildContainer.js';
+import type { Container } from '../../../composition/container.js';
 import { T } from '../../../composition/tokens.js';
 import {
   type DoctorId,

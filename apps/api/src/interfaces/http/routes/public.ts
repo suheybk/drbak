@@ -17,7 +17,6 @@ import { holdSlot } from '../../../application/use-cases/booking/holdSlot.js';
 import { listAvailability } from '../../../application/use-cases/booking/listAvailability.js';
 import { Tx } from '../../../composition/buildContainer.js';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
 import { T } from '../../../composition/tokens.js';
 import { type DoctorId, asServiceId } from '../../../domain/shared/ids.js';
 import {

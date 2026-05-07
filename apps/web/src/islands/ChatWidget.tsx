@@ -152,11 +152,12 @@ export default function ChatWidget({
   const [pending, setPending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-scroll when a new message lands
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages.length]);
 
   const ensureSession = async (): Promise<string | null> => {
     if (sessionId) return sessionId;

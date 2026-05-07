@@ -25,8 +25,8 @@ import { rescheduleAppointment } from '../../../application/use-cases/booking/re
 import { getMyAppointments } from '../../../application/use-cases/patient/getMyAppointments.js';
 import { requestDocumentUpload } from '../../../application/use-cases/patient/requestDocumentUpload.js';
 import { submitTmsScreening } from '../../../application/use-cases/patient/submitTmsScreening.js';
-import type { Container } from '../../../composition/container.js';
 import { Tx } from '../../../composition/buildContainer.js';
+import type { Container } from '../../../composition/container.js';
 import { T } from '../../../composition/tokens.js';
 import {
   type DoctorId,

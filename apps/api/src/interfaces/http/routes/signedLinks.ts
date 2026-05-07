@@ -11,8 +11,8 @@
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { cancelAppointment } from '../../../application/use-cases/booking/cancelAppointment.js';
-import type { Container } from '../../../composition/container.js';
 import { Tx } from '../../../composition/buildContainer.js';
+import type { Container } from '../../../composition/container.js';
 import { T } from '../../../composition/tokens.js';
 import {
   asAppointmentId,
