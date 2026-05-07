@@ -99,11 +99,19 @@ export const serverFetch = async <T>(
   request: Request,
   path: string,
   opts: Omit<FetchOpts, 'cookieHeader' | 'baseUrl'> & { baseUrl?: string } = {},
-): Promise<Result<T>> =>
-  apiFetch<T>(path, {
+): Promise<Result<T>> => {
+  // PUBLIC_API_BASE may be relative (e.g. `/api/v1` for the same-origin
+  // proxy in staging). The Workers `fetch()` requires an absolute URL,
+  // so resolve relative bases against the inbound request origin —
+  // SSR ends up hitting its own proxy, which then forwards to the API.
+  const base = opts.baseUrl ?? PUBLIC_API_BASE;
+  const absoluteBase = base.startsWith('/') ? new URL(base, request.url).toString() : base;
+  return apiFetch<T>(path, {
     ...opts,
+    baseUrl: absoluteBase,
     cookieHeader: request.headers.get('cookie') ?? undefined,
   });
+};
 
 /** Localise an ApiError via the i18n dict. */
 export const errorMessageFor = (

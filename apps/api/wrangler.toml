@@ -118,10 +118,15 @@ ENVIRONMENT = "staging"
 LOG_LEVEL = "info"
 PUBLIC_BASE_URL = "https://dr-bak-web-staging.pages.dev"
 APP_BASE_URL = "https://dr-bak-web-staging.pages.dev"
-# API origin used for OAuth redirect URIs (must match what's registered with
-# Google Cloud Console). Replace with https://api.uzmdroguzbak.com once DNS
-# cut-over (LAUNCH-CHECKLIST §A4) lands and update Google credentials too.
-API_BASE_URL = "https://dr-bak-api-staging.suheybk.workers.dev"
+# OAuth redirect URI is built from `${API_BASE_URL}/api/v1/auth/oauth/google/callback`.
+# Pointing this at the WEB origin (not the workers.dev API host) routes the
+# callback through the same-origin reverse proxy in `apps/web/src/pages/api/[...path].ts`,
+# so the auth cookies set by this Worker land on the same origin the SPA
+# loads from. The matching redirect URI must also be registered in Google
+# Cloud Console (https://console.cloud.google.com/apis/credentials → OAuth
+# 2.0 Client IDs → Authorized redirect URIs). Replace with
+# https://api.uzmdroguzbak.com once §A4 DNS cut-over lands.
+API_BASE_URL = "https://dr-bak-web-staging.pages.dev"
 
 [[env.staging.kv_namespaces]]
 binding = "KV_SESSIONS"

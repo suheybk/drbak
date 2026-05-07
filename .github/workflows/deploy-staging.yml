@@ -87,10 +87,13 @@ jobs:
       - name: Build web (staging env)
         run: pnpm --filter @dr-bak/web build
         env:
-          # Until DNS cut-over (LAUNCH-CHECKLIST §A4), the staging web hits the
-          # workers.dev URL directly. Swap to https://staging-api.uzmdroguzbak.com
-          # the moment §A4 lands.
-          PUBLIC_API_BASE: https://dr-bak-api-staging.suheybk.workers.dev/api/v1
+          # Same-origin: web and API share `dr-bak-web-staging.pages.dev`
+          # via the reverse proxy at `src/pages/api/[...path].ts`. This lets
+          # SameSite=Strict auth cookies work despite pages.dev and
+          # workers.dev being different eTLD+1s. The proxy reads `API_ORIGIN`
+          # from `apps/web/wrangler.toml`. Swap to https://staging-api.uzmdroguzbak.com
+          # once §A4 DNS cut-over lands.
+          PUBLIC_API_BASE: /api/v1
           PUBLIC_BASE_URL: https://dr-bak-web-staging.pages.dev
       - name: Wrangler Pages deploy (staging)
         uses: cloudflare/wrangler-action@v3

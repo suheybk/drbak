@@ -11,10 +11,13 @@ compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist"
 
 # ─── Shared vars ────────────────────────────────────
+# These apply to the staging Pages project (which deploys from `main`).
+# Production has its own Pages project; per-env values are baked at build
+# time via CI workflow env vars (see `.github/workflows/deploy-*.yml`).
 [vars]
-ENVIRONMENT = "production"
-PUBLIC_API_BASE = "https://api.uzmdroguzbak.com/api/v1"
-PUBLIC_BASE_URL = "https://uzmdroguzbak.com"
+ENVIRONMENT = "staging"
+PUBLIC_API_BASE = "/api/v1"
+PUBLIC_BASE_URL = "https://dr-bak-web-staging.pages.dev"
 DEFAULT_LOCALE = "tr"
 SUPPORTED_LOCALES = "tr,ar,en,fr,es"
 CONTACT_EMAIL = "info@uzmdroguzbak.com"
@@ -23,6 +26,13 @@ CONTACT_PHONE_E164 = "+905300874391"
 # When the reviewer signs off, set to "0" or unset entirely. The banner
 # only renders when this is exactly "1" AND the locale is ar/fr/es.
 SOFT_LAUNCH = "1"
+# Backend origin the `/api/*` reverse proxy at
+# `src/pages/api/[...path].ts` forwards to. Same-origin proxy is what
+# lets SameSite=Strict cookies work across web + API in staging — see
+# `memory/dr-bak-tr-isp-dns-block.md` and the cookie-domain note in
+# `dr-bak-resume-here.md`. Swap to the api custom-domain origin once
+# DNS cut-over (LAUNCH-CHECKLIST §A4) lands.
+API_ORIGIN = "https://dr-bak-api-staging.suheybk.workers.dev"
 
 # ─── Preview (local dev / staging) ──────────────────
 [env.preview.vars]
