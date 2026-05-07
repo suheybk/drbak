@@ -26,7 +26,7 @@ import { getMyAppointments } from '../../../application/use-cases/patient/getMyA
 import { requestDocumentUpload } from '../../../application/use-cases/patient/requestDocumentUpload.js';
 import { submitTmsScreening } from '../../../application/use-cases/patient/submitTmsScreening.js';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
+import { Tx } from '../../../composition/buildContainer.js';
 import { T } from '../../../composition/tokens.js';
 import {
   type DoctorId,
@@ -57,7 +57,7 @@ patientRouter.use('*', requireAuth(['patient', 'staff', 'admin']));
 patientRouter.get('/me', async (c) => {
   const auth = c.get('auth')!;
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const rows = await db
@@ -137,7 +137,7 @@ patientRouter.post(
     }
 
     // Load patient contact for notifications
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const userRows = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
@@ -236,7 +236,7 @@ patientRouter.post(
     const body = c.req.valid('json');
     const params = c.req.valid('param');
 
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const userRows = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
@@ -296,7 +296,7 @@ patientRouter.post(
     const body = c.req.valid('json');
     const params = c.req.valid('param');
 
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const userRows = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
@@ -358,7 +358,7 @@ patientRouter.post(
     const auth = c.get('auth')!;
     const body = c.req.valid('json');
     const useCase = requestDocumentUpload({
-      db: container.resolve(token('Db') as never) as never,
+      db: container.resolve(Tx.Db as never) as never,
       r2: c.env.R2_DOCUMENTS,
       patients: container.resolve(T.PatientRepository),
       clock: container.resolve(T.Clock),
@@ -392,7 +392,7 @@ patientRouter.put('/me/documents/:id/_upload', async (c) => {
     return c.json({ error: { code: 'TOKEN_INVALID', message: 'Upload token required.' } }, 401);
   }
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const docs = await db

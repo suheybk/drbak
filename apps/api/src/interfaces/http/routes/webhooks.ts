@@ -15,7 +15,7 @@ import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { ulid } from 'ulid';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
+import { Tx } from '../../../composition/buildContainer.js';
 import { webhookEvents } from '../../../infrastructure/db/schema.js';
 import type { Env } from '../../workers/env.js';
 
@@ -36,7 +36,7 @@ webhookRouter.post('/resend', async (c) => {
     data?: { email_id?: string; tags?: { name: string; value: string }[] };
   };
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const eventId = id;
@@ -68,7 +68,7 @@ webhookRouter.post('/netgsm', async (c) => {
   const body = JSON.parse(raw) as { jobid?: string; status?: string; partnercode?: string };
   if (!body.partnercode) return c.body(null, 400);
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const existing = await db
@@ -107,7 +107,7 @@ webhookRouter.post('/meta-whatsapp', async (c) => {
   }
   const body = JSON.parse(raw) as Record<string, unknown>;
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const eventId = String(body.entry ?? ulid());

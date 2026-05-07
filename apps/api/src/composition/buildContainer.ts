@@ -13,8 +13,11 @@ import type { ExecutionContext } from '@cloudflare/workers-types';
 import type {
   AvailabilityProjector,
   OneTimeTokenStore,
+  PasswordHasher,
+  RandomTokenGenerator,
   RateLimiter,
   SessionStore,
+  TokenIssuer,
   UserRepository,
 } from '../application/ports/index.js';
 import { Argon2idHasher } from '../infrastructure/crypto/Argon2idHasher.js';
@@ -54,13 +57,26 @@ import { Container } from './container.js';
 import { token } from './container.js';
 import { T } from './tokens.js';
 
-/** Extra tokens not in `T` because they're auth-only or read-side-only. */
+/**
+ * Extra tokens not in `T` because they're auth-only or read-side-only.
+ *
+ * IMPORTANT: every token() call returns a fresh Symbol. Tokens that aren't
+ * defined as module-level constants here (or in tokens.ts) and reused by
+ * reference will NEVER match between bind and resolve sites — the
+ * container will throw "No binding for token 'Foo'". Add new entries here
+ * (or to T) and import them; never call token('Foo') inline at a use site.
+ */
 export const Tx = {
+  Db: token<ReturnType<typeof buildDb>>('Db'),
   UserRepository: token<UserRepository>('UserRepository'),
   SessionStore: token<SessionStore>('SessionStore'),
   RateLimiter: token<RateLimiter>('RateLimiter'),
   OneTimeTokenStore: token<OneTimeTokenStore>('OneTimeTokenStore'),
   AvailabilityProjector: token<AvailabilityProjector>('AvailabilityProjector'),
+  PasswordHasher: token<PasswordHasher>('PasswordHasher'),
+  TokenIssuer: token<TokenIssuer>('TokenIssuer'),
+  RandomTokens: token<RandomTokenGenerator>('RandomTokens'),
+  GoogleOauthClient: token<GoogleOauthClient>('GoogleOauthClient'),
 } as const;
 
 export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
@@ -74,9 +90,7 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
   // for TCP-based drivers (pg / postgres-js); pairing it with the HTTP
   // driver gives an empty connection string. The Hyperdrive binding
   // stays in wrangler.toml for the future migration to a TCP driver.
-  c.bindSingleton(token<ReturnType<typeof buildDb>>('Db'), () =>
-    buildDb({ connectionString: env.DATABASE_URL }),
-  );
+  c.bindSingleton(Tx.Db, () => buildDb({ connectionString: env.DATABASE_URL }));
 
   // Stateless infra
   c.bindSingleton(T.Clock, () => new SystemClock());
@@ -93,34 +107,13 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
   );
 
   // Repositories
-  c.bindSingleton(
-    T.PatientRepository,
-    (cc) => new DrizzlePatientRepo(cc.resolve(token('Db') as never) as never),
-  );
-  c.bindSingleton(
-    T.AppointmentRepository,
-    (cc) => new DrizzleAppointmentRepo(cc.resolve(token('Db') as never) as never),
-  );
-  c.bindSingleton(
-    T.ConsentRepository,
-    (cc) => new DrizzleConsentRepo(cc.resolve(token('Db') as never) as never),
-  );
-  c.bindSingleton(
-    T.TmsScreeningRepository,
-    (cc) => new DrizzleTmsScreeningRepo(cc.resolve(token('Db') as never) as never),
-  );
-  c.bindSingleton(
-    T.ServiceCatalogue,
-    (cc) => new DrizzleServiceCatalogue(cc.resolve(token('Db') as never) as never),
-  );
-  c.bindSingleton(
-    T.AuditLogger,
-    (cc) => new DrizzleAuditLogger(cc.resolve(token('Db') as never) as never),
-  );
-  c.bindSingleton(
-    T.DoctorCatalogue,
-    (cc) => new DrizzleDoctorCatalogue(cc.resolve(token('Db') as never) as never),
-  );
+  c.bindSingleton(T.PatientRepository, (cc) => new DrizzlePatientRepo(cc.resolve(Tx.Db)));
+  c.bindSingleton(T.AppointmentRepository, (cc) => new DrizzleAppointmentRepo(cc.resolve(Tx.Db)));
+  c.bindSingleton(T.ConsentRepository, (cc) => new DrizzleConsentRepo(cc.resolve(Tx.Db)));
+  c.bindSingleton(T.TmsScreeningRepository, (cc) => new DrizzleTmsScreeningRepo(cc.resolve(Tx.Db)));
+  c.bindSingleton(T.ServiceCatalogue, (cc) => new DrizzleServiceCatalogue(cc.resolve(Tx.Db)));
+  c.bindSingleton(T.AuditLogger, (cc) => new DrizzleAuditLogger(cc.resolve(Tx.Db)));
+  c.bindSingleton(T.DoctorCatalogue, (cc) => new DrizzleDoctorCatalogue(cc.resolve(Tx.Db)));
 
   // LLM provider (Tier-2 chat assistant). Falls back to a stub provider
   // when ANTHROPIC_API_KEY is missing — chat endpoints return 503 in
@@ -138,10 +131,7 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
   });
 
   // Auth-extra
-  c.bindSingleton(
-    Tx.UserRepository,
-    (cc) => new DrizzleUserRepo(cc.resolve(token('Db') as never) as never),
-  );
+  c.bindSingleton(Tx.UserRepository, (cc) => new DrizzleUserRepo(cc.resolve(Tx.Db)));
   c.bindSingleton(Tx.SessionStore, () => new KVSessionStore(env.KV_SESSIONS));
   c.bindSingleton(Tx.RateLimiter, () => new KVRateLimiter(env.KV_RATELIMIT));
   c.bindSingleton(Tx.OneTimeTokenStore, () => new KVOneTimeTokenStore(env.KV_SESSIONS));
@@ -156,36 +146,21 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
   c.bindSingleton(
     Tx.AvailabilityProjector,
     (cc) =>
-      new DrizzleAvailabilityProjector(
-        cc.resolve(token('Db') as never) as never,
-        cc.resolve(T.SlotLockService) as never,
-      ),
+      new DrizzleAvailabilityProjector(cc.resolve(Tx.Db), cc.resolve(T.SlotLockService) as never),
   );
 
   // Notifiers — write to outbox (DB) + Cloudflare Queue (queue consumer dispatches)
   c.bindSingleton(
     T.EmailNotifier,
-    (cc) =>
-      new QueueEmailNotifier(
-        cc.resolve(token('Db') as never) as never,
-        env.QUEUE_NOTIFICATIONS as never,
-      ),
+    (cc) => new QueueEmailNotifier(cc.resolve(Tx.Db), env.QUEUE_NOTIFICATIONS as never),
   );
   c.bindSingleton(
     T.SmsNotifier,
-    (cc) =>
-      new QueueSmsNotifier(
-        cc.resolve(token('Db') as never) as never,
-        env.QUEUE_NOTIFICATIONS as never,
-      ),
+    (cc) => new QueueSmsNotifier(cc.resolve(Tx.Db), env.QUEUE_NOTIFICATIONS as never),
   );
   c.bindSingleton(
     T.WhatsappNotifier,
-    (cc) =>
-      new QueueWhatsappNotifier(
-        cc.resolve(token('Db') as never) as never,
-        env.QUEUE_NOTIFICATIONS as never,
-      ),
+    (cc) => new QueueWhatsappNotifier(cc.resolve(Tx.Db), env.QUEUE_NOTIFICATIONS as never),
   );
   c.bindSingleton(
     T.TelehealthRoomFactory,
@@ -193,9 +168,9 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
   );
 
   // Auth crypto helpers (re-exported tokens for use cases)
-  c.bindSingleton(token('PasswordHasher'), () => new Argon2idHasher());
+  c.bindSingleton(Tx.PasswordHasher, () => new Argon2idHasher());
   c.bindSingleton(
-    token('TokenIssuer'),
+    Tx.TokenIssuer,
     () =>
       new Es256TokenIssuer(
         {
@@ -207,11 +182,11 @@ export const buildContainer = (env: Env, ctx: ExecutionContext): Container => {
         'drbak-app',
       ),
   );
-  c.bindSingleton(token('RandomTokens'), () => new WebcryptoRandomTokens());
+  c.bindSingleton(Tx.RandomTokens, () => new WebcryptoRandomTokens());
 
   // OAuth
   c.bindSingleton(
-    token('GoogleOauthClient'),
+    Tx.GoogleOauthClient,
     () => new GoogleOauthClient(env.GOOGLE_OAUTH_CLIENT_ID, env.GOOGLE_OAUTH_CLIENT_SECRET),
   );
 

@@ -13,7 +13,7 @@ import type { MiddlewareHandler } from 'hono';
 import type { Clock, TokenIssuer, UserRepository } from '../../../application/ports/index.js';
 import { Tx } from '../../../composition/buildContainer.js';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
+import { T } from '../../../composition/tokens.js';
 
 export interface AuthContext {
   readonly userId: string;
@@ -29,9 +29,9 @@ export const requireAuth =
   (allowedRoles?: ReadonlyArray<AuthContext['role']>): MiddlewareHandler =>
   async (c, next) => {
     const container = c.get('container') as Container;
-    const issuer = container.resolve<TokenIssuer>(token('TokenIssuer'));
+    const issuer = container.resolve<TokenIssuer>(Tx.TokenIssuer);
     const users = container.resolve<UserRepository>(Tx.UserRepository);
-    const clock = container.resolve<Clock>(token('Clock') as never) ?? null;
+    const clock = container.resolve<Clock>(T.Clock) ?? null;
 
     const bearer = c.req.header('authorization');
     const tokenStr = bearer?.startsWith('Bearer ')

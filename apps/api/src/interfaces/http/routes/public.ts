@@ -42,7 +42,7 @@ const defaultDoctorId = async (container: Container): Promise<DoctorId> =>
 
 publicRouter.get('/services', async (c) => {
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const locale = localeOf(c);
@@ -114,7 +114,7 @@ publicRouter.get(
   zValidator('param', z.object({ type: z.string(), slug: z.string() })),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const locale = localeOf(c);
@@ -159,7 +159,7 @@ publicRouter.get(
   zValidator('query', z.object({ type: z.string().optional(), locale: LocaleSchema.optional() })),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const locale = localeOf(c);
@@ -191,7 +191,7 @@ publicRouter.get(
 
 publicRouter.get('/testimonials', async (c) => {
   const container = c.get('container') as Container;
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const locale = localeOf(c);

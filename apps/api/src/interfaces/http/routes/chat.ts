@@ -21,7 +21,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { handleChatMessage } from '../../../application/use-cases/chat/handleChatMessage.js';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
+import { Tx } from '../../../composition/buildContainer.js';
 import { T } from '../../../composition/tokens.js';
 import { chatSessions } from '../../../infrastructure/db/schema.js';
 import type { Env } from '../../workers/env.js';
@@ -43,7 +43,7 @@ chatRouter.post('/sessions', zValidator('json', CreateSessionSchema), async (c) 
   const container = c.get('container') as Container;
   const auth = c.get('auth') as { userId: string; role: string } | undefined;
   const body = c.req.valid('json');
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
 
@@ -75,7 +75,7 @@ chatRouter.post(
     const env = c.env;
     const { id: sessionId } = c.req.valid('param');
     const { message } = c.req.valid('json');
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const llm = container.resolve(T.LlmProvider);
@@ -111,7 +111,7 @@ chatRouter.post(
 chatRouter.get('/sessions/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {
   const container = c.get('container') as Container;
   const { id: sessionId } = c.req.valid('param');
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const rows = await db.select().from(chatSessions).where(eq(chatSessions.id, sessionId)).limit(1);

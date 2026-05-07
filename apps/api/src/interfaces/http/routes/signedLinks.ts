@@ -12,7 +12,7 @@ import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { cancelAppointment } from '../../../application/use-cases/booking/cancelAppointment.js';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
+import { Tx } from '../../../composition/buildContainer.js';
 import { T } from '../../../composition/tokens.js';
 import {
   asAppointmentId,
@@ -43,7 +43,7 @@ signedLinksRouter.post('/iptal/:token', async (c) => {
     return c.json({ error: { code: 'TOKEN_INVALID', message: 'Invalid or expired link.' } }, 400);
   }
 
-  const db = container.resolve(token('Db') as never) as ReturnType<
+  const db = container.resolve(Tx.Db as never) as ReturnType<
     typeof import('../../../infrastructure/db/client.js').buildDb
   >;
   const aRow = await db

@@ -39,7 +39,7 @@ import { dsarErase } from '../../../application/use-cases/admin/dsarErase.js';
 import { exportAppointmentsCsv } from '../../../application/use-cases/admin/exportAppointmentsCsv.js';
 import { reviewTestimonial } from '../../../application/use-cases/admin/reviewTestimonial.js';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
+import { Tx } from '../../../composition/buildContainer.js';
 import { T } from '../../../composition/tokens.js';
 import {
   type DoctorId,
@@ -87,7 +87,7 @@ adminRouter.get(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const q = c.req.valid('query');
@@ -123,7 +123,7 @@ adminRouter.get('/appointments.csv', async (c) => {
   const container = c.get('container') as Container;
   const auth = c.get('auth')!;
   const useCase = exportAppointmentsCsv({
-    db: container.resolve(token('Db') as never) as never,
+    db: container.resolve(Tx.Db as never) as never,
     audit: container.resolve(T.AuditLogger),
   });
   const fromIso = c.req.query('from');
@@ -202,7 +202,7 @@ adminRouter.get(
   zValidator('query', z.object({ status: z.string().optional() })),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const q = c.req.valid('query');
@@ -224,7 +224,7 @@ adminRouter.post(
     const container = c.get('container') as Container;
     const auth = c.get('auth')!;
     const useCase = reviewTestimonial({
-      db: container.resolve(token('Db') as never) as never,
+      db: container.resolve(Tx.Db as never) as never,
       clock: container.resolve(T.Clock),
       consents: container.resolve(T.ConsentRepository),
       audit: container.resolve(T.AuditLogger),
@@ -250,7 +250,7 @@ adminRouter.post(
     const auth = c.get('auth')!;
     const body = c.req.valid('json');
     const useCase = reviewTestimonial({
-      db: container.resolve(token('Db') as never) as never,
+      db: container.resolve(Tx.Db as never) as never,
       clock: container.resolve(T.Clock),
       consents: container.resolve(T.ConsentRepository),
       audit: container.resolve(T.AuditLogger),
@@ -301,7 +301,7 @@ adminRouter.post(
     const auth = c.get('auth')!;
     const body = c.req.valid('json');
     const useCase = createContentEntry({
-      db: container.resolve(token('Db') as never) as never,
+      db: container.resolve(Tx.Db as never) as never,
       clock: container.resolve(T.Clock),
       ids: container.resolve(T.IdGenerator),
       audit: container.resolve(T.AuditLogger),
@@ -331,7 +331,7 @@ adminRouter.post(
     const container = c.get('container') as Container;
     const auth = c.get('auth')!;
     const useCase = publishContentEntry({
-      db: container.resolve(token('Db') as never) as never,
+      db: container.resolve(Tx.Db as never) as never,
       clock: container.resolve(T.Clock),
       ids: container.resolve(T.IdGenerator),
       audit: container.resolve(T.AuditLogger),
@@ -355,7 +355,7 @@ adminRouter.post(
     const container = c.get('container') as Container;
     const auth = c.get('auth')!;
     const useCase = archiveContentEntry({
-      db: container.resolve(token('Db') as never) as never,
+      db: container.resolve(Tx.Db as never) as never,
       clock: container.resolve(T.Clock),
       ids: container.resolve(T.IdGenerator),
       audit: container.resolve(T.AuditLogger),
@@ -395,7 +395,7 @@ adminRouter.post(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const body = c.req.valid('json');
@@ -430,7 +430,7 @@ adminRouter.post(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const body = c.req.valid('json');
@@ -457,7 +457,7 @@ adminRouter.post(
     const container = c.get('container') as Container;
     const auth = c.get('auth')!;
     const useCase = dsarErase({
-      db: container.resolve(token('Db') as never) as never,
+      db: container.resolve(Tx.Db as never) as never,
       r2: c.env.R2_DOCUMENTS,
       clock: container.resolve(T.Clock),
       audit: container.resolve(T.AuditLogger),
@@ -489,7 +489,7 @@ adminRouter.get(
   ),
   async (c) => {
     const container = c.get('container') as Container;
-    const db = container.resolve(token('Db') as never) as ReturnType<
+    const db = container.resolve(Tx.Db as never) as ReturnType<
       typeof import('../../../infrastructure/db/client.js').buildDb
     >;
     const q = c.req.valid('query');

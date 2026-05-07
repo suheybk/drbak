@@ -30,7 +30,6 @@ import { registerPatient } from '../../../application/use-cases/auth/registerPat
 import { verifyEmail } from '../../../application/use-cases/auth/verifyEmail.js';
 import { Tx } from '../../../composition/buildContainer.js';
 import type { Container } from '../../../composition/container.js';
-import { token } from '../../../composition/container.js';
 import { T } from '../../../composition/tokens.js';
 import { asCorrelationId, asUserId } from '../../../domain/shared/ids.js';
 import type { Env } from '../../workers/env.js';
@@ -67,14 +66,14 @@ authRouter.post('/register', zValidator('json', RegisterRequestSchema), async (c
   const env = c.env;
   const container = c.get('container') as Container;
   const useCase = registerPatient({
-    db: container.resolve(token('Db') as never) as never,
+    db: container.resolve(Tx.Db as never) as never,
     users: container.resolve(Tx.UserRepository),
     consents: container.resolve(T.ConsentRepository),
-    hasher: container.resolve(token('PasswordHasher') as never) as never,
+    hasher: container.resolve(Tx.PasswordHasher as never) as never,
     clock: container.resolve(T.Clock),
     ids: container.resolve(T.IdGenerator),
     tokens: container.resolve(Tx.OneTimeTokenStore),
-    random: container.resolve(token('RandomTokens') as never) as never,
+    random: container.resolve(Tx.RandomTokens as never) as never,
     audit: container.resolve(T.AuditLogger),
     env: { CONSENT_DOCUMENT_VERSION: env.CONSENT_DOCUMENT_VERSION },
   });
@@ -121,10 +120,10 @@ authRouter.post('/login', zValidator('json', LoginRequestSchema), async (c) => {
   const useCase = login({
     clock: container.resolve(T.Clock),
     users: container.resolve(Tx.UserRepository),
-    hasher: container.resolve(token('PasswordHasher') as never) as never,
-    tokenIssuer: container.resolve(token('TokenIssuer') as never) as never,
+    hasher: container.resolve(Tx.PasswordHasher as never) as never,
+    tokenIssuer: container.resolve(Tx.TokenIssuer as never) as never,
     sessions: container.resolve(Tx.SessionStore),
-    random: container.resolve(token('RandomTokens') as never) as never,
+    random: container.resolve(Tx.RandomTokens as never) as never,
     ids: container.resolve(T.IdGenerator),
     rateLimiter: container.resolve(Tx.RateLimiter),
     audit: container.resolve(T.AuditLogger),
@@ -167,8 +166,8 @@ authRouter.post('/refresh', async (c) => {
     clock: container.resolve(T.Clock),
     users: container.resolve(Tx.UserRepository),
     sessions: container.resolve(Tx.SessionStore),
-    tokenIssuer: container.resolve(token('TokenIssuer') as never) as never,
-    random: container.resolve(token('RandomTokens') as never) as never,
+    tokenIssuer: container.resolve(Tx.TokenIssuer as never) as never,
+    random: container.resolve(Tx.RandomTokens as never) as never,
     env: {
       TOKEN_ACCESS_TTL_SECONDS: Number(env.TOKEN_ACCESS_TTL_SECONDS),
       TOKEN_REFRESH_TTL_SECONDS: Number(env.TOKEN_REFRESH_TTL_SECONDS),
@@ -263,7 +262,7 @@ authRouter.post(
       clock: container.resolve(T.Clock),
       users: container.resolve(Tx.UserRepository),
       tokens: container.resolve(Tx.OneTimeTokenStore),
-      random: container.resolve(token('RandomTokens') as never) as never,
+      random: container.resolve(Tx.RandomTokens as never) as never,
       email: container.resolve(T.EmailNotifier),
       rateLimiter: container.resolve(Tx.RateLimiter),
       env: { PUBLIC_BASE_URL: env.PUBLIC_BASE_URL },
@@ -287,7 +286,7 @@ authRouter.post(
       clock: container.resolve(T.Clock),
       users: container.resolve(Tx.UserRepository),
       tokens: container.resolve(Tx.OneTimeTokenStore),
-      hasher: container.resolve(token('PasswordHasher') as never) as never,
+      hasher: container.resolve(Tx.PasswordHasher as never) as never,
       sessions: container.resolve(Tx.SessionStore),
       audit: container.resolve(T.AuditLogger),
     });
@@ -315,7 +314,7 @@ authRouter.get(
     const container = c.get('container') as Container;
     const q = c.req.valid('query');
     const useCase = beginGoogleOauth({
-      google: container.resolve(token('GoogleOauthClient') as never) as never,
+      google: container.resolve(Tx.GoogleOauthClient as never) as never,
       tokens: container.resolve(Tx.OneTimeTokenStore),
       clock: container.resolve(T.Clock),
       env: { PUBLIC_BASE_URL: env.PUBLIC_BASE_URL, API_BASE_URL: env.API_BASE_URL },
@@ -336,12 +335,12 @@ authRouter.get(
     const container = c.get('container') as Container;
     const q = c.req.valid('query');
     const useCase = completeGoogleOauth({
-      google: container.resolve(token('GoogleOauthClient') as never) as never,
+      google: container.resolve(Tx.GoogleOauthClient as never) as never,
       tokens: container.resolve(Tx.OneTimeTokenStore),
       users: container.resolve(Tx.UserRepository),
       sessions: container.resolve(Tx.SessionStore),
-      tokenIssuer: container.resolve(token('TokenIssuer') as never) as never,
-      random: container.resolve(token('RandomTokens') as never) as never,
+      tokenIssuer: container.resolve(Tx.TokenIssuer as never) as never,
+      random: container.resolve(Tx.RandomTokens as never) as never,
       ids: container.resolve(T.IdGenerator),
       clock: container.resolve(T.Clock),
       audit: container.resolve(T.AuditLogger),
