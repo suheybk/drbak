@@ -1,14 +1,18 @@
 ---
 import { LocaleSwitcher } from '@dr-bak/ui';
+import type { Me } from '~/lib/auth-guard';
 import { buildT } from '~/lib/i18n';
 import { type AppLocale, DEFAULT_LOCALE } from '~/lib/locales';
 import { routes } from '~/lib/routes';
 
 interface Props {
   alternates: Record<AppLocale, string>;
+  /** Visitor session resolved by BaseLayout via /auth/me. Null when logged out. */
+  me?: Me | null;
 }
 const locale = (Astro.currentLocale ?? DEFAULT_LOCALE) as AppLocale;
 const t = buildT(locale);
+const me = Astro.props.me ?? null;
 const navLinks = [
   { href: routes.services(locale), label: t('nav.services') },
   { href: routes.conditions(locale), label: t('nav.conditions') },
@@ -19,6 +23,7 @@ const navLinks = [
 ];
 const current = Astro.url.pathname.replace(/\/$/, '');
 const menuLabel = locale === 'tr' ? 'Menü' : locale === 'ar' ? 'القائمة' : locale === 'fr' ? 'Menu' : locale === 'es' ? 'Menú' : 'Menu';
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? '/api/v1';
 ---
 <header class="app-header">
   <div class="app-header__inner">
@@ -59,9 +64,27 @@ const menuLabel = locale === 'tr' ? 'Menü' : locale === 'ar' ? 'القائمة'
       <a class="drb-btn drb-btn--primary drb-btn--sm" href={routes.book(locale)}>
         {t('nav.book')}
       </a>
-      <a class="drb-btn drb-btn--ghost drb-btn--sm" href={routes.portal(locale)}>
-        {t('nav.portal')}
-      </a>
+      {me ? (
+        <>
+          <a
+            class="drb-btn drb-btn--ghost drb-btn--sm app-nav__portal"
+            href={routes.portal(locale)}
+            title={me.email ?? ''}
+          >
+            <span>{t('nav.portal')}</span>
+            {me.email && <span class="app-nav__email">{me.email}</span>}
+          </a>
+          <form class="app-nav__logout" action={`${apiBase}/auth/logout`} method="post">
+            <button type="submit" class="drb-btn drb-btn--ghost drb-btn--sm">
+              {t('nav.logout')}
+            </button>
+          </form>
+        </>
+      ) : (
+        <a class="drb-btn drb-btn--ghost drb-btn--sm" href={routes.login(locale)}>
+          {t('nav.login')}
+        </a>
+      )}
       <div class="app-nav__locales">
         <LocaleSwitcher
           client:idle
@@ -73,3 +96,30 @@ const menuLabel = locale === 'tr' ? 'Menü' : locale === 'ar' ? 'القائمة'
     </nav>
   </div>
 </header>
+
+<style>
+  /* Keep the logged-in "Hesabım" pill compact: stack the brand label on top
+     of a smaller email so the button height matches the other nav buttons. */
+  .app-nav__portal {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+    padding-block: 0.4rem;
+  }
+  .app-nav__email {
+    font-size: 0.7em;
+    font-weight: 400;
+    opacity: 0.75;
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* The logout <form> shouldn't introduce vertical block-flow inside
+     the inline nav — strip default form margin and let it sit inline. */
+  .app-nav__logout {
+    margin: 0;
+    display: inline-flex;
+  }
+</style>

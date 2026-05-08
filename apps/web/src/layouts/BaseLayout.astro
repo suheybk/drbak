@@ -20,6 +20,7 @@ import Footer from '~/components/Footer.astro';
 import Header from '~/components/Header.astro';
 import StickyCtaBar from '~/components/StickyCtaBar.astro';
 import ChatWidget from '~/islands/ChatWidget';
+import { getOptionalAuth } from '~/lib/auth-guard';
 import { buildT } from '~/lib/i18n';
 import { type AppLocale, DEFAULT_LOCALE, dirOf } from '~/lib/locales';
 import { localeHrefsFor, routes } from '~/lib/routes';
@@ -57,6 +58,12 @@ const ogImage = Astro.props.ogImage ?? `${baseUrl}/og/default.jpg`;
  * The TR copy is the master string; per-locale text below is one-time
  * placeholder content vetted in TR + EN by the doctor on Phase 2 sign-off.
  */
+// Resolve the visitor's session (if any) once per page render so the
+// header can show "Hesabım — email · Çıkış" instead of a generic
+// "Portal" button. `getOptionalAuth` returns null on missing/expired
+// cookie without redirecting.
+const me = await getOptionalAuth(Astro.request);
+
 const softLaunchOn = import.meta.env.SOFT_LAUNCH === '1';
 const showSoftLaunchBanner = softLaunchOn && (locale === 'ar' || locale === 'fr' || locale === 'es');
 const softLaunchCopy: Record<AppLocale, string> = {
@@ -109,7 +116,7 @@ const softLaunchCopy: Record<AppLocale, string> = {
       </div>
     )}
     <div class="app-shell">
-      <Header alternates={alternates} />
+      <Header alternates={alternates} me={me} />
       <main id="main" class="app-main">
         <slot />
       </main>

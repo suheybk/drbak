@@ -19,6 +19,8 @@ export type Me = {
   emailVerified: boolean;
   /** Server returns this on /auth/me; treat as opaque string for now. */
   role?: string;
+  /** Display email for header / portal — server returns this on /auth/me. */
+  email?: string;
 };
 
 export type AuthGuardResult = { me: Me } | { redirectTo: string };
@@ -34,4 +36,14 @@ export const requireAuth = async (
     return { redirectTo: `${routes.login(locale)}?next=${encodeURIComponent(next)}` };
   }
   return { me: r.value };
+};
+
+/**
+ * Non-redirecting variant — used by the layout/header to render
+ * "Hesabım" + email when the visitor has a session, and the "Giriş"
+ * call-to-action when they don't.
+ */
+export const getOptionalAuth = async (request: Request): Promise<Me | null> => {
+  const r = await serverFetch<Me>(request, '/auth/me');
+  return r.ok ? r.value : null;
 };

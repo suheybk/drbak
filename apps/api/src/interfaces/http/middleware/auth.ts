@@ -21,6 +21,7 @@ export interface AuthContext {
   readonly locale: string;
   readonly sessionId: string;
   readonly emailVerified: boolean;
+  readonly email: string;
 }
 
 const COOKIE_NAME = '__Secure-drbak_at';
@@ -60,6 +61,7 @@ export const requireAuth =
       locale: user.locale,
       sessionId: claims.sid,
       emailVerified: user.emailVerifiedAt !== null,
+      email: user.email,
     };
     c.set('auth', auth);
     await next();

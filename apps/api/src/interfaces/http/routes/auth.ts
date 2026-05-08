@@ -375,5 +375,6 @@ authRouter.get('/me', requireAuth(), async (c) => {
     role: auth.role,
     locale: auth.locale,
     emailVerified: auth.emailVerified,
+    email: auth.email,
   });
 });
