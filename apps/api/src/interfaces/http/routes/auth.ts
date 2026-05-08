@@ -344,6 +344,7 @@ authRouter.get(
       ids: container.resolve(T.IdGenerator),
       clock: container.resolve(T.Clock),
       audit: container.resolve(T.AuditLogger),
+      db: container.resolve(Tx.Db),
       env: {
         PUBLIC_BASE_URL: env.PUBLIC_BASE_URL,
         API_BASE_URL: env.API_BASE_URL,

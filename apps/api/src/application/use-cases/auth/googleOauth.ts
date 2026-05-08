@@ -4,8 +4,15 @@
 
 import type { Locale } from '@dr-bak/contracts';
 import { DomainError, type Result, err, ok } from '../../../domain/shared/errors.js';
-import { type CorrelationId, type UserId, asUserId } from '../../../domain/shared/ids.js';
+import {
+  type CorrelationId,
+  type UserId,
+  asPatientId,
+  asUserId,
+} from '../../../domain/shared/ids.js';
 import { type Instant, instantFromMillis } from '../../../domain/shared/time.js';
+import type { Db } from '../../../infrastructure/db/client.js';
+import { patients } from '../../../infrastructure/db/schema.js';
 import type { GoogleOauthClient } from '../../../infrastructure/oauth/GoogleOauthClient.js';
 import type {
   AuditLogger,
@@ -83,6 +90,8 @@ export interface CompleteGoogleOauthDeps {
   readonly ids: IdGenerator;
   readonly clock: Clock;
   readonly audit: AuditLogger;
+  /** Drizzle client — used to insert the matching `patients` row on first sign-in. */
+  readonly db: Db;
   readonly env: {
     PUBLIC_BASE_URL: string;
     /** Optional override for the API origin used in OAuth redirect URIs. */
@@ -193,6 +202,32 @@ export const completeGoogleOauth =
         now,
       });
     }
+
+    // Mirror the registerPatient flow: every patient-role user must have a
+    // matching `patients` row, otherwise booking 404s with NOT_FOUND
+    // ("Patient profile missing"). Google only gives us email + name + sub,
+    // so we insert with placeholder DOB. The patient updates these via the
+    // portal's profile screen (TODO: add a post-OAuth onboarding step that
+    // forces the real DOB + phone before the first booking).
+    //
+    // Run this on every successful OAuth callback (not only first-sign-in)
+    // so users whose patient row was never provisioned (existed before this
+    // fix landed) get backfilled the next time they sign in. The
+    // `onConflictDoNothing` keys on the unique `patients_user_unique` index.
+    const fullName = (claims.name ?? '').trim() || claims.email.split('@')[0] || 'Hasta';
+    await deps.db
+      .insert(patients)
+      .values({
+        id: asPatientId(deps.ids.generate()),
+        userId: user.id,
+        fullName,
+        dateOfBirth: '2000-01-01',
+        phoneE164: null,
+        countryIso2: 'TR',
+        createdAt: new Date(now as number),
+        updatedAt: new Date(now as number),
+      })
+      .onConflictDoNothing({ target: patients.userId });
 
     // Issue tokens (mirrors login.ts)
     const sessionId = deps.ids.generate();
