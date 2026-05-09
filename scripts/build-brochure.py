@@ -267,31 +267,31 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
     draw_arc_glyph(c, x_right() - 8 * mm, y_top() - 30 * mm, r=14 * mm)
 
     # ── Editorial cover line ─────────────────────────────────────────
-    # The cover headline is a calm invitation, not a sales line. Set in
-    # serif at ~28pt with generous leading. The italic line below is
-    # the doctor's voice — kept short.
+    # Headline is the practice's own promise from uzmdroguzbak.com,
+    # broken into three calm lines. Avoids any service or address claim
+    # that isn't on the official site.
     headline_lines = [
-        "Ağrı çoğu zaman",
-        "yalnız bir",
-        "deneyimdir.",
+        "Kişiye özel",
+        "tedavi",
+        "planlaması.",
     ]
     head_size = 30
     head_lead = 11.5 * mm
-    head_top = y_top() - 56 * mm  # high enough to leave the bottom open
+    head_top = y_top() - 56 * mm
     c.setFillColor(INK)
     c.setFont(SERIF_BOLD, head_size)
     for i, line in enumerate(headline_lines):
         c.drawString(x_left(), head_top - i * head_lead, line)
 
-    # Italic byline (the invitation)
-    c.setFont(SERIF_ITALIC, 14)
+    # Italic byline — distilled from the site's mission paragraph
+    c.setFont(SERIF_ITALIC, 13)
     c.setFillColor(PRIMARY)
     bz_y = head_top - len(headline_lines) * head_lead - 4 * mm
-    c.drawString(x_left(), bz_y, "Birlikte anlayalım.")
+    c.drawString(x_left(), bz_y, "Sinir sisteminde, bütüncül bakım.")
     # Attribution
     c.setFont(SANS, 9)
     c.setFillColor(INK_SOFT)
-    c.drawString(x_left(), bz_y - 7 * mm, "— Uzm. Dr. Oğuz Bak,  Nöroloji ve Ağrı Tedavisi")
+    c.drawString(x_left(), bz_y - 7 * mm, "— Uzm. Dr. Oğuz Bak,  Nöroloji • Ozon Terapi • Mezoterapi")
 
     # ── Bottom rail: hairline + small QR + handle ───────────────────
     rail_y = y_bot() + 6 * mm
@@ -319,10 +319,11 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
     c.setFillColor(INK_SOFT)
     c.drawString(x_left(), qr_y + qr_size - 17 * mm, "Kareyi okutun veya kullanıcı adını arayın.")
 
-    # Footer: tracked URL (no ribbon)
+    # Footer: tracked URL — no fake address (the site has no street
+    # address, contact is phone + form + Instagram).
     tracked_caps(
         c, x_left(), BLEED + 8 * mm,
-        "uzmdroguzbak.com  ·  Helis More Residence, Kartal — İstanbul",
+        "uzmdroguzbak.com  ·  Resmî Sağlık Turizmi Kuruluşu — İstanbul",
         size=7, tracking=0.18, color=INK_SOFT, font=SANS,
     )
 
@@ -366,16 +367,15 @@ def draw_back(c: Canvas, portrait: Image.Image) -> None:
     c.drawCentredString(px + portrait_size / 2, py - 4 * mm,
                         "Uzm. Dr. Oğuz Bak")
 
-    # ── Manifesto paragraph (left column, asymmetric) ───────────────
+    # ── Manifesto paragraph (distilled from the site's own copy) ───
     manifesto = [
-        "Her hasta bir hikâyedir. Migren, kronik",
-        "ağrı, fibromiyalji — semptomlar tanıdık",
-        "olabilir, ama sebeplerini ve sizin yaşam",
-        "ritminizi anlamak zaman ister.",
+        "Sinir sistemi hastalıklarının tanı",
+        "ve tedavisinde bilimsel, güncel",
+        "ve kişiye özel yaklaşımlar.",
     ]
     manifesto2 = [
-        "Önce sizi dinler, sonra birlikte bir",
-        "tedavi planı kurarız. Acelemiz yok.",
+        "Bireysel analiz, en uygun tedavi",
+        "stratejisi ve sürekli izlem.",
     ]
     body_y = y_top() - 28 * mm
     body_left = x_left()
@@ -400,17 +400,17 @@ def draw_back(c: Canvas, portrait: Image.Image) -> None:
     sep_y = cur_y - 6 * mm
     hairline(c, x_left(), sep_y, x_right())
 
-    # ── Three principles, numbered (editorial list) ─────────────────
+    # ── Three services (lifted from uzmdroguzbak.com) ───────────────
     principles = [
         ("01",
-         "Yavaş muayene",
-         "40 dakikalık konsültasyon. Acelemiz yok; doğru\nteşhis için zaman ayırırız."),
+         "Nöropatik Ağrı & Sinir Sorunları",
+         "Diyabetik nöropati, sinir sıkışmaları,\npostherpetik nevralji."),
         ("02",
-         "Bilim ve deneyim",
-         "FDA onaylı TMS tedavisinden evde verilen IV vitamin\nprotokollerine — kanıta dayalı, kişiye uyarlanmış."),
+         "Migren Tanı ve Tedavisi",
+         "Kronik migren, gerilim tipi baş ağrıları,\nönleyici tedavi ve atak yönetimi."),
         ("03",
-         "Tek başınıza değilsiniz",
-         "Tedavi başladığında WhatsApp ve görüntülü görüşme\nile yanınızdayız."),
+         "Ozon & Destekleyici Tedaviler",
+         "Ozon terapisi ve glutatyon desteğiyle\nvücudun iyileşme kapasitesini artırma."),
     ]
     p_top = sep_y - 8 * mm
     p_h = 24 * mm
@@ -434,8 +434,8 @@ def draw_back(c: Canvas, portrait: Image.Image) -> None:
     foot_y = y_bot() + 4 * mm
     hairline(c, x_left(), foot_y + 12 * mm, x_right())
     contact_lines = [
-        ("RANDEVU", "uzmdroguzbak.com  ·  +90 530 087 4391"),
-        ("KLİNİK", "Helis More Residence, Kartal — İstanbul"),
+        ("RANDEVU", "uzmdroguzbak.com  ·  +90 530 087 43 91"),
+        ("ÇALIŞMA", "Pzt – Cum  09:00 – 17:00  ·  Cmt – Paz  Kapalı"),
     ]
     cur = foot_y + 6 * mm
     for label, value in contact_lines:

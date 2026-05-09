@@ -3,7 +3,13 @@
 Generated, print-ready files for the Dr. Bak clinic. All artwork ships
 in CMYK with crop marks and bleed.
 
-## A5 brochure
+All copy in both brochures is sourced strictly from
+`uzmdroguzbak-com/index.html` — the practice's three real service
+pillars (Nöropatik Ağrı, Migren, Ozon & Destekleyici), the doctor's
+own positioning, working hours, phone, and the International Health
+Tourism credential. No fabricated services or addresses.
+
+## A5 booklet brochure
 
 - **File**: `dr-bak-brochure-A5-cmyk.pdf`
 - **Trim size**: 148 × 210 mm (A5 portrait)
@@ -42,3 +48,48 @@ python scripts/build-brochure.py
 ```
 
 Output goes back to this directory.
+
+## A4 tri-fold clinic leaflet
+
+- **File**: `dr-bak-trifold-A4-cmyk.pdf`
+- **Trim**: A4 landscape (297 × 210 mm), three 99 mm panels
+- **Bleed**: 3 mm on every side
+- **Pages**: 2 (outer face + inner face)
+- **Format**: standard "letter-fold" / Z-fold imposition
+- **Builder**: `scripts/build-trifold.py`
+
+### Imposition (left-to-right when laid flat)
+
+```
+Page 1 (outer face)
+  ┌────────────┬────────────┬────────────┐
+  │ İLETİŞİM   │ TANIŞALIM  │ FRONT      │
+  │ phone /    │ doctor +   │ COVER      │
+  │ web / IG   │ team /     │ headline + │
+  │ hours /    │ portrait   │ QR         │
+  │ creds      │            │            │
+  └────────────┴────────────┴────────────┘
+
+Page 2 (inner face — the spread you see when the brochure is fully open)
+  ┌────────────┬────────────┬────────────┐
+  │ 01         │ 02         │ 03         │
+  │ Nöropatik  │ Migren     │ Ozon &     │
+  │ Ağrı       │ Tanı ve    │ Destek-    │
+  │            │ Tedavisi   │ leyici     │
+  └────────────┴────────────┴────────────┘
+```
+
+Fold ticks (small lines) appear above and below each fold position,
+outside the trim, so the press operator folds at the right line. The
+crop marks at the four trim corners come off in the cut.
+
+### Re-running
+
+```bash
+python scripts/build-trifold.py
+```
+
+### Editing
+
+Service copy lives in the `services = [...]` list at the top of
+`draw_inside()`. Doctor bio + team list are in `draw_outside()`.
