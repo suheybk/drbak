@@ -185,15 +185,18 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
     c.drawString(BLEED + 12 * mm, base_y - 9 * mm, line2)
     c.drawString(BLEED + 12 * mm, base_y - 18 * mm, line3)
 
-    # Subhead
+    # Subhead — sits inside the green hero band so the white text actually
+    # has the green for contrast. Earlier it was at base_y - 28mm which
+    # crossed the band edge → white-on-cream, unreadable. Tighter leading
+    # too so both lines clear the boundary.
     c.setFont(FONT_REGULAR, 10.5)
-    sub_y = base_y - 28 * mm
+    sub_y = base_y - 22 * mm
     c.drawString(
         BLEED + 12 * mm, sub_y,
         "Migren, baş ağrısı, fibromiyalji ve uyku bozuklukları."
     )
     c.drawString(
-        BLEED + 12 * mm, sub_y - 5 * mm,
+        BLEED + 12 * mm, sub_y - 4.5 * mm,
         "TMS tedavisi, IV vitamin desteği ve evde sağlık hizmeti."
     )
 
