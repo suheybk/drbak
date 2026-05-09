@@ -132,7 +132,11 @@ export const requestDocumentUpload =
       ttlSeconds: 5 * 60,
       nowMs: now as number,
     });
-    const uploadUrl = `/api/v1/patient/me/documents/${docId}/_upload?token=${encodeURIComponent(minted.token)}`;
+    // Path is relative to the API mount (PUBLIC_API_BASE) — the web client
+    // prepends PUBLIC_API_BASE (which already contains `/api/v1`) before
+    // PUTting. Returning the absolute mount-prefixed path here doubled it
+    // (`/api/v1/api/v1/...`) and the upload 404'd.
+    const uploadUrl = `/patient/me/documents/${docId}/_upload?token=${encodeURIComponent(minted.token)}`;
 
     await deps.audit.record({
       actorUserId: input.actorUserId,
