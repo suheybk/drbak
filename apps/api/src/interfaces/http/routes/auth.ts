@@ -176,8 +176,8 @@ authRouter.post('/refresh', async (c) => {
   });
   const r = await useCase(refreshToken);
   if (!r.ok) {
-    deleteCookie(c, REFRESH_COOKIE, { path: '/api/v1/auth' });
-    deleteCookie(c, ACCESS_COOKIE, { path: '/' });
+    deleteCookie(c, REFRESH_COOKIE, { path: '/api/v1/auth', secure: true, sameSite: 'Strict' });
+    deleteCookie(c, ACCESS_COOKIE, { path: '/', secure: true, sameSite: 'Strict' });
     return c.json({ error: r.error.toJSON() }, r.error.httpStatus as never);
   }
   setAuthCookies(c, env, {
@@ -207,8 +207,12 @@ authRouter.post('/logout', requireAuth(), async (c) => {
     ipAddress: clientIp(c),
     userAgent: userAgent(c),
   });
-  deleteCookie(c, ACCESS_COOKIE, { path: '/' });
-  deleteCookie(c, REFRESH_COOKIE, { path: '/api/v1/auth' });
+  // Cookie names start with `__Secure-`, so the runtime requires every
+  // Set-Cookie (including the deletion variant) to carry the Secure flag.
+  // sameSite must match what setAuthCookies issued for the deletion to
+  // actually clear the original.
+  deleteCookie(c, ACCESS_COOKIE, { path: '/', secure: true, sameSite: 'Strict' });
+  deleteCookie(c, REFRESH_COOKIE, { path: '/api/v1/auth', secure: true, sameSite: 'Strict' });
   return c.body(null, 204);
 });
 
