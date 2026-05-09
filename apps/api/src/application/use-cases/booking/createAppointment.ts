@@ -137,6 +137,17 @@ export const createAppointment =
     const now = deps.clock.now();
 
     // 1. Idempotency
+    //
+    // The KV claim is recorded before the appointment row is written, so a
+    // failure between claim and insert (slot-lock conflict, consent
+    // missing, TMS rejection, network blip) leaves a "claimed but no
+    // appointment" row. The original behaviour returned APPOINTMENT_NOT_FOUND
+    // on the next attempt with the same key, which made retries impossible
+    // — patients would just see "Randevu bulunamadı" forever. Instead, when
+    // the claim is matched but no appointment exists yet, treat it as a
+    // retry of the original work (fall through to the normal create path).
+    // The appointments table's unique idempotency-key index protects us
+    // from creating duplicates on a true race.
     if (input.idempotencyKey !== null) {
       const claim = await deps.idempotency.claim({
         key: input.idempotencyKey,
@@ -145,14 +156,16 @@ export const createAppointment =
       });
       if (claim === 'duplicate_mismatch') return err(new IdempotencyConflict());
       if (claim === 'duplicate_match') {
-        // Replay path: load the original appointment via repo.
         const existing = await deps.appointments.findByIdempotencyKey(input.idempotencyKey);
-        if (!existing) return err(new AppointmentNotFound());
-        return ok({
-          appointment: existing,
-          rescheduleUrl: await rescheduleUrlFor(deps, existing.id, existing.snapshot.startsAt),
-          cancelUrl: await cancelUrlFor(deps, existing.id, existing.snapshot.startsAt),
-        });
+        if (existing) {
+          // True replay: original succeeded, return the same response.
+          return ok({
+            appointment: existing,
+            rescheduleUrl: await rescheduleUrlFor(deps, existing.id, existing.snapshot.startsAt),
+            cancelUrl: await cancelUrlFor(deps, existing.id, existing.snapshot.startsAt),
+          });
+        }
+        // Otherwise: stale claim from a prior failed attempt — fall through.
       }
     }
 
