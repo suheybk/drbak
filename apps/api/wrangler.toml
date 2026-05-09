@@ -134,6 +134,15 @@ DEFAULT_SLOT_DURATION_MINUTES = "40"
 TMS_SCREENING_VALIDITY_DAYS = "365"
 APPOINTMENT_RESCHEDULE_WINDOW_HOURS = "24"
 APPOINTMENT_CANCEL_WINDOW_HOURS = "24"
+# Email — Resend free tier requires either a verified sending domain OR
+# their pre-verified `onboarding@resend.dev`. Until LAUNCH-CHECKLIST §A4
+# (DNS cut-over) lets us verify uzmdroguzbak.com, staging uses the test
+# sender. Recipient must match the email registered with the Resend
+# account, otherwise Resend returns 403 "you can only send to the email
+# you signed up with" until the domain is verified.
+EMAIL_FROM = "Dr. Bak (staging) <onboarding@resend.dev>"
+EMAIL_REPLY_TO = "info@uzmdroguzbak.com"
+CONTACT_EMAIL = "info@uzmdroguzbak.com"
 # OAuth redirect URI is built from `${API_BASE_URL}/api/v1/auth/oauth/google/callback`.
 # Pointing this at the WEB origin (not the workers.dev API host) routes the
 # callback through the same-origin reverse proxy in `apps/web/src/pages/api/[...path].ts`,

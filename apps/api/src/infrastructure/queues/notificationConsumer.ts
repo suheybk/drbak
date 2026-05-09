@@ -73,13 +73,21 @@ export const handleNotificationBatch = async (
           // payloadJson so we read it back here.
           const ics = (payload as { icsAttachment?: { filename: string; content: string } })
             .icsAttachment;
+          // Resend free tier rejects FROM addresses on un-verified domains.
+          // Staging uses Resend's pre-verified `onboarding@resend.dev` so we
+          // can exercise the email path before the production DNS cut-over
+          // and Resend domain-verification (LAUNCH-CHECKLIST §A3 + §A4).
+          // Production overrides EMAIL_FROM to `info@uzmdroguzbak.com` once
+          // the domain is verified in Resend.
+          const from = env.EMAIL_FROM || 'Dr. Bak (staging) <onboarding@resend.dev>';
+          const replyTo = env.EMAIL_REPLY_TO || env.CONTACT_EMAIL || 'info@uzmdroguzbak.com';
           await resend.send({
             to: row.toEmail!,
-            from: 'Uzm. Dr. Oğuz Bak <info@uzmdroguzbak.com>',
+            from,
             subject: r.subject,
             html: r.html,
             text: r.text,
-            replyTo: 'info@uzmdroguzbak.com',
+            replyTo,
             idempotencyKey: row.id,
             ...(ics ? { icsAttachment: ics } : {}),
           });

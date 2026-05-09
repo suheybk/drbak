@@ -68,6 +68,11 @@ export interface Env {
   JWT_SIGNING_PUBLIC_KEY: string;
   JWT_SIGNING_KID: string;
   RESEND_API_KEY: string;
+  /** Optional FROM address for outbound mail (Resend). Falls back to a
+   * staging-friendly `onboarding@resend.dev` sender when unset. */
+  EMAIL_FROM?: string;
+  EMAIL_REPLY_TO?: string;
+  CONTACT_EMAIL?: string;
   NETGSM_USERNAME: string;
   NETGSM_PASSWORD: string;
   NETGSM_SENDER_ID: string;
