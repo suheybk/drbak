@@ -10,7 +10,10 @@ in CMYK with crop marks and bleed.
 - **Bleed**: 3 mm on every side (full sheet 154 × 216 mm)
 - **Pages**: 2 (front + back, intended for double-sided printing on one A5 sheet)
 - **Colour space**: CMYK (every fill/stroke explicitly constructed via `CMYKColor(c, m, y, k)`)
-- **Fonts**: Helvetica family (PDF Type 1, ReportLab embeds the subset)
+- **Fonts**: Liberation Sans (open SIL/GPL Arial/Helvetica clone, bundled
+  at `scripts/fonts/LiberationSans-{Regular,Bold}.ttf`). The PDF carries
+  an embedded TTF subset with full Turkish glyph coverage. The original
+  Helvetica fallback dropped ğ Ğ ı İ ş Ş entirely.
 - **QR code**: encodes `https://www.instagram.com/uzm_dr_oguzbak`, error
   correction level H (~30% damage tolerated, scans down to 30 mm print
   size with margin to spare)

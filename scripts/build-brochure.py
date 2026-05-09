@@ -11,7 +11,9 @@ Notes for the print shop (also embedded in the PDF metadata):
   - Trim size: A5 (148 x 210 mm)
   - Bleed: 3 mm on all sides (full sheet 154 x 216 mm)
   - Colour space: CMYK (every fill/stroke is constructed via CMYKColor)
-  - Fonts: ReportLab built-in Helvetica family (subset-embedded by ReportLab)
+  - Fonts: Liberation Sans (open SIL/GPL clone of Helvetica/Arial) bundled
+    in `scripts/fonts/`. PDF carries an embedded TTF subset with full
+    Turkish glyph coverage (ğ Ğ ı İ ş Ş ç Ç).
   - QR code: encodes https://www.instagram.com/uzm_dr_oguzbak — high error-
     correction so partial-occlusion doesn't break the scan.
 """
@@ -34,10 +36,23 @@ from reportlab.pdfgen.canvas import Canvas
 # ─── Constants ──────────────────────────────────────────────────────
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOGO_PATH = os.path.join(ROOT, "apps/web/public/images/drbak-logo-square.png")
+FONT_DIR = os.path.join(ROOT, "scripts/fonts")
 OUT_DIR = os.path.join(ROOT, "docs/marketing")
 OUT_PDF = os.path.join(OUT_DIR, "dr-bak-brochure-A5-cmyk.pdf")
 
 INSTAGRAM_URL = "https://www.instagram.com/uzm_dr_oguzbak"
+
+# ─── Fonts ──────────────────────────────────────────────────────────
+# ReportLab's built-in Helvetica is a Type 1 font using WinAnsi/CP1252
+# encoding, which does NOT cover the Turkish letters ğ Ğ ı İ ş Ş — they
+# fell through as blank boxes in the v1 print proof. Liberation Sans
+# (open SIL/GPL-with-font-exception, metric-compatible with Arial /
+# Helvetica) is bundled in `scripts/fonts/` so this build is portable
+# and the PDF carries a properly embedded subset.
+FONT_REGULAR = "LiberationSans"
+FONT_BOLD = "LiberationSans-Bold"
+pdfmetrics.registerFont(TTFont(FONT_REGULAR, os.path.join(FONT_DIR, "LiberationSans-Regular.ttf")))
+pdfmetrics.registerFont(TTFont(FONT_BOLD, os.path.join(FONT_DIR, "LiberationSans-Bold.ttf")))
 
 # Trim and bleed
 TRIM_W, TRIM_H = A5  # (148*mm, 210*mm)
@@ -155,13 +170,13 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
 
     # Doctor name + title (white on green)
     c.setFillColor(PAPER)
-    c.setFont("Helvetica-Bold", 22)
+    c.setFont(FONT_BOLD, 22)
     c.drawString(BLEED + 12 * mm, BLEED + TRIM_H - 60 * mm, "Uzm. Dr. Oğuz Bak")
-    c.setFont("Helvetica", 11)
+    c.setFont(FONT_REGULAR, 11)
     c.drawString(BLEED + 12 * mm, BLEED + TRIM_H - 67 * mm, "Nöroloji • Ağrı Tedavisi • TMS")
 
     # Headline (large, white)
-    c.setFont("Helvetica-Bold", 26)
+    c.setFont(FONT_BOLD, 26)
     line1 = "Ağrı ve kronik"
     line2 = "hastalıklar için"
     line3 = "bütüncül bakım."
@@ -171,7 +186,7 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
     c.drawString(BLEED + 12 * mm, base_y - 18 * mm, line3)
 
     # Subhead
-    c.setFont("Helvetica", 10.5)
+    c.setFont(FONT_REGULAR, 10.5)
     sub_y = base_y - 28 * mm
     c.drawString(
         BLEED + 12 * mm, sub_y,
@@ -207,18 +222,18 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
 
     # Caption under QR
     c.setFillColor(INK)
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(FONT_BOLD, 9)
     c.drawCentredString(card_x + card_w / 2, card_y + 10 * mm, "Instagram'da takip et")
-    c.setFont("Helvetica", 7.5)
+    c.setFont(FONT_REGULAR, 7.5)
     c.setFillColor(INK_SOFT)
     c.drawCentredString(card_x + card_w / 2, card_y + 6 * mm, "@uzm_dr_oguzbak")
 
     # Left column under hero: short bullets. INK (full strength) on cream
     # for legibility — INK_SOFT was muddy at this body size.
     c.setFillColor(INK)
-    c.setFont("Helvetica-Bold", 10.5)
+    c.setFont(FONT_BOLD, 10.5)
     c.drawString(BLEED + 12 * mm, card_y + card_h - 4 * mm, "Hızlı randevu")
-    c.setFont("Helvetica", 9)
+    c.setFont(FONT_REGULAR, 9)
     bullets_y = card_y + card_h - 12 * mm
     for line in [
         "Online randevu",
@@ -235,7 +250,7 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
     c.setFillColor(ACCENT)
     c.rect(0, 0, PAGE_W, fr_h + BLEED, fill=1, stroke=0)
     c.setFillColor(INK)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(FONT_BOLD, 10)
     c.drawCentredString(PAGE_W / 2, BLEED + 3 * mm, "uzmdroguzbak.com")
 
     crop_marks(c)
@@ -250,9 +265,9 @@ def draw_back(c: Canvas) -> None:
     c.setFillColor(PRIMARY)
     c.rect(0, BLEED + TRIM_H - band_h, PAGE_W, band_h + BLEED, fill=1, stroke=0)
     c.setFillColor(PAPER)
-    c.setFont("Helvetica-Bold", 14)
+    c.setFont(FONT_BOLD, 14)
     c.drawString(BLEED + 12 * mm, BLEED + TRIM_H - 14 * mm, "Hizmetlerimiz")
-    c.setFont("Helvetica", 9)
+    c.setFont(FONT_REGULAR, 9)
     c.drawString(BLEED + 12 * mm, BLEED + TRIM_H - 19 * mm, "Bilimsel temellere dayalı, bütüncül yaklaşım.")
 
     # Services list — Turkish copy reviewed: medical "tedavi" preferred over
@@ -269,11 +284,11 @@ def draw_back(c: Canvas) -> None:
     cur_y = BLEED + TRIM_H - band_h - 9 * mm
     for title, desc in services:
         c.setFillColor(PRIMARY_INK)
-        c.setFont("Helvetica-Bold", 10.5)
+        c.setFont(FONT_BOLD, 10.5)
         c.drawString(BLEED + 12 * mm, cur_y, title)
         # Body uses full INK on cream; INK_SOFT looked muddy in proof.
         c.setFillColor(INK)
-        c.setFont("Helvetica", 8.5)
+        c.setFont(FONT_REGULAR, 8.5)
         c.drawString(BLEED + 12 * mm, cur_y - 4.5 * mm, desc)
         # divider rule
         c.setStrokeColor(CMYKColor(0.05, 0.05, 0.10, 0.20))
@@ -295,26 +310,26 @@ def draw_back(c: Canvas) -> None:
     base = panel_y + panel_h - 8 * mm
 
     c.setFillColor(PRIMARY_INK)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(FONT_BOLD, 10)
     c.drawString(col1_x, base, "İletişim")
-    c.setFont("Helvetica", 9)
+    c.setFont(FONT_REGULAR, 9)
     c.setFillColor(INK)
     c.drawString(col1_x, base - 6 * mm, "info@uzmdroguzbak.com")
     c.drawString(col1_x, base - 11 * mm, "+90 530 087 4391")
     c.drawString(col1_x, base - 16 * mm, "WhatsApp hattı aktiftir")
 
     c.setFillColor(PRIMARY_INK)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(FONT_BOLD, 10)
     c.drawString(col1_x, base - 26 * mm, "Adres")
-    c.setFont("Helvetica", 9)
+    c.setFont(FONT_REGULAR, 9)
     c.setFillColor(INK)
     c.drawString(col1_x, base - 32 * mm, "Helis More Residence")
     c.drawString(col1_x, base - 37 * mm, "Kartal, İstanbul")
 
     c.setFillColor(PRIMARY_INK)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(FONT_BOLD, 10)
     c.drawString(col2_x, base, "Çalışma Saatleri")
-    c.setFont("Helvetica", 9)
+    c.setFont(FONT_REGULAR, 9)
     c.setFillColor(INK)
     c.drawString(col2_x, base - 6 * mm, "Pazartesi – Cuma")
     c.drawString(col2_x, base - 11 * mm, "09:00 – 17:00")
@@ -322,9 +337,9 @@ def draw_back(c: Canvas) -> None:
     c.drawString(col2_x, base - 22 * mm, "Kapalı")
 
     c.setFillColor(PRIMARY_INK)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(FONT_BOLD, 10)
     c.drawString(col2_x, base - 32 * mm, "Online randevu")
-    c.setFont("Helvetica", 9)
+    c.setFont(FONT_REGULAR, 9)
     c.setFillColor(INK)
     c.drawString(col2_x, base - 38 * mm, "uzmdroguzbak.com/book")
 
@@ -333,7 +348,7 @@ def draw_back(c: Canvas) -> None:
     c.setFillColor(ACCENT)
     c.rect(0, 0, PAGE_W, fr_h + BLEED, fill=1, stroke=0)
     c.setFillColor(INK)
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(FONT_BOLD, 9)
     c.drawCentredString(PAGE_W / 2, BLEED + 3 * mm, "Bilimsel temellere dayalı, bütüncül bakım")
 
     crop_marks(c)
