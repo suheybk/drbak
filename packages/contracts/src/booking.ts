@@ -69,6 +69,15 @@ export const SlotHoldSchema = z.object({
 export type SlotHold = z.infer<typeof SlotHoldSchema>;
 
 export const CreateAppointmentRequestSchema = z.object({
+  // Slot identification — the client picked these in the booking flow and
+  // must echo them back so the API can re-derive the slot, validate it
+  // against the held DO record, and look up the service for duration +
+  // delivery-mode rules. Without these the route reads them as empty
+  // strings and findById('') returns null → SLOT_NOT_FOUND ("Seçilen
+  // saat artık uygun değil"), which made booking impossible.
+  serviceId: z.string().min(1),
+  startsAt: z.string().datetime(),
+  deliveryMode: DeliveryModeSchema,
   holdToken: z.string(),
   patientNotes: z.string().max(2000).optional(),
   homeAddressLine1: z.string().max(200).optional(),

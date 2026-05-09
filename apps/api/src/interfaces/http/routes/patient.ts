@@ -179,11 +179,9 @@ patientRouter.post(
       actorUserId: asUserId(auth.userId),
       correlationId: asCorrelationId(c.get('correlationId')),
       idempotencyKey: idem ? asIdempotencyKey(idem) : null,
-      serviceId: asServiceId((body as never as { serviceId?: string }).serviceId ?? ''), // populated by client
-      slotStartsAtIso: (body as never as { startsAt?: string }).startsAt ?? '',
-      deliveryMode:
-        (body as never as { deliveryMode?: 'in_person' | 'home_visit' | 'telehealth' })
-          .deliveryMode ?? 'in_person',
+      serviceId: asServiceId(body.serviceId),
+      slotStartsAtIso: body.startsAt,
+      deliveryMode: body.deliveryMode,
       holdToken: asSlotHoldToken(body.holdToken),
       homeAddressLine1: body.homeAddressLine1 ?? null,
       homeAddressLine2: body.homeAddressLine2 ?? null,
