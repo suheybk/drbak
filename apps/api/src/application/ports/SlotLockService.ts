@@ -56,4 +56,11 @@ export interface SlotLockService {
     startsAt: Instant;
     appointmentId: AppointmentId;
   }): Promise<void>;
+  dayProjection(
+    doctorId: DoctorId,
+    anyInstantInDay: Instant,
+  ): Promise<{
+    booked: ReadonlyArray<{ startsAtMs: number; endsAtMs: number; appointmentId: string }>;
+    activeHolds: ReadonlyArray<{ startsAtMs: number; expiresAtMs: number }>;
+  }>;
 }

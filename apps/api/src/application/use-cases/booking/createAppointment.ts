@@ -274,7 +274,29 @@ export const createAppointment =
       now,
     });
     if (confirm === 'hold_expired') return err(new SlotHoldExpired());
-    if (confirm === 'hold_invalid') return err(new SlotNotFound());
+    if (confirm === 'hold_invalid') {
+      // Surface what the DO sees right now so we can debug from the
+      // browser when wrangler tail isn't reachable on the dev network.
+      // Project the day to read back active holds + booked slots; only
+      // exposed in non-production envelopes via errorMapper.
+      let projection: unknown = null;
+      try {
+        projection = await deps.slotLock.dayProjection(deps.env.DEFAULT_DOCTOR_ID, slotStartsAt);
+      } catch (_e) {
+        projection = { error: 'projection_failed' };
+      }
+      return err(
+        new SlotNotFound({
+          details: {
+            reason: 'do_hold_invalid',
+            startsAtIso: input.slotStartsAtIso,
+            startsAtMs: slotStartsAt as number,
+            tokenHead: String(input.holdToken).slice(0, 8),
+            doProjection: projection,
+          },
+        }),
+      );
+    }
     if (confirm === 'slot_taken') return err(new SlotConflict());
 
     // 7. Persist any newly-granted consents

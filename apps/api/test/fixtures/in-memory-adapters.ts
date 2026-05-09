@@ -258,6 +258,9 @@ export class InMemorySlotLock implements SlotLockService {
       this.booked.delete(key);
     }
   }
+  async dayProjection(_doctorId: DoctorId, _anyInstantInDay: Instant) {
+    return { booked: [], activeHolds: [] };
+  }
 }
 
 /* ──────────────── Notifiers + audit + idempotency + telehealth ──────────────── */
