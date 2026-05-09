@@ -179,7 +179,7 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
     )
     c.drawString(
         BLEED + 12 * mm, sub_y - 5 * mm,
-        "TMS terapisi, IV vitamin desteği ve evde sağlık hizmeti."
+        "TMS tedavisi, IV vitamin desteği ve evde sağlık hizmeti."
     )
 
     # Lower band: cream / white-ish (already by background) with QR card
@@ -213,27 +213,28 @@ def draw_front(c: Canvas, qr_img: Image.Image) -> None:
     c.setFillColor(INK_SOFT)
     c.drawCentredString(card_x + card_w / 2, card_y + 6 * mm, "@uzm_dr_oguzbak")
 
-    # Left column under hero: short bullets
+    # Left column under hero: short bullets. INK (full strength) on cream
+    # for legibility — INK_SOFT was muddy at this body size.
     c.setFillColor(INK)
     c.setFont("Helvetica-Bold", 10.5)
     c.drawString(BLEED + 12 * mm, card_y + card_h - 4 * mm, "Hızlı randevu")
     c.setFont("Helvetica", 9)
-    c.setFillColor(INK_SOFT)
     bullets_y = card_y + card_h - 12 * mm
     for line in [
         "Online randevu",
-        "Çevrim içi danışma",
+        "Online danışma",
         "Evde değerlendirme",
         "5 dilde hizmet",
     ]:
         c.drawString(BLEED + 12 * mm, bullets_y, "•  " + line)
         bullets_y -= 5 * mm
 
-    # Footer ribbon (accent orange) with web URL
+    # Footer ribbon (accent orange) with web URL — deep ink for legibility
+    # (white-on-orange was low-contrast in print proof).
     fr_h = 10 * mm
     c.setFillColor(ACCENT)
     c.rect(0, 0, PAGE_W, fr_h + BLEED, fill=1, stroke=0)
-    c.setFillColor(PAPER)
+    c.setFillColor(INK)
     c.setFont("Helvetica-Bold", 10)
     c.drawCentredString(PAGE_W / 2, BLEED + 3 * mm, "uzmdroguzbak.com")
 
@@ -254,11 +255,14 @@ def draw_back(c: Canvas) -> None:
     c.setFont("Helvetica", 9)
     c.drawString(BLEED + 12 * mm, BLEED + TRIM_H - 19 * mm, "Bilimsel temellere dayalı, bütüncül yaklaşım.")
 
-    # Services list
+    # Services list — Turkish copy reviewed: medical "tedavi" preferred over
+    # "terapi", "Transkraniyal" with the correct -y-, "FDA onaylı" without
+    # hyphen, plural "bozukluklarının değerlendirilmesi", and "Online"
+    # standardised across the brochure to match the site copy.
     services = [
-        ("Nöroloji Muayenesi", "Migren, baş ağrısı, vertigo, uyku ve hareket bozukluğu değerlendirmesi."),
-        ("TMS Terapisi", "Transkranial manyetik stimülasyon — ilaç dışı, FDA-onaylı tedavi seçeneği."),
-        ("IV Vitamin Tedavisi", "B12, magnezyum ve antioksidan damar yolu protokolleri."),
+        ("Nöroloji Muayenesi", "Migren, baş ağrısı, vertigo, uyku ve hareket bozukluklarının değerlendirilmesi."),
+        ("TMS Tedavisi", "Transkraniyal manyetik stimülasyon — ilaç dışı, FDA onaylı tedavi seçeneği."),
+        ("IV Vitamin Tedavisi", "B12, magnezyum ve antioksidan içerikli damar yolu protokolleri."),
         ("Evde Sağlık Hizmeti", "İstanbul'un seçkin bölgelerinde evde muayene ve takip."),
         ("Görüntülü Görüşme", "Tedavi sonrası takip için online danışma randevusu."),
     ]
@@ -267,7 +271,8 @@ def draw_back(c: Canvas) -> None:
         c.setFillColor(PRIMARY_INK)
         c.setFont("Helvetica-Bold", 10.5)
         c.drawString(BLEED + 12 * mm, cur_y, title)
-        c.setFillColor(INK_SOFT)
+        # Body uses full INK on cream; INK_SOFT looked muddy in proof.
+        c.setFillColor(INK)
         c.setFont("Helvetica", 8.5)
         c.drawString(BLEED + 12 * mm, cur_y - 4.5 * mm, desc)
         # divider rule
@@ -323,11 +328,11 @@ def draw_back(c: Canvas) -> None:
     c.setFillColor(INK)
     c.drawString(col2_x, base - 38 * mm, "uzmdroguzbak.com/book")
 
-    # Footer ribbon (mirror of page 1)
+    # Footer ribbon (mirror of page 1) — deep ink on accent orange.
     fr_h = 10 * mm
     c.setFillColor(ACCENT)
     c.rect(0, 0, PAGE_W, fr_h + BLEED, fill=1, stroke=0)
-    c.setFillColor(PAPER)
+    c.setFillColor(INK)
     c.setFont("Helvetica-Bold", 9)
     c.drawCentredString(PAGE_W / 2, BLEED + 3 * mm, "Bilimsel temellere dayalı, bütüncül bakım")
 
