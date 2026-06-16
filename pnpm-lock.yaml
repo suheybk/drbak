@@ -34,10 +34,10 @@ importers:
         version: link:../../packages/i18n-keys
       '@hono/zod-openapi':
         specifier: 0.16.4
-        version: 0.16.4(hono@4.6.5)(zod@3.23.8)
+        version: 0.16.4(hono@4.6.5)(zod@4.4.1)
       '@hono/zod-validator':
         specifier: 0.4.1
-        version: 0.4.1(hono@4.6.5)(zod@3.23.8)
+        version: 0.4.1(hono@4.6.5)(zod@4.4.1)
       '@neondatabase/serverless':
         specifier: 0.10.1
         version: 0.10.1
@@ -66,8 +66,8 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
       zod:
-        specifier: 3.23.8
-        version: 3.23.8
+        specifier: 4.4.1
+        version: 4.4.1
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: 0.5.13
@@ -149,8 +149,8 @@ importers:
   packages/contracts:
     dependencies:
       zod:
-        specifier: 3.23.8
-        version: 3.23.8
+        specifier: 4.4.1
+        version: 4.4.1
     devDependencies:
       typescript:
         specifier: 5.6.3
@@ -4047,18 +4047,21 @@ packages:
   zod@3.22.3:
     resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
 
-  zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.4.1:
+    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
 
-  '@asteasolutions/zod-to-openapi@7.3.4(zod@3.23.8)':
+  '@asteasolutions/zod-to-openapi@7.3.4(zod@4.4.1)':
     dependencies:
       openapi3-ts: 4.5.0
-      zod: 3.23.8
+      zod: 4.4.1
 
   '@astrojs/check@0.9.4(prettier@3.8.3)(typescript@5.6.3)':
     dependencies:
@@ -4370,7 +4373,7 @@ snapshots:
       semver: 7.7.4
       vitest: 2.1.3(@types/node@20.16.10)(lightningcss@1.32.0)
       wrangler: 3.79.0(@cloudflare/workers-types@4.20241011.0)
-      zod: 3.23.8
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - bufferutil
@@ -4425,12 +4428,12 @@ snapshots:
   '@cloudflare/workers-shared@0.5.4':
     dependencies:
       mime: 3.0.0
-      zod: 3.23.8
+      zod: 3.25.76
 
   '@cloudflare/workers-shared@0.7.0':
     dependencies:
       mime: 3.0.0
-      zod: 3.23.8
+      zod: 3.25.76
 
   '@cloudflare/workers-types@4.20241011.0': {}
 
@@ -4987,22 +4990,22 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@hono/zod-openapi@0.16.4(hono@4.6.5)(zod@3.23.8)':
+  '@hono/zod-openapi@0.16.4(hono@4.6.5)(zod@4.4.1)':
     dependencies:
-      '@asteasolutions/zod-to-openapi': 7.3.4(zod@3.23.8)
-      '@hono/zod-validator': 0.3.0(hono@4.6.5)(zod@3.23.8)
+      '@asteasolutions/zod-to-openapi': 7.3.4(zod@4.4.1)
+      '@hono/zod-validator': 0.3.0(hono@4.6.5)(zod@4.4.1)
       hono: 4.6.5
-      zod: 3.23.8
+      zod: 4.4.1
 
-  '@hono/zod-validator@0.3.0(hono@4.6.5)(zod@3.23.8)':
+  '@hono/zod-validator@0.3.0(hono@4.6.5)(zod@4.4.1)':
     dependencies:
       hono: 4.6.5
-      zod: 3.23.8
+      zod: 4.4.1
 
-  '@hono/zod-validator@0.4.1(hono@4.6.5)(zod@3.23.8)':
+  '@hono/zod-validator@0.4.1(hono@4.6.5)(zod@4.4.1)':
     dependencies:
       hono: 4.6.5
-      zod: 3.23.8
+      zod: 4.4.1
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -5631,9 +5634,9 @@ snapshots:
       xxhash-wasm: 1.1.0
       yargs-parser: 21.1.1
       yocto-spinner: 0.1.2
-      zod: 3.23.8
-      zod-to-json-schema: 3.23.5(zod@3.23.8)
-      zod-to-ts: 1.2.0(typescript@5.6.3)(zod@3.23.8)
+      zod: 3.25.76
+      zod-to-json-schema: 3.23.5(zod@3.25.76)
+      zod-to-ts: 1.2.0(typescript@5.6.3)(zod@3.25.76)
     optionalDependencies:
       sharp: 0.33.5
     transitivePeerDependencies:
@@ -6736,7 +6739,7 @@ snapshots:
       workerd: 1.20240925.0
       ws: 8.20.0
       youch: 3.3.4
-      zod: 3.23.8
+      zod: 3.25.76
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -6755,7 +6758,7 @@ snapshots:
       workerd: 1.20241022.0
       ws: 8.20.0
       youch: 3.3.4
-      zod: 3.23.8
+      zod: 3.25.76
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -7848,17 +7851,19 @@ snapshots:
       mustache: 4.2.0
       stacktracey: 2.2.0
 
-  zod-to-json-schema@3.23.5(zod@3.23.8):
+  zod-to-json-schema@3.23.5(zod@3.25.76):
     dependencies:
-      zod: 3.23.8
+      zod: 3.25.76
 
-  zod-to-ts@1.2.0(typescript@5.6.3)(zod@3.23.8):
+  zod-to-ts@1.2.0(typescript@5.6.3)(zod@3.25.76):
     dependencies:
       typescript: 5.6.3
-      zod: 3.23.8
+      zod: 3.25.76
 
   zod@3.22.3: {}
 
-  zod@3.23.8: {}
+  zod@3.25.76: {}
+
+  zod@4.4.1: {}
 
   zwitch@2.0.4: {}
