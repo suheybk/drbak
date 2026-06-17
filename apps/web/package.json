@@ -16,7 +16,7 @@
     "@dr-bak/contracts": "workspace:*",
     "@dr-bak/i18n-keys": "workspace:*",
     "@dr-bak/ui": "workspace:*",
-    "astro": "5.0.5",
+    "astro": "6.1.10",
     "@astrojs/react": "4.1.0",
     "@astrojs/cloudflare": "12.0.1",
     "react": "19.0.0",
