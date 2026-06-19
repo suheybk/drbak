@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ env.DEPLOY_SHA }}
       - uses: pnpm/action-setup@v4
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ env.DEPLOY_SHA }}
       - uses: pnpm/action-setup@v4
